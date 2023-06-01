@@ -1,0 +1,12 @@
+name: kyonrlstepping
+
+physics_engine: ${..physics_engine}
+
+env:
+  numEnvs: ${resolve_default:8192,${...num_envs}}
+
+sim:
+  dt: 0.01667
+ 
+task:
+  randomize: False
