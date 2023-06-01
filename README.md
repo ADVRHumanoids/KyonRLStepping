@@ -1,7 +1,7 @@
 # KyonRLStepping package
 
-Create the conda environment with 'conda env create -f kyon_stepping_conda_env.yml'
+Create the conda environment with ```conda env create -f kyon_stepping_conda_env.yml```
 
-Activate the environement with 'conda activate kyonrlstepping'
+Activate the environment with ```conda activate kyonrlstepping```
 
-Test the Lunar Lander example with 'python kyonrlstepping/tests/test_lunar_lander_stable_bs3.py'
+Test the Lunar Lander example from StableBaselines3 v2.0 with ```python kyonrlstepping/tests/test_lunar_lander_stable_bs3.py```
