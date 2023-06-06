@@ -9,7 +9,6 @@ from abc import abstractmethod
 # from omni.isaac.core.tasks import BaseTask
 # from omni.isaac.core.prims import RigidPrimView, RigidPrim, XFormPrim
 from omni.isaac.core import World
-# from omni.isaac.core.objects import DynamicSphere
 # from omni.isaac.core.utils.prims import define_prim, get_prim_at_path
 # from omni.isaac.core.utils.nucleus import find_nucleus_server
 # from omni.isaac.core.utils.stage import add_reference_to_stage, get_current_stage
@@ -17,9 +16,14 @@ from omni.isaac.core import World
 # from omni.isaac.cloner import GridCloner
 from omni.isaac.core.robots import Robot
 from omni.isaac.core.utils.rotations import euler_angles_to_quat 
-from omni.isaac.core.simulation_context import SimulationContext
+from omni.isaac.core.objects import DynamicCuboid, DynamicSphere
+from omni.isaac.core.utils.types import ArticulationAction
+
+from omni.isaac.core.utils.nucleus import get_assets_root_path
 
 import numpy as np
+import torch 
+cuda0 = torch.device('cuda:0')
 
 from omni.isaac.core.controllers import ArticulationController
 
@@ -66,7 +70,7 @@ if __name__ == "__main__":
         stage_units_in_meters=1.0,
         physics_dt=1.0/60.0, 
         rendering_dt=1.0/60.0,
-        backend="torch", 
+        backend="torch", # "torch" or "numpy"
         device=device,
         physics_prim_path="/physicsScene"
     )
@@ -75,6 +79,10 @@ if __name__ == "__main__":
     scene = world.scene
     # get stage handle
     stage = omni.usd.get_context().get_stage()
+
+    # add lighting
+    distantLight = UsdLux.DistantLight.Define(stage, Sdf.Path("/DistantLight"))
+    distantLight.CreateIntensityAttr(500)
 
     # scene = UsdPhysics.Scene.Define(stage, Sdf.Path("/physicsScene"))
 
@@ -113,6 +121,29 @@ if __name__ == "__main__":
                             restitution=0.8)
     ground_plane_path = ground_plane.prim_path
 
+    # dynamic_cuboid = scene.add(
+    #     DynamicCuboid(
+    #         prim_path="/dynamic_cuboid",
+    #         name="dynamic_cuboid",
+    #         position=np.array([0, 0, 2.0]),
+    #         orientation=euler_angles_to_quat(np.array([45, 45, 45]), degrees = True),
+    #         scale=np.array([1.0, 1.0, 1.0]),
+    #         size=0.2,
+    #         color=np.array([0.8, 0.6, 1.0]),
+    #         mass=50.0
+    #     )
+    # )   
+    dynamic_sphere = scene.add(
+        DynamicSphere(
+            prim_path="/dynamic_sphere",
+            name="dynamic_sphere",
+            position=np.array([0, 0, 10.0]),
+            radius=0.2,
+            color=np.array([0.2, 0.6, 1.0]),
+            mass=50.0
+        )
+    )   
+
     # scene.CreateGravityDirectionAttr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
     # scene.CreateGravityMagnitudeAttr().Set(9.81)
     
@@ -126,9 +157,9 @@ if __name__ == "__main__":
     import_config.self_collision = False
     import_config.create_physics_scene = False
     import_config.import_inertia_tensor = False
-    import_config.default_drive_strength = 100.0
-    import_config.default_position_drive_damping = 10.0
-    import_config.default_drive_type = _urdf.UrdfJointTargetType.JOINT_DRIVE_POSITION
+    # import_config.default_drive_strength = 0.0
+    # import_config.default_position_drive_damping = 0.0
+    import_config.default_drive_type = _urdf.UrdfJointTargetType.JOINT_DRIVE_POSITION # JOINT_DRIVE_POSITION 
     import_config.distance_scale = 1
     import_config.density = 0.0
     # Get path to extension data:
@@ -149,39 +180,71 @@ if __name__ == "__main__":
                                               position=kyon_position,
                                               orientation=kyon_orientation, 
                                               articulation_controller = kyon_jnt_imp_controller)
-    kyon_robot.set_default_state(position = kyon_position, 
-                                orientation = kyon_orientation)
+    kyon_articulation = world.scene.add(kyon_robot) # necessary. otherwise we are not
+    # able to set positions, default states, etc...
     enable_kyon_self_coll = True
     kyon_robot.set_enabled_self_collisions(enable_kyon_self_coll)
-    # kyon_joints_state = kyon_robot.get_joints_state()
-    # kyon_joints_positions = kyon_robot.get_joint_positions()
-    # kyon_joints_velocities = kyon_robot.get_joint_velocities()
-
-    # kyon_robot.initialize()
-    # kyon_dofs_names = kyon_robot.dof_names
-
-    # kyon_robot.set_joint_default_state(positions = kyon_joints_positions, 
-    #                                    velocities = None,
-    #                                    efforts = None)
+    
     # camera_state = ViewportCameraState("/OmniverseKit_Persp")
     # camera_state.set_position_world(Gf.Vec3d(1.22, -1.24, 1.13), True)
     # camera_state.set_target_world(Gf.Vec3d(-0.96, 1.08, 0.0), True)
 
-    
-    # enable physics
-    
-    # kyon_articulation = world.scene.add(kyon_robot)
-    # add lighting
-    distantLight = UsdLux.DistantLight.Define(stage, Sdf.Path("/DistantLight"))
-    distantLight.CreateIntensityAttr(500)
+    world.reset(soft=False) # first reset should be with soft flag set to False.
+    # Additionally, this method takes care of initializing articulation handles 
+    # with the first reset called and will also do one simulation step internally.
 
-    world.reset(soft=False)
+    hip_roll_default_config = torch.tensor([0.3, -0.3, 0.3, -0.3])
+    hip_pitch_default_config = torch.tensor([-0.3, -0.3, 0.3, 0.3])
+    knee_pitch_default_config = torch.tensor([0.3, 0.3, -0.3, -0.3])
+    wheels_default_config = torch.tensor([0.0, 0.0, 0.0, 0.0])
+    kyon_default_joint_positions = torch.cat((hip_roll_default_config, 
+                                                hip_pitch_default_config, 
+                                                knee_pitch_default_config, 
+                                                wheels_default_config),
+                                                0)
+    hip_roll_default_vel = torch.tensor([0.0, 0.0, 0.0, 0.0])
+    hip_pitch_default_vel = torch.tensor([0.0, 0.0, 0.0, 0.0])
+    knee_pitch_default_vel = torch.tensor([0.0, 0.0, 0.0, 0.0])
+    wheels_default_vel =  torch.tensor([0.5, 0.5, 0.5, 0.5])
+    kyon_default_joint_velocities = torch.cat((hip_roll_default_vel, 
+                                                hip_pitch_default_vel, 
+                                                knee_pitch_default_vel, 
+                                                wheels_default_vel),
+                                                0)
+    
+    kyon_robot.set_joints_default_state(positions = kyon_default_joint_positions)
+    kyon_robot.set_default_state(position = kyon_position, 
+                                orientation = kyon_orientation) # default root orientation and position
+    
+    kyon_robot.initialize()
+
+    # kyon_joints_state = kyon_robot.get_joints_state() 
+    kyon_joints_positions = kyon_robot.get_joint_positions()# these methods have to be called 
+    # after the call to initialize(), otherwise they return None objects
+    kyon_joints_velocities = kyon_robot.get_joint_velocities()
+
+    kyon_dofs_names = kyon_robot.dof_names
+
+    print("KYON joint names: " + ', '.join(kyon_dofs_names))
+    print("KYON n. DOFs: " + str(len(kyon_dofs_names)))
+    print("KYON joint configuration: " + str(kyon_joints_positions))
+    print("joint positions device: " + str(kyon_joints_positions.get_device())) # -1 if on CPU
+    print("KYON joint velocities: " + str(kyon_joints_velocities))
+    print("joint velocities device: " + str(kyon_joints_velocities.get_device()))
+
+    kyon_articulation.set_joint_positions(kyon_default_joint_positions)
     world.pause()
     while simulation_app.is_running():
         if world.is_playing():
             if world.current_time_step_index == 0:
                 world.reset(soft=True)
             world.step(render=True)
+
+            kyon_jnt_imp_controller.apply_action(
+                ArticulationAction(joint_positions=kyon_default_joint_positions, 
+                                   joint_velocities=kyon_default_joint_velocities)
+                )
+
         else:
             world.step(render=True)
 
