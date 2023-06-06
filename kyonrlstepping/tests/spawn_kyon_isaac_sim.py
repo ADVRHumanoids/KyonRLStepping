@@ -20,6 +20,7 @@ from omni.isaac.core.objects import DynamicCuboid, DynamicSphere
 from omni.isaac.core.utils.types import ArticulationAction
 
 from omni.isaac.core.utils.nucleus import get_assets_root_path
+from omni.isaac.urdf._urdf import UrdfJointTargetType
 
 import numpy as np
 import torch 
@@ -65,11 +66,14 @@ except:
         
 if __name__ == "__main__":
     
+    rendering_freq = 60.0 # [Hz]
+    integration_freq = 60.0 # [Hz]
+
     device = "cpu" # either "cpu" or "cuda"
     world = World(
         stage_units_in_meters=1.0,
-        physics_dt=1.0/60.0, 
-        rendering_dt=1.0/60.0,
+        physics_dt=1.0/integration_freq, 
+        rendering_dt=1.0/rendering_freq,
         backend="torch", # "torch" or "numpy"
         device=device,
         physics_prim_path="/physicsScene"
@@ -137,10 +141,10 @@ if __name__ == "__main__":
         DynamicSphere(
             prim_path="/dynamic_sphere",
             name="dynamic_sphere",
-            position=np.array([0, 0, 10.0]),
+            position=np.array([0, 0, 1.5]),
             radius=0.2,
             color=np.array([0.2, 0.6, 1.0]),
-            mass=50.0
+            mass=100.0
         )
     )   
 
@@ -154,14 +158,14 @@ if __name__ == "__main__":
     import_config.import_inertia_tensor = True
     import_config.fix_base = False
     import_config.make_default_prim = True
-    import_config.self_collision = False
+    import_config.self_collision = True
     import_config.create_physics_scene = False
     import_config.import_inertia_tensor = False
-    # import_config.default_drive_strength = 0.0
-    # import_config.default_position_drive_damping = 0.0
-    import_config.default_drive_type = _urdf.UrdfJointTargetType.JOINT_DRIVE_POSITION # JOINT_DRIVE_POSITION 
+    import_config.default_drive_strength = 10.0 # strange behavior: not parsed, unless == 0
+    import_config.default_position_drive_damping = 1.0 # strange behavior: not parsed, unless == 0
+    import_config.default_drive_type = _urdf.UrdfJointTargetType.JOINT_DRIVE_POSITION # JOINT_DRIVE_POSITION, JOINT_DRIVE_VELOCITY, JOINT_DRIVE_NONE
     import_config.distance_scale = 1
-    import_config.density = 0.0
+    # import_config.density = 0.0
     # Get path to extension data:
     ext_manager = omni.kit.app.get_app().get_extension_manager()
     ext_id = ext_manager.get_enabled_extension_id("omni.isaac.urdf")
@@ -184,7 +188,7 @@ if __name__ == "__main__":
     # able to set positions, default states, etc...
     enable_kyon_self_coll = True
     kyon_robot.set_enabled_self_collisions(enable_kyon_self_coll)
-    
+    # kyon_robot.switch_control_mode()
     # camera_state = ViewportCameraState("/OmniverseKit_Persp")
     # camera_state.set_position_world(Gf.Vec3d(1.22, -1.24, 1.13), True)
     # camera_state.set_target_world(Gf.Vec3d(-0.96, 1.08, 0.0), True)
@@ -212,10 +216,44 @@ if __name__ == "__main__":
                                                 wheels_default_vel),
                                                 0)
     
-    kyon_robot.set_joints_default_state(positions = kyon_default_joint_positions)
+    kyon_robot.set_joints_default_state(positions = kyon_default_joint_positions, 
+                                        velocities = kyon_default_joint_velocities)
     kyon_robot.set_default_state(position = kyon_position, 
                                 orientation = kyon_orientation) # default root orientation and position
     
+    hip_roll_kp = 500.0
+    hip_roll_kd = 20.0
+    hip_pitch_kp = 500.0
+    hip_pitch_kd = 20.0
+    knee_pitch_kp = 500.0
+    knee_pitch_kd = 20.0 
+    wheels_kp = 0.0
+    wheels_kd = 100.0
+    hip_roll_kps = torch.tensor([hip_roll_kp, hip_roll_kp, hip_roll_kp, hip_roll_kp])
+    hip_roll_kds = torch.tensor([hip_roll_kd, hip_roll_kd, hip_roll_kd, hip_roll_kd])
+    hip_pitch_kps = torch.tensor([hip_pitch_kp, hip_pitch_kp, hip_pitch_kp, hip_pitch_kp])
+    hip_pitch_kds = torch.tensor([hip_pitch_kd, hip_pitch_kd, hip_pitch_kd, hip_pitch_kd])
+    knee_pitch_kps = torch.tensor([knee_pitch_kp, knee_pitch_kp, knee_pitch_kp, knee_pitch_kp])
+    knee_pitch_kds = torch.tensor([knee_pitch_kd, knee_pitch_kd, knee_pitch_kd, knee_pitch_kd])
+    wheels_kps = torch.tensor([wheels_kp, wheels_kp, wheels_kp, wheels_kp])
+    wheels_kds = torch.tensor([wheels_kd, wheels_kd, wheels_kd, wheels_kd])
+    
+    kyon_joint_kps = torch.cat((hip_roll_kps, 
+                                hip_pitch_kps, 
+                                knee_pitch_kps, 
+                                wheels_kps),
+                                0)
+    kyon_joint_kds = torch.cat((hip_roll_kds, 
+                                hip_pitch_kds, 
+                                knee_pitch_kds, 
+                                wheels_kds),
+                                0)   
+    kyon_jnt_imp_controller.set_gains(kps = kyon_joint_kps,
+                                      kds = kyon_joint_kds)
+    # kyon_jnt_imp_controller.switch_control_mode("effort") # we set joint mode to "effort" to be able to
+    # perform full joint impedance control (both ArticulationController and the lower level
+    # ArticulationView only allow a single control mode to be active at a time). This will set the 
+    # gains internally to 0 for both position and velocity
     kyon_robot.initialize()
 
     # kyon_joints_state = kyon_robot.get_joints_state() 
@@ -231,6 +269,11 @@ if __name__ == "__main__":
     print("joint positions device: " + str(kyon_joints_positions.get_device())) # -1 if on CPU
     print("KYON joint velocities: " + str(kyon_joints_velocities))
     print("joint velocities device: " + str(kyon_joints_velocities.get_device()))
+    print("KYON joint position gains: " + str(kyon_jnt_imp_controller.get_gains()[0]))
+    print("KYON joint velocity gains: " + str(kyon_jnt_imp_controller.get_gains()[1]))
+    print("KYON joint drive mode: " + str(kyon_jnt_imp_controller.get_effort_modes()))
+    print("KYON joint limits: " + str(kyon_jnt_imp_controller.get_joint_limits()))
+
 
     kyon_articulation.set_joint_positions(kyon_default_joint_positions)
     world.pause()
