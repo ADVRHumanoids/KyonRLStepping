@@ -141,7 +141,7 @@ if __name__ == "__main__":
         DynamicSphere(
             prim_path="/dynamic_sphere",
             name="dynamic_sphere",
-            position=np.array([0, 0, 1.5]),
+            position=np.array([0, 0, 5.5]),
             radius=0.2,
             color=np.array([0.2, 0.6, 1.0]),
             mass=100.0
@@ -209,13 +209,21 @@ if __name__ == "__main__":
     hip_roll_default_vel = torch.tensor([0.0, 0.0, 0.0, 0.0])
     hip_pitch_default_vel = torch.tensor([0.0, 0.0, 0.0, 0.0])
     knee_pitch_default_vel = torch.tensor([0.0, 0.0, 0.0, 0.0])
-    wheels_default_vel =  torch.tensor([0.5, 0.5, 0.5, 0.5])
+    # wheels_default_vel =  torch.tensor([0.5, -0.5, 0.5, -0.5])
+    wheels_default_vel =  torch.tensor([0.0, -0.0, 0.0, -0.0])
+
     kyon_default_joint_velocities = torch.cat((hip_roll_default_vel, 
                                                 hip_pitch_default_vel, 
                                                 knee_pitch_default_vel, 
                                                 wheels_default_vel),
                                                 0)
     
+    kyon_default_joint_efforts = torch.cat((torch.tensor([0, 0, 0, 0]), 
+                                            torch.tensor([0, 0, 0, 0]), 
+                                            torch.tensor([0, 0, 0, 0]), 
+                                            torch.tensor([0.0, -0.0, 0.0, -0.0])),
+                                            0)
+
     kyon_robot.set_joints_default_state(positions = kyon_default_joint_positions, 
                                         velocities = kyon_default_joint_velocities)
     kyon_robot.set_default_state(position = kyon_position, 
@@ -249,12 +257,14 @@ if __name__ == "__main__":
                                 wheels_kds),
                                 0)   
     kyon_jnt_imp_controller.set_gains(kps = kyon_joint_kps,
-                                      kds = kyon_joint_kds)
-    # kyon_jnt_imp_controller.switch_control_mode("effort") # we set joint mode to "effort" to be able to
-    # perform full joint impedance control (both ArticulationController and the lower level
-    # ArticulationView only allow a single control mode to be active at a time). This will set the 
-    # gains internally to 0 for both position and velocity
-    kyon_robot.initialize()
+                                      kds = kyon_joint_kds) # this calls the low level set_gains from 
+    #ArticulationView. So, if all gains are set and no switch_control_mode is called, 
+    # ArticulationController can also be used as a full impedance controller.
+    # kyon_jnt_imp_controller.switch_control_mode("effort") # do not call this if the intention is
+    # to use full joint impedance control: this will internally call set_gains and only allow for one 
+    # between position, velocity and effort control modes to be used at the same time !!!
+
+    kyon_robot.initialize() # initialize robot (it probably also initializes the ArticulationController)
 
     # kyon_joints_state = kyon_robot.get_joints_state() 
     kyon_joints_positions = kyon_robot.get_joint_positions()# these methods have to be called 
@@ -273,7 +283,7 @@ if __name__ == "__main__":
     print("KYON joint velocity gains: " + str(kyon_jnt_imp_controller.get_gains()[1]))
     print("KYON joint drive mode: " + str(kyon_jnt_imp_controller.get_effort_modes()))
     print("KYON joint limits: " + str(kyon_jnt_imp_controller.get_joint_limits()))
-
+    print("KYON max efforts: " + str(kyon_jnt_imp_controller.get_max_efforts()))
 
     kyon_articulation.set_joint_positions(kyon_default_joint_positions)
     world.pause()
@@ -282,11 +292,11 @@ if __name__ == "__main__":
             if world.current_time_step_index == 0:
                 world.reset(soft=True)
             world.step(render=True)
-
-            kyon_jnt_imp_controller.apply_action(
-                ArticulationAction(joint_positions=kyon_default_joint_positions, 
-                                   joint_velocities=kyon_default_joint_velocities)
-                )
+            
+            control_action = ArticulationAction(joint_positions=kyon_default_joint_positions, 
+                                   joint_velocities=kyon_default_joint_velocities, 
+                                   joint_efforts=kyon_default_joint_efforts)
+            kyon_jnt_imp_controller.apply_action(control_action)
 
         else:
             world.step(render=True)
