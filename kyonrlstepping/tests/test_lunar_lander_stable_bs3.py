@@ -30,7 +30,8 @@ mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episode
 # Enjoy trained agent
 vec_env = model.get_env()
 obs = vec_env.reset()
-for i in range(1000):
+n_pred_iterations = 100000
+for i in range(n_pred_iterations):
     action, _states = model.predict(obs, deterministic=True)
     obs, rewards, dones, info = vec_env.step(action)
     vec_env.render("human")

@@ -12,7 +12,7 @@ dependencies:
   - cuda-toolkit=11.7
   - pip:
     - nvidia-cublas-cu11==11.11.3.6
-    - torch==1.12.0
+    # - torch==1.12.0
     - gym==0.26.2
     - gymnasium==0.28.1
     - stable_baselines3[extra]==2.0.0a10
@@ -21,3 +21,4 @@ dependencies:
     - tensorboard-plugin-wit
     - protobuf
     - rospkg
+    - matplotlib
