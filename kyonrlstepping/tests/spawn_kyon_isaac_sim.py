@@ -1,6 +1,7 @@
 from omni.isaac.kit import SimulationApp 
 
-simulation_app = SimulationApp( {"headless": False} )
+headless = False 
+simulation_app = SimulationApp( {"headless": headless} )
 
 import omni.kit.commands 
 from omni.kit.viewport.utility.camera_state import ViewportCameraState
@@ -67,7 +68,7 @@ except:
 if __name__ == "__main__":
     
     rendering_freq = 60.0 # [Hz]
-    integration_freq = 60.0 # [Hz]
+    integration_freq = 100.0 # [Hz]
 
     device = "cpu" # either "cpu" or "cuda"
     world = World(
@@ -193,7 +194,7 @@ if __name__ == "__main__":
     # camera_state.set_position_world(Gf.Vec3d(1.22, -1.24, 1.13), True)
     # camera_state.set_target_world(Gf.Vec3d(-0.96, 1.08, 0.0), True)
 
-    world.reset(soft=False) # first reset should be with soft flag set to False.
+    world.reset(soft=False) # firTruest reset should be with soft flag set to False.
     # Additionally, this method takes care of initializing articulation handles 
     # with the first reset called and will also do one simulation step internally.
 
@@ -287,11 +288,13 @@ if __name__ == "__main__":
 
     kyon_articulation.set_joint_positions(kyon_default_joint_positions)
     world.pause()
+    if(headless):
+        world.play()
     while simulation_app.is_running():
         if world.is_playing():
             if world.current_time_step_index == 0:
                 world.reset(soft=True)
-            world.step(render=True)
+            world.step(render=not headless)
             
             control_action = ArticulationAction(joint_positions=kyon_default_joint_positions, 
                                    joint_velocities=kyon_default_joint_velocities, 
@@ -299,6 +302,8 @@ if __name__ == "__main__":
             kyon_jnt_imp_controller.apply_action(control_action)
 
         else:
-            world.step(render=True)
+            world.step(render=not headless)
+
+        print("KYON joint configuration: " + str(kyon_robot.get_joint_positions()))
 
     simulation_app.close()
