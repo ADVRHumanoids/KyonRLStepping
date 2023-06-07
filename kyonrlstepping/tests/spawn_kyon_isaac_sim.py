@@ -11,7 +11,7 @@ from abc import abstractmethod
 # from omni.isaac.core.tasks import BaseTask
 # from omni.isaac.core.prims import RigidPrimView, RigidPrim, XFormPrim
 from omni.isaac.core import World
-# from omni.isaac.core.utils.prims import define_prim, get_prim_at_path
+from omni.isaac.core.utils.prims import move_prim
 # from omni.isaac.core.utils.nucleus import find_nucleus_server
 # from omni.isaac.core.utils.stage import add_reference_to_stage, get_current_stage
 # from omni.isaac.core.materials import PreviewSurface
@@ -155,6 +155,7 @@ if __name__ == "__main__":
     
     urdf_interface = _urdf.acquire_urdf_interface()
     import_config = _urdf.ImportConfig()
+
     import_config.merge_fixed_joints = True
     import_config.convex_decomp = False
     import_config.import_inertia_tensor = True
@@ -168,16 +169,19 @@ if __name__ == "__main__":
     import_config.default_drive_type = _urdf.UrdfJointTargetType.JOINT_DRIVE_POSITION # JOINT_DRIVE_POSITION, JOINT_DRIVE_VELOCITY, JOINT_DRIVE_NONE
     import_config.distance_scale = 1
     # import_config.density = 0.0
+
     # Get path to extension data:
     ext_manager = omni.kit.app.get_app().get_extension_manager()
     ext_id = ext_manager.get_enabled_extension_id("omni.isaac.urdf")
     extension_path = ext_manager.get_extension_path(ext_id)
     # import URDF
-    success, kyon_prim_path = omni.kit.commands.execute(
+    success, kyon_prim_path_default = omni.kit.commands.execute(
         "URDFParseAndImportFile",
         urdf_path=kyon_urdf_path,
         import_config=import_config, 
     )
+    kyon_prim_path = "/World/Kyon"
+    move_prim(kyon_prim_path_default, kyon_prim_path)
 
     kyon_orientation = euler_angles_to_quat(np.array([0, 0, 0]), degrees = True)
     kyon_position = Gf.Vec3f(0, 0, 0.8)
@@ -186,10 +190,13 @@ if __name__ == "__main__":
                                               position=kyon_position,
                                               orientation=kyon_orientation, 
                                               articulation_controller = kyon_jnt_imp_controller)
+    kyon_prim = kyon_robot.prim
+
     kyon_articulation = world.scene.add(kyon_robot) # necessary. otherwise we are not
     # able to set positions, default states, etc...
     enable_kyon_self_coll = True
     kyon_robot.set_enabled_self_collisions(enable_kyon_self_coll)
+    
     # kyon_robot.switch_control_mode()
     # camera_state = ViewportCameraState("/OmniverseKit_Persp")
     # camera_state.set_position_world(Gf.Vec3d(1.22, -1.24, 1.13), True)
