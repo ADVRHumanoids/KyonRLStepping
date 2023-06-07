@@ -13,10 +13,17 @@ root_dir = os.path.dirname(os.path.realpath(__file__))
 # Minimum dependencies required prior to installation
 INSTALL_REQUIRES = [
     # RL
-#    "gym==0.23.1",
-#    "torch",
+    "torch==1.12.0",
+    "gym==0.26.2",
+    "gymnasium==0.28.1", 
+    "stable_baselines3[extra]==2.0.0a10", 
+    "box2d-py",
+    "tensorboard",
+    "tensorboard-plugin-wit",
+    "protobuf",
     "termcolor",
     "hydra-core>=1.1",
+    "rospkg",
     ]
 
 # Installation operation
@@ -27,7 +34,7 @@ setup(
     description="",
     keywords=["kyon", "stepping", "rl"],
     include_package_data=True,
-    python_requires=">=3.7",
+    python_requires=">=3.7, <3.8",
     install_requires=INSTALL_REQUIRES,
     packages=find_packages("."),
     classifiers=["Natural Language :: English", "Programming Language :: Python :: 3.6, 3.7, 3.8"],

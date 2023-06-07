@@ -1,3 +1,4 @@
+import os
 from omni.isaac.kit import SimulationApp 
 
 headless = False 
