@@ -312,6 +312,6 @@ if __name__ == "__main__":
         else:
             world.step(render=not headless)
 
-        print("KYON joint configuration: " + str(kyon_robot.get_joint_positions()))
+        # print("KYON joint configuration: " + str(kyon_robot.get_joint_positions()))
 
     simulation_app.close()

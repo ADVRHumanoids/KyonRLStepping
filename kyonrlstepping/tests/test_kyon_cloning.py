@@ -71,8 +71,8 @@ except:
         
 if __name__ == "__main__":
     
-    num_envs = 3
-    env_spacing = 4
+    num_envs = 7
+    env_spacing = 5
     env_ns = "/World/envs"
     template_env_ns = env_ns + "/env_0"
 
@@ -109,9 +109,58 @@ if __name__ == "__main__":
         sim_params=sim_params
     )
     
+    # Physics context settings
     physics_context = world.get_physics_context()
+    
+    # GPU buffers
+    gpu_max_rigid_contact_count = physics_context.get_gpu_max_rigid_contact_count()
+    gpu_max_rigid_patch_count = physics_context.get_gpu_max_rigid_patch_count()
+    gpu_found_lost_pairs_capacity = physics_context.get_gpu_found_lost_pairs_capacity()
+    gpu_found_lost_aggregate_pairs_capacity = physics_context.get_gpu_found_lost_aggregate_pairs_capacity()
+    gpu_total_aggregate_pairs_capacity = physics_context.get_gpu_total_aggregate_pairs_capacity()
+    gpu_max_soft_body_contacts = physics_context.get_gpu_max_soft_body_contacts()
+    gpu_max_particle_contacts = physics_context.get_gpu_max_particle_contacts()
+    gpu_heap_capacity = physics_context.get_gpu_heap_capacity()
+    gpu_temp_buffer_capacity = physics_context.get_gpu_temp_buffer_capacity()
+    # gpu_max_num_partitions = physics_context.get_gpu_max_num_partitions()
+
+    print("PHYSICS CONTEXT INFO: ")
+    print("gpu_max_rigid_contact_count: " + str(gpu_max_rigid_contact_count))
+    print("gpu_max_rigid_patch_count: " + str(gpu_max_rigid_patch_count))
+    print("gpu_found_lost_pairs_capacity: " + str(gpu_found_lost_pairs_capacity))
+    print("gpu_found_lost_aggregate_pairs_capacity: " + str(gpu_found_lost_aggregate_pairs_capacity))
+    print("gpu_total_aggregate_pairs_capacity: " + str(gpu_total_aggregate_pairs_capacity))
+    print("gpu_max_soft_body_contacts: " + str(gpu_max_soft_body_contacts))
+    print("gpu_max_particle_contacts: " + str(gpu_max_particle_contacts))
+    print("gpu_heap_capacity: " + str(gpu_heap_capacity))
+    print("gpu_temp_buffer_capacity: " + str(gpu_temp_buffer_capacity))
+    # print(gpu_max_num_partitions)
+
     physics_context.enable_gpu_dynamics(True)
     physics_context.enable_stablization(True)
+
+    gpu_max_rigid_contact_count_setting = 1000000
+    gpu_max_rigid_patch_count_setting = gpu_max_rigid_patch_count
+    gpu_found_lost_pairs_capacity_setting = gpu_found_lost_pairs_capacity
+    gpu_found_lost_aggregate_pairs_capacity_setting = gpu_found_lost_aggregate_pairs_capacity
+    gpu_total_aggregate_pairs_capacity_setting = gpu_total_aggregate_pairs_capacity
+    gpu_max_soft_body_contacts_setting = gpu_max_soft_body_contacts
+    gpu_max_particle_contacts_setting = gpu_max_particle_contacts
+    gpu_heap_capacity_setting = gpu_heap_capacity
+    gpu_temp_buffer_capacity_setting = gpu_temp_buffer_capacity
+    gpu_max_num_partitions = 8
+
+    physics_context.set_gpu_max_rigid_contact_count(gpu_max_rigid_contact_count_setting)
+    physics_context.set_gpu_max_rigid_patch_count(gpu_max_rigid_patch_count_setting)
+    physics_context.set_gpu_found_lost_pairs_capacity(gpu_found_lost_pairs_capacity_setting)
+    physics_context.set_gpu_found_lost_aggregate_pairs_capacity(gpu_found_lost_aggregate_pairs_capacity_setting)
+    physics_context.set_gpu_total_aggregate_pairs_capacity(gpu_total_aggregate_pairs_capacity_setting)
+    physics_context.set_gpu_max_soft_body_contacts(gpu_max_soft_body_contacts_setting)
+    physics_context.set_gpu_max_particle_contacts(gpu_max_particle_contacts_setting)
+    physics_context.set_gpu_heap_capacity(gpu_heap_capacity_setting)
+    physics_context.set_gpu_temp_buffer_capacity(gpu_temp_buffer_capacity_setting)
+    physics_context.set_gpu_max_num_partitions(gpu_max_num_partitions)
+
     physics_scene_prim = physics_context.get_current_physics_scene_prim()
     solver_type = physics_context.get_solver_type()
     # solver = "TGS" # TGS (default) or PGS (more accurate?)
@@ -127,8 +176,9 @@ if __name__ == "__main__":
     distantLight.CreateIntensityAttr(500)
 
     # a ground plane common to all envs
+    ground_plane_prim_path = "/World/ground_plane"
     ground_plane = scene.add_default_ground_plane(z_position=0, name="ground_plane", 
-                            prim_path= "/World/ground_plane", 
+                            prim_path= ground_plane_prim_path, 
                             static_friction=0.5, 
                             dynamic_friction=0.5, 
                             restitution=0.8)
@@ -172,6 +222,15 @@ if __name__ == "__main__":
     ) # kyon is now at the default env prim --> we can clone the environment
 
     kyons = ArticulationView(env_ns + "/env*"+ "/Kyon", reset_xform_properties=False)
+
+    physics_scene_path = world.get_physics_context().prim_path
+    cloner.filter_collisions(
+        physics_scene_path, 
+        "/World/collisions", 
+        prim_paths=envs_prim_paths, 
+        global_paths=[ground_plane_prim_path] # can collide with these prims
+    )
+
     scene.add(kyons)
     n_prims = kyons.count
     enable_self_collisions = True
@@ -182,10 +241,10 @@ if __name__ == "__main__":
     knee_pitch_default_config = torch.tensor([0.3, 0.3, -0.3, -0.3])
     wheels_default_config = torch.tensor([0.0, 0.0, 0.0, 0.0])
     kyon_default_joint_positions = torch.cat((hip_roll_default_config, 
-                                                hip_pitch_default_config, 
-                                                knee_pitch_default_config, 
-                                                wheels_default_config),
-                                                0)
+                                            hip_pitch_default_config, 
+                                            knee_pitch_default_config, 
+                                            wheels_default_config),
+                                            0)
 
     world.reset(soft=False) 
 
