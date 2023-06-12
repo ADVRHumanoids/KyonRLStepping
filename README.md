@@ -1,9 +1,13 @@
 # KyonRLStepping package
 
-Instructions:
-- Create the conda environment by running ```create_conda_env.sh```. This will properly setup a Python 3.7```kyonrlstepping``` conda environment and also install this package.
+The preferred way of using KyonRLStepping package is to employ the provided [mamba](https://mamba.readthedocs.io/en/latest/user_guide/mamba.html) environment. 
 
-- Activate the environment with ```conda activate kyonrlstepping```
+Installation instructions:
+- First install Mamba by running ```curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"``` and then ```bash Mambaforge-$(uname)-$(uname -m).sh```.
+
+- Create the mamba environment by running ```create_mamba_env.sh```. This will properly setup a Python 3.7 mamba environment named ```kyonrlstepping``` with (almost) all necessary dependencies and also install this package.
+
+- Activate the environment with ```mamba activate kyonrlstepping```
 
 - Test the Lunar Lander example from StableBaselines3 v2.0 with ```python kyonrlstepping/tests/test_lunar_lander_stable_bs3.py```.
 
@@ -11,12 +15,15 @@ Instructions:
 
 - To be able to run any script with dependencies on Omniverse packages, it's necessary to first source ```${HOME}/.local/share/ov/pkg/isaac_sim-*/setup_conda_env.sh```.
 
-- You can now test a simple simulation with Kyon by running ```python kyonrlstepping/tests/spawn_kyon_isaac_sim.py```.
+- You can now test a simple simulation with Kyon by running ```python kyonrlstepping/tests/spawn_kyon_isaac_sim.py``` or ```python kyonrlstepping/tests/test_kyon_cloning.py```.
 
+- To be able to use the controllers, you need to install also the remaining external dependencies (horizon, phase_manager).
 
-Additional dependencies: 
-- [Horizon](https://github.com/ADVRHumanoids/horizon), T.O. tool tailored to robotics, based on [Casadi](https://web.casadi.org/).
-- [casadi_kin_dyn](https://github.com/ADVRHumanoids/horizon), generation of symbolic expressions for robot kinematics and dynamics, based on [http://wiki.ros.org/urdf](URDF) and [https://github.com/stack-of-tasks/pinocchio](Pinocchio).
+External dependencies to be installed separately: 
+- [horizon-casadi](https://github.com/ADVRHumanoids/horizon), T.O. tool tailored to robotics, based on [Casadi](https://web.casadi.org/). Branch to be used: ```add_nodes_py37```. Clone this repo at your preferred location and, from its root, run ```pip install --no-deps -e .```. This will install the package in editable mode without its dependencies (this is necessary to avoid circumvent current issues with horizon's pip distribution).
+<!-- - [casadi_kin_dyn](https://github.com/ADVRHumanoids/horizon), generation of symbolic expressions for robot kinematics and dynamics, based on [http://wiki.ros.org/urdf](URDF) and [https://github.com/stack-of-tasks/pinocchio](Pinocchio). This library is automatically installed through mamba config file. -->
+- [phase_manager](https://github.com/FrancescoRuscelli/phase_manager/tree/master). Currently stable branch: ```add_nodes```. Build this CMake package in you workspace (after activating the ```kyonrlstepping``` environment) and set the ```CMAKE_INSTALL_PREFIX``` to ```${HOME}/mambaforge/envs/kyonrlstepping```. 
+<!-- - [Cartesian Interface](https://github.com/ADVRHumanoids/CartesianInterface/tree/2.0-devel) -->
 - [Omniverse Isaac Sim](https://docs.omniverse.nvidia.com/app_isaacsim/app_isaacsim.html), photo-realistic GPU accelerated simulatorfrom NVIDIA.
 
 ### Short-term ToDo list:
@@ -48,10 +55,12 @@ Additional dependencies:
 - [x] First simple test of IsaacSim simulators: What was done:
     - [x] Kyon ```prim``` is spawned in the scene at a user defined ```prim_path``` calling the ``URDFParseAndImportFile`` script.
     - [x] A simple joint-space impedance controller is attached to the robot. This allows to send position, velocity, effort commands.
-    - [x] Checked simulation stability and collision behavior
+    - [x] Checked simulation stability and collision behavior.
+
+- [x] Integration and testing of casadi_kin_dyn and horizon in Conda 
 
 - [] Fist proof-of-concept integration of Horizon-based [kyon mpc controller](https://github.com/ADVRHumanoids/kyon_controller) within the simulation
 
 - [] Setting up the RL task:
-    - [] Testing vectorization of Kyon's simulation
+    - [x] Testing vectorization of Kyon's simulation
     - [] Implementing observations, rewards, envs reset, etc..
