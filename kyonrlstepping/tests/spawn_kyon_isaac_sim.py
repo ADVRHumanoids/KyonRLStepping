@@ -64,7 +64,7 @@ try:
 
 except:
 
-    print('\nFAILED TO GENERATE KYON\'S URDF!!!.\n')
+    raise Exception('\nFAILED TO GENERATE KYON\'S URDF!!!.\n')
         
 if __name__ == "__main__":
     

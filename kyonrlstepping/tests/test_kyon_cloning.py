@@ -67,11 +67,11 @@ try:
 
 except:
 
-    print('\nFAILED TO GENERATE KYON\'S URDF!!!.\n')
+    raise Exception('\nFAILED TO GENERATE KYON\'S URDF!!!.\n')
         
 if __name__ == "__main__":
     
-    num_envs = 7
+    num_envs = 11
     env_spacing = 5
     env_ns = "/World/envs"
     template_env_ns = env_ns + "/env_0"
