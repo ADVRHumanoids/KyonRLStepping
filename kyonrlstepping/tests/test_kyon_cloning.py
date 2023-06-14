@@ -195,7 +195,6 @@ if __name__ == "__main__":
     import_config.make_default_prim = True
     import_config.self_collision = True
     import_config.create_physics_scene = True
-    import_config.import_inertia_tensor = False
     import_config.default_drive_strength = 10.0 # strange behavior: not parsed, unless == 0
     import_config.default_position_drive_damping = 1.0 # strange behavior: not parsed, unless == 0
     import_config.default_drive_type = _urdf.UrdfJointTargetType.JOINT_DRIVE_POSITION # JOINT_DRIVE_POSITION, JOINT_DRIVE_VELOCITY, JOINT_DRIVE_NONE
@@ -332,7 +331,6 @@ if __name__ == "__main__":
             if world.current_time_step_index == 0:
                 world.reset(soft=True)
             world.step(render=not headless)
-
         else:
             world.step(render=not headless)
 
