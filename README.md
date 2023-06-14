@@ -59,8 +59,14 @@ External dependencies to be installed separately:
 
 - [x] Integration and testing of casadi_kin_dyn and horizon in Conda 
 
-- [] Fist proof-of-concept integration of Horizon-based [kyon mpc controller](https://github.com/ADVRHumanoids/kyon_controller) within the simulation
+- [] Fist proof-of-concept integration of Horizon-based [kyon mpc controller](https://github.com/ADVRHumanoids/kyon_controller) within the simulation:
+
+    - [] Horizon's abstract class for RHC controller
+    - [] Kyon's specific implementation of RHC controller
+    - [] Testing of joystick-based MPC control in IsaacSim
+    - [] Implementation of a joint space impedance controller for simultaneous application of control actions through all environments?
 
 - [] Setting up the RL task:
     - [x] Testing vectorization of Kyon's simulation
+    - [x] Test first skeleton of Kyon's Gymnasium environment and task (without rewards, observations...)
     - [] Implementing observations, rewards, envs reset, etc..

@@ -11,7 +11,7 @@ env = KyonVecEnv(headless=False) # create environment
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
 
 task = KyonRlSteppingTask(name="KyonRLStepping", 
-                        num_envs = 9, 
+                        num_envs = 5, 
                         robot_offset = np.array([0.0, 0.0, 0.8])) # create task
 
 sim_params = {}

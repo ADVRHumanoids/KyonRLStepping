@@ -186,13 +186,9 @@ class KyonVecEnv(gym.Env):
         self._task = task
 
         # filter collisions between envs
-        self._task._cloner.filter_collisions(
-                                self._physics_scene_path, 
-                                "/World/collisions", 
-                                prim_paths=self._task._envs_prim_paths, 
-                                global_paths=[self._task._ground_plane_prim_path] # can collide with these prims
-                            )
-
+        self._task.apply_collision_filters(self._physics_scene_path, 
+                                "/World/collisions")
+        
         self._num_envs = self._task.num_envs
 
         self.observation_space = self._task.observation_space

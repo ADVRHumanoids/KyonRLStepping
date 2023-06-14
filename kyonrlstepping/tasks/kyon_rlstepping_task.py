@@ -18,6 +18,8 @@ from omni.isaac.cloner import GridCloner
 import omni.isaac.core.utils.prims as prim_utils
 from omni.isaac.urdf._urdf import UrdfJointTargetType
 
+from omni.isaac.core.utils.types import ArticulationActions
+
 class KyonRlSteppingTask(BaseTask):
     def __init__(self, 
                 name: str, 
@@ -25,12 +27,13 @@ class KyonRlSteppingTask(BaseTask):
                 device = "cuda", 
                 robot_offset: np.array = np.array([0.0, 0.0, 0.0]),
                 replicate_physics: bool = True,
-                offset=None) -> None:
+                offset=None, 
+                env_spacing = 5.0) -> None:
 
         # cloning stuff
         self.num_envs = num_envs
         self._env_ns = "/World/envs"
-        self._env_spacing = 0.5 # [m]
+        self._env_spacing = env_spacing # [m]
         self._template_env_ns = self._env_ns + "/env_0"
 
         self._cloner = GridCloner(spacing=self._env_spacing)
@@ -159,11 +162,20 @@ class KyonRlSteppingTask(BaseTask):
         self._world_initialized = True
 
     def set_robot_default_jnt_config(self, 
-                                hip_roll = torch.tensor([0.3, -0.3, 0.3, -0.3]), 
-                                hip_pitch = torch.tensor([-0.3, -0.3, 0.3, 0.3]), 
-                                knee_pitch = torch.tensor([0.3, 0.3, -0.3, -0.3]), 
-                                wheels = torch.tensor([0.0, 0.0, 0.0, 0.0])):
+                                hip_roll = None, 
+                                hip_pitch = None, 
+                                knee_pitch = None, 
+                                wheels = None):
         
+        if hip_roll is None:
+            hip_roll = torch.tensor([0.3, -0.3, 0.3, -0.3], device=self._device)
+        if hip_pitch is None:
+            hip_pitch = torch.tensor([-0.3, -0.3, 0.3, 0.3], device=self._device)
+        if knee_pitch is None:
+            knee_pitch = torch.tensor([0.3, 0.3, -0.3, -0.3], device=self._device)
+        if wheels is None:
+            wheels = torch.tensor([0.0, 0.0, 0.0, 0.0], device=self._device)
+
         if (self._world_initialized):
 
             self._default_jnt_positions = torch.zeros((self.num_envs, self._robot_n_dofs))
@@ -206,14 +218,14 @@ class KyonRlSteppingTask(BaseTask):
                             knee_pitch_kd = 10.0, 
                             wheels_kd = 10.0):
 
-        hip_roll_kps = torch.tensor([hip_roll_kp, hip_roll_kp, hip_roll_kp, hip_roll_kp])
-        hip_roll_kds = torch.tensor([hip_roll_kd, hip_roll_kd, hip_roll_kd, hip_roll_kd])
-        hip_pitch_kps = torch.tensor([hip_pitch_kp, hip_pitch_kp, hip_pitch_kp, hip_pitch_kp])
-        hip_pitch_kds = torch.tensor([hip_pitch_kd, hip_pitch_kd, hip_pitch_kd, hip_pitch_kd])
-        knee_pitch_kps = torch.tensor([knee_pitch_kp, knee_pitch_kp, knee_pitch_kp, knee_pitch_kp])
-        knee_pitch_kds = torch.tensor([knee_pitch_kd, knee_pitch_kd, knee_pitch_kd, knee_pitch_kd])
-        wheels_kps = torch.tensor([wheels_kp, wheels_kp, wheels_kp, wheels_kp])
-        wheels_kds = torch.tensor([wheels_kd, wheels_kd, wheels_kd, wheels_kd])
+        hip_roll_kps = torch.tensor([hip_roll_kp, hip_roll_kp, hip_roll_kp, hip_roll_kp], device=self._device)
+        hip_roll_kds = torch.tensor([hip_roll_kd, hip_roll_kd, hip_roll_kd, hip_roll_kd], device=self._device)
+        hip_pitch_kps = torch.tensor([hip_pitch_kp, hip_pitch_kp, hip_pitch_kp, hip_pitch_kp], device=self._device)
+        hip_pitch_kds = torch.tensor([hip_pitch_kd, hip_pitch_kd, hip_pitch_kd, hip_pitch_kd], device=self._device)
+        knee_pitch_kps = torch.tensor([knee_pitch_kp, knee_pitch_kp, knee_pitch_kp, knee_pitch_kp], device=self._device)
+        knee_pitch_kds = torch.tensor([knee_pitch_kd, knee_pitch_kd, knee_pitch_kd, knee_pitch_kd], device=self._device)
+        wheels_kps = torch.tensor([wheels_kp, wheels_kp, wheels_kp, wheels_kp], device=self._device)
+        wheels_kds = torch.tensor([wheels_kd, wheels_kd, wheels_kd, wheels_kd], device=self._device)
 
         joint_kps = torch.cat((hip_roll_kps, 
                                 hip_pitch_kps, 
@@ -238,6 +250,16 @@ class KyonRlSteppingTask(BaseTask):
                                         kds= self.joint_kds_envs, 
                                         # indices= 
                                         )
+
+    def apply_collision_filters(self, 
+                                physicscene_path: str, 
+                                coll_root_path: str):
+
+        self._cloner.filter_collisions(physicsscene_path = physicscene_path,
+                                collision_root_path = coll_root_path, 
+                                prim_paths=self._envs_prim_paths, 
+                                global_paths=[self._ground_plane_prim_path] # can collide with these prims
+                            )
 
     def print_envs_info(self):
         
@@ -355,9 +377,24 @@ class KyonRlSteppingTask(BaseTask):
         # forces[:, self._cart_dof_idx] = self._max_push_effort * actions[0]
 
         # indices = torch.arange(self._cartpoles.count, dtype=torch.int32, device=self._device)
-        # self._cartpoles.set_joint_efforts(forces, indices=indices)
 
-        a = 1
+        pos_ref = torch.zeros((1, self._robot_n_dofs), device=self._device)
+        vel_ref = torch.zeros((self.num_envs, self._robot_n_dofs), device=self._device)
+        eff_ref = torch.zeros((1, self._robot_n_dofs), device=self._device)
+
+        pos_ref = torch.rand((1, self._robot_n_dofs), device=self._device)
+        # vel_ref = torch.rand((1, self._robot_n_dofs), device=self._device)
+        eff_ref = torch.mul(torch.rand((1, self._robot_n_dofs), device=self._device), 100.0)
+
+        # prim_idxs = torch.tensor([2], device=self._device)
+
+        # self._robots_art_view.set_joint_position_targets(positions = pos_ref, 
+        #                                                 indices = prim_idxs)
+        # self._robots_art_view.set_joint_velocity_targets(velocities = vel_ref, 
+        #                                                 indices = prim_idxs)
+        # self._robots_art_view.set_joint_efforts(efforts = eff_ref, 
+        #                                         indices = torch.tensor([0], device=self._device))
+
 
     def get_observations(self):
 
