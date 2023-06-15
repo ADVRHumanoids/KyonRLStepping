@@ -5,9 +5,11 @@ The preferred way of using KyonRLStepping package is to employ the provided [mam
 Installation instructions:
 - First install Mamba by running ```curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-$(uname)-$(uname -m).sh"``` and then ```bash Mambaforge-$(uname)-$(uname -m).sh```.
 
-- Create the mamba environment by running ```create_mamba_env.sh```. This will properly setup a Python 3.7 mamba environment named ```kyonrlstepping``` with (almost) all necessary dependencies and also install this package.
+- Create the mamba environment by running ```create_mamba_env.sh```. This will properly setup a Python 3.7 mamba environment named ```kyonrlstepping``` with (almost) all necessary dependencies
 
 - Activate the environment with ```mamba activate kyonrlstepping```
+
+- From the root folder install the package with ```pip install -e .```.
 
 - Test the Lunar Lander example from StableBaselines3 v2.0 with ```python kyonrlstepping/tests/test_lunar_lander_stable_bs3.py```.
 

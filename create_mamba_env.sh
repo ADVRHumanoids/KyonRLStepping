@@ -9,6 +9,7 @@ pushd "${ROOT_DIR}/"
 
     # setup mamba
     MAMBA_DIR="$(mamba info --base)"
+    
     source "${MAMBA_DIR}/etc/profile.d/mamba.sh"
 
     # !!! this removes existing version of the env
@@ -18,12 +19,11 @@ pushd "${ROOT_DIR}/"
     mamba env create -f ./kyon_stepping_mamba_env.yml
 
     # activate env
-    mamba activate "${ENV_NAME}"
+    # mamba activate "${ENV_NAME}"
 
-    # install KyonRlStepping package in editable mode
-    pip install -e .
+    # # install KyonRlStepping package in editable mode
+    # pip install -e .
 
 popd
 
 echo "SUCCESS"
-

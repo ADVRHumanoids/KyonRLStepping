@@ -31,4 +31,4 @@ dependencies:
     # - pip install urdf-parser-py
     - empy
     # - numpy-quaternion
-    - numpy-ros
+#    - numpy-ros
