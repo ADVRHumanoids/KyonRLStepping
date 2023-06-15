@@ -20,6 +20,8 @@ from omni.isaac.urdf._urdf import UrdfJointTargetType
 
 from omni.isaac.core.utils.types import ArticulationActions
 
+from omni.isaac.core.scenes.scene import Scene
+
 class KyonRlSteppingTask(BaseTask):
     def __init__(self, 
                 name: str, 
@@ -297,8 +299,8 @@ class KyonRlSteppingTask(BaseTask):
             raise Exception("Before calling _get_robot_info_from_world(), you need to reset the World at least once!")
 
     def set_up_scene(self, 
-                    scene) -> None:
-        
+                    scene: Scene) -> None:
+
         self._generate_urdf()
 
         self._import_urdf()
@@ -325,12 +327,19 @@ class KyonRlSteppingTask(BaseTask):
                             static_friction=0.5, 
                             dynamic_friction=0.5, 
                             restitution=0.8)
-
+        
+        # delete_prim(self._ground_plane_prim_path + "/SphereLight") # we remove the default spherical light
+        
         # set default camera viewport position and target
         self.set_initial_camera_params()
 
-    def set_initial_camera_params(self, camera_position=[10, 10, 3], camera_target=[0, 0, 0]):
-        set_camera_view(eye=camera_position, target=camera_target, camera_prim_path="/OmniverseKit_Persp")
+    def set_initial_camera_params(self, 
+                                camera_position=[10, 10, 3], 
+                                camera_target=[0, 0, 0]):
+        
+        set_camera_view(eye=camera_position, 
+                        target=camera_target, 
+                        camera_prim_path="/OmniverseKit_Persp")
 
     def post_reset(self):
         # self._cart_dof_idx = self._cartpoles.get_dof_index("cartJoint")
@@ -394,7 +403,6 @@ class KyonRlSteppingTask(BaseTask):
         #                                                 indices = prim_idxs)
         # self._robots_art_view.set_joint_efforts(efforts = eff_ref, 
         #                                         indices = torch.tensor([0], device=self._device))
-
 
     def get_observations(self):
 

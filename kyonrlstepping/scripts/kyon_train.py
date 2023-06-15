@@ -1,17 +1,17 @@
 import numpy as np
 
-from kyonrlstepping.gym.omni_vect_env.vec_envs import KyonVecEnv
+from kyonrlstepping.gym.omni_vect_env.vec_envs import RobotVecEnv
 
 #from stable_baselines3 import PPO
 
-env = KyonVecEnv(headless=False) # create environment
+env = RobotVecEnv(headless=False) # create environment
 
 # now we can import the task (not before, since Omni plugins are loaded 
 # upon environment initialization)
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
 
 task = KyonRlSteppingTask(name="KyonRLStepping", 
-                        num_envs = 9, 
+                        num_envs = 5, 
                         robot_offset = np.array([0.0, 0.0, 0.8])) # create task
 
 sim_params = {}

@@ -12,7 +12,7 @@ import os
 import carb
 import gymnasium as gym 
 
-class KyonVecEnv(gym.Env):
+class RobotVecEnv(gym.Env):
     """ This class provides a base interface for connecting RL policies with task implementations.
         APIs provided in this interface follow the interface in gymnasium.Env.
         This class also provides utilities for initializing simulation apps, creating the World,
@@ -199,6 +199,7 @@ class KyonVecEnv(gym.Env):
             
         if init_sim:
             self._world.reset()
+            
             self._task.world_was_initialized() # we signal the task 
             # that the first reset was called -> all info is now available
             # to be retrieved
@@ -208,7 +209,6 @@ class KyonVecEnv(gym.Env):
             self._task.set_robot_imp_gains()
 
             self._task.print_envs_info() # debug prints
-
 
     def render(self, mode="human") -> None:
         """ Step the renderer.
