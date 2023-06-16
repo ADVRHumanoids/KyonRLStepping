@@ -15,7 +15,7 @@ from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
 num_envs = 5
 task = KyonRlSteppingTask(name="KyonRLStepping", 
                         num_envs = num_envs, 
-                        robot_offset = np.array([0.0, 0.0, 0.8])) # create task
+                        robot_offset = np.array([0.0, 0.0, 2.0])) # create task
 
 device = "cuda"
 
@@ -40,7 +40,7 @@ env.set_task(task,
 #model = PPO.load("ppo_cartpole")
 env._world.reset()
 obs = env.reset()
-env._world.pause()
+# env._world.pause()
 
 cmd_size = 2
 n_jnts = env._task._robot_n_dofs
@@ -57,6 +57,15 @@ control_cluster = KyonRHCluster(cluster_size = num_envs,
                             cmd_size = cmd_size, 
                             device = device)
 
+for i in range(0, num_envs):
+
+    result = control_cluster.add_controller(KyonRHC(urdf_path = "", 
+                                        config_path = "", 
+                                        trigger_pipe = control_cluster.trigger_pipes[i][0],
+                                        success_pipe = control_cluster.success_pipes[i][1]))
+    
+control_cluster.setup()
+
 control_cluster.update(cluster_state)
 
 while env._simulation_app.is_running():
@@ -65,12 +74,15 @@ while env._simulation_app.is_running():
     # rhc_cmds = rhc_get_cmds_fromjoy() or from agent
 
     control_cluster.set_commands(cluster_cmds)
+
     control_cluster.solve()
 
-    obs, rewards, dones, info = env.step(control_cluster.get()) 
+    # print("Cluster solution time: " + str(control_cluster.solution_time))
 
-    control_cluster.update() # open loop update of the internal control cluster
+    obs, rewards, dones, info = env.step() 
+
+    # control_cluster.update() # open loop update of the internal control cluster
     # control_cluster.update(cluster_state) # closed loop update of the internal control cluster
 
-
+control_cluster.terminate() # closes all processes
 env.close()
