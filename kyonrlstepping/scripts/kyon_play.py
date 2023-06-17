@@ -4,8 +4,6 @@ from kyonrlstepping.gym.omni_vect_env.vec_envs import RobotVecEnv
 from kyon_rhc.kyonrhc import KyonRHCluster, KyonRHC, KyonClusterCmd
 from kyon_rhc.interface.control_cluster import RobotClusterState
 
-from kyonrlstepping.utils.jnt_imp_cntrl import JntImpCntrl
-
 #from stable_baselines3 import PPO
 
 env = RobotVecEnv(headless=False) # create environment

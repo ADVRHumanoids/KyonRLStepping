@@ -22,6 +22,8 @@ from omni.isaac.core.utils.types import ArticulationActions
 
 from omni.isaac.core.scenes.scene import Scene
 
+from kyonrlstepping.utils.jnt_imp_cntrl import JntImpCntrl
+
 class KyonRlSteppingTask(BaseTask):
     def __init__(self, 
                 name: str, 
@@ -85,6 +87,8 @@ class KyonRlSteppingTask(BaseTask):
         BaseTask.__init__(self,
                         name=name, 
                         offset=offset)
+        
+        self._jnt_imp_controller = None 
     
     def _generate_urdf(self, 
                     wheels: bool = True, 
@@ -253,6 +257,17 @@ class KyonRlSteppingTask(BaseTask):
                                         # indices= 
                                         )
 
+    def override_pd_controller_gains(self):
+        
+        # all gains set to 0 so that it's possible to 
+        # attach to the articulation a custom joint controller 
+
+        self.joint_kps_envs = torch.zeros((self.num_envs, self._robot_n_dofs))
+        self.joint_kds_envs = torch.zeros((self.num_envs, self._robot_n_dofs)) 
+
+        self._robots_art_view.set_gains(kps= self.joint_kps_envs, 
+                                        kds= self.joint_kds_envs)
+        
     def apply_collision_filters(self, 
                                 physicscene_path: str, 
                                 coll_root_path: str):
@@ -298,6 +313,14 @@ class KyonRlSteppingTask(BaseTask):
 
             raise Exception("Before calling _get_robot_info_from_world(), you need to reset the World at least once!")
 
+    def init_imp_control(self):
+
+        self._jnt_imp_controller = JntImpCntrl(num_robots=self.num_envs, 
+                                            dofs_names=self._robot_dof_names, 
+                                            default_pgain = 100.0, 
+                                            default_vgain = 20,
+                                            device= self._device)
+        
     def set_up_scene(self, 
                     scene: Scene) -> None:
 

@@ -206,8 +206,9 @@ class RobotVecEnv(gym.Env):
             self._task.fill_robot_info_from_world() # populates robot info data
             # in task
             self._task.set_robot_default_jnt_config()
-            self._task.set_robot_imp_gains()
-
+            # self._task.set_robot_imp_gains()
+            self._task.override_pd_controller_gains() # removes the default pd articulation controller
+            self._task.init_imp_control() # initialized the impedance controller
             self._task.print_envs_info() # debug prints
 
     def render(self, mode="human") -> None:
