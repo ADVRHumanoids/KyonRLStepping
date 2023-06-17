@@ -63,10 +63,13 @@ External dependencies to be installed separately:
 
 - [] Fist proof-of-concept integration of Horizon-based [kyon mpc controller](https://github.com/ADVRHumanoids/kyon_controller) within the simulation:
 
-    - [] Horizon's abstract class for RHC controller
-    - [] Kyon's specific implementation of RHC controller
-    - [] Testing of joystick-based MPC control in IsaacSim
-    - [] Implementation of a joint space impedance controller for simultaneous application of control actions through all environments?
+    - [x] abstract ControlCluster class for spawning n controllers and running their solve in parallel, while synchronizing with the simulation.
+    - [x] abstract class for RHC controller
+    - [x] implementation of RHC controller and ControlCluster for kyon. 
+    - [x] implementation of a joint space impedance controller for simultaneous application of control actions through all environments
+    - [] integration of joint imp controller inside environment and task + testing
+    - [] testing of joystick-based MPC control in IsaacSim
+
 
 - [] Setting up the RL task:
     - [x] Testing vectorization of Kyon's simulation

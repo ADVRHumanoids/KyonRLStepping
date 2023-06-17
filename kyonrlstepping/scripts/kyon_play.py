@@ -4,6 +4,8 @@ from kyonrlstepping.gym.omni_vect_env.vec_envs import RobotVecEnv
 from kyon_rhc.kyonrhc import KyonRHCluster, KyonRHC, KyonClusterCmd
 from kyon_rhc.interface.control_cluster import RobotClusterState
 
+from kyonrlstepping.utils.jnt_imp_cntrl import JntImpCntrl
+
 #from stable_baselines3 import PPO
 
 env = RobotVecEnv(headless=False) # create environment
@@ -56,17 +58,15 @@ control_cluster = KyonRHCluster(cluster_size = num_envs,
                             n_dofs = n_jnts,
                             cmd_size = cmd_size, 
                             device = device)
-
 for i in range(0, num_envs):
 
     result = control_cluster.add_controller(KyonRHC(urdf_path = "", 
                                         config_path = "", 
                                         trigger_pipe = control_cluster.trigger_pipes[i][0],
                                         success_pipe = control_cluster.success_pipes[i][1]))
-    
 control_cluster.setup()
-
-control_cluster.update(cluster_state)
+control_cluster.update(cluster_state) # we set the initial control cluster state
+# using the observations from the first reset call
 
 while env._simulation_app.is_running():
     # action, _states = model.predict(obs)
