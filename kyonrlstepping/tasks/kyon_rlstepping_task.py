@@ -22,7 +22,7 @@ from omni.isaac.core.utils.types import ArticulationActions
 
 from omni.isaac.core.scenes.scene import Scene
 
-from kyonrlstepping.utils.jnt_imp_cntrl import JntImpCntrl
+from kyonrlstepping.utils.jnt_imp_cntrl import OmniJntImpCntrl
 
 class KyonRlSteppingTask(BaseTask):
     def __init__(self, 
@@ -224,60 +224,17 @@ class KyonRlSteppingTask(BaseTask):
 
         return True
 
-    def set_robot_imp_gains(self, 
-                            hip_roll_kp = 100.0, 
-                            hip_pitch_kp = 100.0, 
-                            knee_pitch_kp = 100.0,
-                            wheels_kp = 0.0, 
-                            hip_roll_kd = 10.0, 
-                            hip_pitch_kd = 10.0, 
-                            knee_pitch_kd = 10.0, 
-                            wheels_kd = 10.0):
-
-        hip_roll_kps = torch.tensor([hip_roll_kp, hip_roll_kp, hip_roll_kp, hip_roll_kp], device=self._device)
-        hip_roll_kds = torch.tensor([hip_roll_kd, hip_roll_kd, hip_roll_kd, hip_roll_kd], device=self._device)
-        hip_pitch_kps = torch.tensor([hip_pitch_kp, hip_pitch_kp, hip_pitch_kp, hip_pitch_kp], device=self._device)
-        hip_pitch_kds = torch.tensor([hip_pitch_kd, hip_pitch_kd, hip_pitch_kd, hip_pitch_kd], device=self._device)
-        knee_pitch_kps = torch.tensor([knee_pitch_kp, knee_pitch_kp, knee_pitch_kp, knee_pitch_kp], device=self._device)
-        knee_pitch_kds = torch.tensor([knee_pitch_kd, knee_pitch_kd, knee_pitch_kd, knee_pitch_kd], device=self._device)
-        wheels_kps = torch.tensor([wheels_kp, wheels_kp, wheels_kp, wheels_kp], device=self._device)
-        wheels_kds = torch.tensor([wheels_kd, wheels_kd, wheels_kd, wheels_kd], device=self._device)
-
-        joint_kps = torch.cat((hip_roll_kps, 
-                                hip_pitch_kps, 
-                                knee_pitch_kps, 
-                                wheels_kps),
-                                0)
-        joint_kds = torch.cat((hip_roll_kds, 
-                                hip_pitch_kds, 
-                                knee_pitch_kds, 
-                                wheels_kds),
-                                0)
-
-        self.joint_kps_envs = torch.zeros((self.num_envs, self._robot_n_dofs))
-        self.joint_kds_envs = torch.zeros((self.num_envs, self._robot_n_dofs)) 
-
-        for i in range(0, self.num_envs):
-
-            self.joint_kps_envs[i, :] = joint_kps
-            self.joint_kds_envs[i, :] = joint_kds
-
-        self._robots_art_view.set_gains(kps= self.joint_kps_envs, 
-                                        kds= self.joint_kds_envs, 
-                                        # indices= 
-                                        )
-
-    def override_pd_controller_gains(self):
+    # def override_pd_controller_gains(self):
         
-        # all gains set to 0 so that it's possible to 
-        # attach to the articulation a custom joint controller (e.g. jnt impedance), 
-        # on top of the default articulation pd controller
+    #     # all gains set to 0 so that it's possible to 
+    #     # attach to the articulation a custom joint controller (e.g. jnt impedance), 
+    #     # on top of the default articulation pd controller
 
-        self.joint_kps_envs = torch.zeros((self.num_envs, self._robot_n_dofs))
-        self.joint_kds_envs = torch.zeros((self.num_envs, self._robot_n_dofs)) 
+    #     self.joint_kps_envs = torch.zeros((self.num_envs, self._robot_n_dofs))
+    #     self.joint_kds_envs = torch.zeros((self.num_envs, self._robot_n_dofs)) 
 
-        self._robots_art_view.set_gains(kps= self.joint_kps_envs, 
-                                        kds= self.joint_kds_envs)
+    #     self._robots_art_view.set_gains(kps= self.joint_kps_envs, 
+    #                                     kds= self.joint_kds_envs)
         
     def apply_collision_filters(self, 
                                 physicscene_path: str, 
@@ -325,24 +282,17 @@ class KyonRlSteppingTask(BaseTask):
             raise Exception("Before calling _get_robot_info_from_world(), you need to reset the World at least once!")
 
     def init_imp_control(self, 
-                sim_dt: float,
                 default_jnt_pgain = 300.0, 
-                default_jnt_vgain = 0.1, 
+                default_jnt_vgain = 30.0, 
                 default_wheel_pgain = 0.0, 
-                default_wheel_vgain = 0.0, 
-                enable_filtering = False, 
-                filter_BW = 1):
+                default_wheel_vgain = 0.0):
         
         if self.world_was_initialized:
 
-            self._jnt_imp_controller = JntImpCntrl(num_robots=self.num_envs, 
-                                                jnts_names=self._robot_dof_names, 
+            self._jnt_imp_controller = OmniJntImpCntrl(articulation=self._robots_art_view,
                                                 default_pgain = default_jnt_pgain, 
                                                 default_vgain = default_jnt_vgain,
-                                                device= self._device, 
-                                                dt = sim_dt, 
-                                                filter_BW=filter_BW,
-                                                disable_filter = not enable_filtering)
+                                                device= self._device)
 
             # we override internal default gains for the wheels, which are usually
             # velocity controlled
@@ -364,7 +314,7 @@ class KyonRlSteppingTask(BaseTask):
             # we update the internal references on the imp. controller using 
             # measured states, for smoothness sake
             print("set_ref_success:" )
-            print(self._jnt_imp_controller.set_refs(pos_ref=self.robot_jnt_positions)) 
+            print(self._jnt_imp_controller.set_refs(pos_ref=self._default_jnt_positions)) 
 
         else:
 
@@ -452,23 +402,16 @@ class KyonRlSteppingTask(BaseTask):
 
     def pre_physics_step(self, actions) -> None:
         
-        self._jnt_imp_controller.set_state(pos = self.robot_jnt_positions, 
-                                        vel = self.robot_jnt_velocities)
-        self._jnt_imp_controller.update() # updates jnt effort impedance efforts, 
-        # given the internal state of the controller (updated in get_observations)
-        
-        print("eff:\n")
-        # print(self._jnt_imp_controller.get())
-        # print("pos:\n")
-        print(self._jnt_imp_controller._pos)
-        # print("pos_ref:\n")
-        # print(self._jnt_imp_controller._pos_ref)
-        # print("vel:\n")
-        # print(self._jnt_imp_controller._vel)
-        # print("vel_ref:\n")
-        # print(self._jnt_imp_controller._vel_ref)
+        wheel_idxs = self._jnt_imp_controller.get_jnt_idxs_matching("wheel")
+        # pos_ref = torch.mul(torch.sub(torch.rand((1, len(knee_indxs)), device = self._device), 0.5), 2.0)
+        eff_ref = torch.mul(torch.sub(torch.rand((1, len(wheel_idxs)), device = self._device), 0.5), 5.0)
+        success = self._jnt_imp_controller.set_refs(eff_ref=eff_ref, 
+                                        pos_ref=None, 
+                                        vel_ref=None, 
+                                        jnt_indxs=wheel_idxs, 
+                                        robot_indxs=torch.tensor([0], device=self._device))
 
-        self._robots_art_view.set_joint_efforts(efforts = self._jnt_imp_controller.get())
+        self._jnt_imp_controller.apply_refs()
 
     def get_observations(self):
 

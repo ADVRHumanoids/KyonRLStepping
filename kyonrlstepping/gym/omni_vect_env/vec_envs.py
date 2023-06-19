@@ -198,7 +198,7 @@ class RobotVecEnv(gym.Env):
 
         if sim_params and "enable_viewport" in sim_params:
             self._render = sim_params["enable_viewport"]
-            
+
         if init_sim:
 
             self._world.reset() # after the first reset we get get all quantities 
@@ -217,9 +217,7 @@ class RobotVecEnv(gym.Env):
             # self._task.set_robot_imp_gains()
 
             self._task._get_jnts_state()
-            self._task.override_pd_controller_gains() # removes the default pd articulation controller
-            self._task.init_imp_control(sim_dt = self._sim_params["integration_dt"], 
-                                    enable_filtering = False) # initialized the impedance controller
+            self._task.init_imp_control() # initialized the impedance controller
 
             self._task.print_envs_info() # debug prints
 
