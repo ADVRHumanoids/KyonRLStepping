@@ -3,6 +3,69 @@ import torch
 from typing import List
 from enum import Enum
 
+class SimpleFilter:
+
+    def __init__(self,
+            dt: float, 
+            filter_BW: float = 0.1, 
+            rows: int = 1, 
+            cols: int = 1, 
+            device = "cuda"):
+        
+        self._device = device
+
+        self._dt = dt
+
+        self._rows = rows
+        self._cols = cols
+
+        self._filter_BW = filter_BW
+
+        import math 
+        self._gain = 2 * math.pi * self._filter_BW
+
+        self.yk = torch.zeros((self._rows, self._cols), device = self._device, 
+                                dtype=torch.float32)
+        self.ykm1 = torch.zeros((self._rows, self._cols), device = self._device, 
+                                dtype=torch.float32)
+        
+        self.refk = torch.zeros((self._rows, self._cols), device = self._device, 
+                                dtype=torch.float32)
+        self.refkm1 = torch.zeros((self._rows, self._cols), device = self._device, 
+                                dtype=torch.float32)
+        
+        self._kh2 = self._gain * self._dt / 2.0
+        self._coeff_ref = self._kh2 * 1/ (1 + self._kh2)
+        self._coeff_km1 = (1 - self._kh2) / (1 + self._kh2)
+
+    def update(self, 
+               refk: torch.Tensor = None):
+        
+        if refk is not None:
+
+            self.refk = refk
+
+        self.yk = torch.add(torch.mul(self.ykm1, self._coeff_km1), torch.mul(torch.add(self.refk, self.refkm1), self._coeff_ref))
+
+        self.refkm1 = self.refk
+        self.ykm1 = self.yk
+    
+    def reset(self):
+
+        self.yk = torch.zeros((self._rows, self._cols), device = self._device, 
+                                dtype=torch.float32)
+        self.ykm1 = torch.zeros((self._rows, self._cols), device = self._device, 
+                                dtype=torch.float32)
+        
+        self.refk = torch.zeros((self._rows, self._cols), device = self._device, 
+                                dtype=torch.float32)
+        self.refkm1 = torch.zeros((self._rows, self._cols), device = self._device, 
+                                dtype=torch.float32)
+    
+    def get(self):
+
+        return self.yk
+    
 class JntImpCntrl:
 
     class IndxState(Enum):
@@ -13,11 +76,14 @@ class JntImpCntrl:
 
     def __init__(self, 
                 num_robots: int,
-                dofs_names: List[str],
+                jnts_names: List[str],
+                dt: float,
                 default_pgain = 300.0, 
                 default_vgain = 30.0, 
                 backend = "torch", 
-                device = "cpu"):
+                device = "cpu", 
+                filter_BW = 100.0, 
+                disable_filter = True):
         
         self._valid_signal_types = ["pos_ref", "vel_ref", "eff_ref", 
                                     "pos", "vel", 
@@ -26,9 +92,13 @@ class JntImpCntrl:
 
         self.num_robots = num_robots
 
-        self.n_dofs = len(dofs_names)
+        self.n_dofs = len(jnts_names)
         
-        self.dofs_names = dofs_names
+        if not (len(jnts_names) == len(set(jnts_names))):
+
+            raise Exception("The provided joints names are not unique!")
+        
+        self.jnts_names = jnts_names
         self.jnt_idxs = torch.tensor([i for i in range(0, self.n_dofs)], 
                                     device = self._device, 
                                     dtype=torch.int64)
@@ -40,6 +110,10 @@ class JntImpCntrl:
         self._backend = "torch"
 
         self.cntrl_action = torch.zeros((self.num_robots, self.n_dofs), device = self._device, 
+                                    dtype=torch.float32)
+        self.pos_err = torch.zeros((self.num_robots, self.n_dofs), device = self._device, 
+                                    dtype=torch.float32)
+        self.vel_err = torch.zeros((self.num_robots, self.n_dofs), device = self._device, 
                                     dtype=torch.float32)
         
         # we assume diagonal gain matrices, so we can save on memory and only store the diagonal
@@ -65,6 +139,15 @@ class JntImpCntrl:
                                     dtype=torch.float32)
         self._vel = torch.zeros((self.num_robots, self.n_dofs), device = self._device, 
                                     dtype=torch.float32)
+        
+        self._filter_BW = filter_BW
+        self._disable_filter = disable_filter
+        
+        self.eff_filter = SimpleFilter(dt=dt, 
+                                filter_BW=self._filter_BW, 
+                                rows=self.num_robots, 
+                                cols=self.n_dofs, 
+                                device=self._device)
 
     def _validate_selectors(self, 
                 robot_indxs: torch.Tensor = None, 
@@ -274,7 +357,7 @@ class JntImpCntrl:
         else:
 
             return False
-        
+    
     def set_gains(self, 
                 pos_gains: torch.Tensor = None, 
                 vel_gains: torch.Tensor = None, 
@@ -458,22 +541,35 @@ class JntImpCntrl:
         
         if selector is not None:
 
+            self.pos_err[selector] = torch.sub(self._pos_ref[selector], 
+                                            self._pos[selector])
+
+            self.vel_err[selector] = torch.sub(self._vel_ref[selector], 
+                    self._vel[selector])
+            
             self.cntrl_action[selector] = torch.add(self._eff_ref[selector], 
-                                                        torch.add(
-                                                            torch.mul(self._pos_gains[selector], 
-                                                                torch.sub(self._pos[selector], self._pos_ref[selector])),  \
-                                                            torch.mul(self._vel_gains[selector], torch.sub(self._vel[selector], self._vel_ref[selector]))))
+                                                    torch.add(
+                                                        torch.mul(self._pos_gains[selector], 
+                                                                self.pos_err[selector]),
+                                                        torch.mul(self._vel_gains[selector],
+                                                                self.vel_err[selector])))
                                                         
         
         else:
             
             if robot_indxs is None and jnt_indxs is None:
+                
+                self.pos_err  = torch.sub(self._pos_ref, self._pos)
+
+                self.vel_err = torch.sub(self._vel_ref, 
+                                self._vel)
 
                 self.cntrl_action = torch.add(self._eff_ref, 
                                                 torch.add(
                                                     torch.mul(self._pos_gains, 
-                                                        torch.sub(self._pos, self._pos_ref)),  \
-                                                    torch.mul(self._vel_gains, torch.sub(self._vel, self._vel_ref))))
+                                                            self.pos_err),
+                                                    torch.mul(self._vel_gains,
+                                                            self.vel_err)))
             else:
 
                 success = False
@@ -485,17 +581,30 @@ class JntImpCntrl:
             jnt_indxs: torch.Tensor = None):
         
         # returns a view of the internal control action
-
         selector = self._gen_selector(robot_indxs=robot_indxs, 
-                           jnt_indxs=jnt_indxs)
+                                    jnt_indxs=jnt_indxs)
+        
+        if self._disable_filter:
 
-        if selector is not None:
-            
-            return self.cntrl_action[selector]
-                                                        
+            if selector is not None:
+                
+                return self.cntrl_action[selector]
+                                                            
+            else:
+                
+                return self.cntrl_action
+
         else:
+
+            self.eff_filter.update(refk=self.cntrl_action)
             
-            return self.cntrl_action
+            if selector is not None:
+                
+                return self.eff_filter.get()[selector]
+                                                            
+            else:
+                
+                return self.eff_filter.get()
 
     def get_pos_gains(self):
 
@@ -504,3 +613,19 @@ class JntImpCntrl:
     def get_vel_gains(self):
 
         return self._vel_gains
+    
+    def get_jnt_names_matching(self, 
+                        name_pattern: str):
+
+        return [jnt for jnt in self.jnts_names if name_pattern in jnt]
+
+    def get_jnt_idxs_matching(self, 
+                        name_pattern: str):
+
+        jnts_names = self.get_jnt_names_matching(name_pattern)
+
+        jnt_idxs = [self.jnts_names.index(jnt) for jnt in jnts_names]
+
+        return torch.tensor(jnt_idxs, 
+                            device=self._device, 
+                            dtype=torch.float32)

@@ -108,6 +108,8 @@ class RobotVecEnv(gym.Env):
             sim_params=sim_params
         )
 
+        self._sim_params = sim_params
+
         print("CREATING TASK: " + task.name + "\n")
 
         print("WORLD INFO: ")
@@ -198,17 +200,27 @@ class RobotVecEnv(gym.Env):
             self._render = sim_params["enable_viewport"]
             
         if init_sim:
-            self._world.reset()
+
+            self._world.reset() # after the first reset we get get all quantities 
+            # from the scene 
             
             self._task.world_was_initialized() # we signal the task 
             # that the first reset was called -> all info is now available
             # to be retrieved
-            self._task.fill_robot_info_from_world() # populates robot info data
+
+            self._task.fill_robot_info_from_world() # populates robot info fields
             # in task
+
             self._task.set_robot_default_jnt_config()
+            # self._task.set_robot_root_default_config()
+
             # self._task.set_robot_imp_gains()
+
+            self._task._get_jnts_state()
             self._task.override_pd_controller_gains() # removes the default pd articulation controller
-            self._task.init_imp_control() # initialized the impedance controller
+            self._task.init_imp_control(sim_dt = self._sim_params["integration_dt"], 
+                                    enable_filtering = False) # initialized the impedance controller
+
             self._task.print_envs_info() # debug prints
 
     def render(self, mode="human") -> None:

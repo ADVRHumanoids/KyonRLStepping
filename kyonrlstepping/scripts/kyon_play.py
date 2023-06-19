@@ -20,7 +20,7 @@ task = KyonRlSteppingTask(name="KyonRLStepping",
 device = "cuda"
 
 sim_params = {}
-sim_params["integration_dt"] = 1.0/200.0
+sim_params["integration_dt"] = 1.0/100.0
 sim_params["rendering_dt"] = 1.0/60.0
 sim_params["substeps"] = 1
 sim_params["gravity"] = np.array([0.0, 0.0, -9.81])
@@ -78,7 +78,7 @@ while env._simulation_app.is_running():
     # print("Cluster solution time: " + str(control_cluster.solution_time))
 
     obs, rewards, dones, info = env.step() 
-
+    print("sim_count: " + str(env.sim_frame_count))
     # control_cluster.update() # open loop update of the internal control cluster
     # control_cluster.update(cluster_state) # closed loop update of the internal control cluster
 

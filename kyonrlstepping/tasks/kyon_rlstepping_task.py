@@ -162,6 +162,16 @@ class KyonRlSteppingTask(BaseTask):
         # from the default one of the URDF importer to the prescribed one
 
         return success
+    
+    def _get_jnts_state(self):
+
+        self.robot_jnt_positions = self._robots_art_view.get_joint_positions(indices = None, 
+                                        joint_indices = None, 
+                                        clone = True)
+        
+        self.robot_jnt_velocities = self._robots_art_view.get_joint_velocities(indices = None, 
+                                        joint_indices = None, 
+                                        clone = True)
 
     def world_was_initialized(self):
 
@@ -260,7 +270,8 @@ class KyonRlSteppingTask(BaseTask):
     def override_pd_controller_gains(self):
         
         # all gains set to 0 so that it's possible to 
-        # attach to the articulation a custom joint controller 
+        # attach to the articulation a custom joint controller (e.g. jnt impedance), 
+        # on top of the default articulation pd controller
 
         self.joint_kps_envs = torch.zeros((self.num_envs, self._robot_n_dofs))
         self.joint_kds_envs = torch.zeros((self.num_envs, self._robot_n_dofs)) 
@@ -313,13 +324,54 @@ class KyonRlSteppingTask(BaseTask):
 
             raise Exception("Before calling _get_robot_info_from_world(), you need to reset the World at least once!")
 
-    def init_imp_control(self):
+    def init_imp_control(self, 
+                sim_dt: float,
+                default_jnt_pgain = 300.0, 
+                default_jnt_vgain = 0.1, 
+                default_wheel_pgain = 0.0, 
+                default_wheel_vgain = 0.0, 
+                enable_filtering = False, 
+                filter_BW = 1):
+        
+        if self.world_was_initialized:
 
-        self._jnt_imp_controller = JntImpCntrl(num_robots=self.num_envs, 
-                                            dofs_names=self._robot_dof_names, 
-                                            default_pgain = 100.0, 
-                                            default_vgain = 20,
-                                            device= self._device)
+            self._jnt_imp_controller = JntImpCntrl(num_robots=self.num_envs, 
+                                                jnts_names=self._robot_dof_names, 
+                                                default_pgain = default_jnt_pgain, 
+                                                default_vgain = default_jnt_vgain,
+                                                device= self._device, 
+                                                dt = sim_dt, 
+                                                filter_BW=filter_BW,
+                                                disable_filter = not enable_filtering)
+
+            # we override internal default gains for the wheels, which are usually
+            # velocity controlled
+            wheels_indxs = self._jnt_imp_controller.get_jnt_idxs_matching(name_pattern="wheel")
+
+            wheels_pos_gains = torch.full((self.num_envs, len(wheels_indxs)), 
+                                        default_wheel_pgain, 
+                                        device = self._device, 
+                                        dtype=torch.float32)
+            wheels_vel_gains = torch.full((self.num_envs, len(wheels_indxs)), 
+                                        default_wheel_vgain, 
+                                        device = self._device, 
+                                        dtype=torch.float32)
+
+            self._jnt_imp_controller.set_gains(pos_gains = wheels_pos_gains,
+                                        vel_gains = wheels_vel_gains,
+                                        jnt_indxs=wheels_indxs)
+
+            # we update the internal references on the imp. controller using 
+            # measured states, for smoothness sake
+            print("set_ref_success:" )
+            print(self._jnt_imp_controller.set_refs(pos_ref=self.robot_jnt_positions)) 
+
+        else:
+
+            raise Exception(str("You should reset the World at least once and call the ") +  
+                            str("world_was_initialized() method before initializing the ") + 
+                            str("joint impedance controller.")
+                            )
         
     def set_up_scene(self, 
                     scene: Scene) -> None:
@@ -399,35 +451,28 @@ class KyonRlSteppingTask(BaseTask):
         a = 1
 
     def pre_physics_step(self, actions) -> None:
-        # reset_env_ids = self.resets.nonzero(as_tuple=False).squeeze(-1)
-        # if len(reset_env_ids) > 0:
-        #     self.reset(reset_env_ids)
+        
+        self._jnt_imp_controller.set_state(pos = self.robot_jnt_positions, 
+                                        vel = self.robot_jnt_velocities)
+        self._jnt_imp_controller.update() # updates jnt effort impedance efforts, 
+        # given the internal state of the controller (updated in get_observations)
+        
+        print("eff:\n")
+        # print(self._jnt_imp_controller.get())
+        # print("pos:\n")
+        print(self._jnt_imp_controller._pos)
+        # print("pos_ref:\n")
+        # print(self._jnt_imp_controller._pos_ref)
+        # print("vel:\n")
+        # print(self._jnt_imp_controller._vel)
+        # print("vel_ref:\n")
+        # print(self._jnt_imp_controller._vel_ref)
 
-        # actions = torch.tensor(actions)
-
-        # forces = torch.zeros((self._cartpoles.count, self._cartpoles.num_dof), dtype=torch.float32, device=self._device)
-        # forces[:, self._cart_dof_idx] = self._max_push_effort * actions[0]
-
-        # indices = torch.arange(self._cartpoles.count, dtype=torch.int32, device=self._device)
-
-        pos_ref = torch.zeros((1, self._robot_n_dofs), device=self._device)
-        vel_ref = torch.zeros((self.num_envs, self._robot_n_dofs), device=self._device)
-        eff_ref = torch.zeros((1, self._robot_n_dofs), device=self._device)
-
-        pos_ref = torch.rand((1, self._robot_n_dofs), device=self._device)
-        # vel_ref = torch.rand((1, self._robot_n_dofs), device=self._device)
-        eff_ref = torch.mul(torch.rand((1, self._robot_n_dofs), device=self._device), 100.0)
-
-        # prim_idxs = torch.tensor([2], device=self._device)
-
-        # self._robots_art_view.set_joint_position_targets(positions = pos_ref, 
-        #                                                 indices = prim_idxs)
-        # self._robots_art_view.set_joint_velocity_targets(velocities = vel_ref, 
-        #                                                 indices = prim_idxs)
-        # self._robots_art_view.set_joint_efforts(efforts = eff_ref, 
-        #                                         indices = torch.tensor([0], device=self._device))
+        self._robots_art_view.set_joint_efforts(efforts = self._jnt_imp_controller.get())
 
     def get_observations(self):
+
+        self._get_jnts_state() # updates joints states
 
         return self.obs
 
