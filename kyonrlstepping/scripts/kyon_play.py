@@ -6,7 +6,9 @@ from kyon_rhc.interface.control_cluster import RobotClusterState
 
 #from stable_baselines3 import PPO
 
-env = RobotVecEnv(headless=False) # create environment
+env = RobotVecEnv(headless=True, 
+                enable_livestream=False, 
+                enable_viewport=False) # create environment
 
 # now we can import the task (not before, since Omni plugins are loaded 
 # upon environment initialization)
@@ -66,7 +68,22 @@ control_cluster.setup()
 control_cluster.update(cluster_state) # we set the initial control cluster state
 # using the observations from the first reset call
 
+import torch
+import time
+
+rt_time_reset = 100
+rt_factor = 1.0
+real_time = 0.0
+sim_time = 0.0
+i = 0
 while env._simulation_app.is_running():
+
+    if (i >= rt_time_reset):
+
+        real_time = 0.0
+        sim_time = 0.0
+
+    start_time = time.time()
     # action, _states = model.predict(obs)
 
     # rhc_cmds = rhc_get_cmds_fromjoy() or from agent
@@ -78,9 +95,21 @@ while env._simulation_app.is_running():
     # print("Cluster solution time: " + str(control_cluster.solution_time))
 
     obs, rewards, dones, info = env.step() 
-    print("sim_count: " + str(env.sim_frame_count))
     # control_cluster.update() # open loop update of the internal control cluster
     # control_cluster.update(cluster_state) # closed loop update of the internal control cluster
+    
+    loop_exec_time = time.time() - start_time
+
+    real_time = real_time + loop_exec_time
+    sim_time = sim_time + sim_params["integration_dt"]
+
+    rt_factor = sim_time / real_time
+    
+    i=+1
+
+    print("\nCurrent RT factor: " + str(rt_factor))
+    print("\nreal_time: " + str(real_time))
+    print("\nsim_time: " + str(sim_time))
 
 control_cluster.terminate() # closes all processes
 env.close()
