@@ -36,13 +36,13 @@ class RobotVecEnv(gym.Env):
         """
 
         experience = ""
-        if headless:
-            if enable_livestream:
-                experience = ""
-            elif enable_viewport:
-                experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.gym.headless.render.kit'
-            else:
-                experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.gym.headless.kit'
+        # if headless:
+        #     if enable_livestream:
+        #         experience = ""
+        #     elif enable_viewport:
+        #         experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.gym.headless.render.kit'
+        #     else:
+        #         experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.gym.headless.kit'
 
         self._simulation_app = SimulationApp({"headless": headless, "physics_gpu": sim_device}, experience=experience)
         carb.settings.get_settings().set("/persistent/omnihydra/useSceneGraphInstancing", True)
