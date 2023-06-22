@@ -90,6 +90,59 @@ class KyonRlSteppingTask(BaseTask):
         
         self._jnt_imp_controller = None 
     
+    def _generate_srdf(self,
+                    wheels: bool = True, 
+                    arms: bool = False, 
+                    payload: bool = False):
+        
+        # we generate the URDF where the Kyon description package is located
+        import rospkg
+        rospackage = rospkg.RosPack()
+        descr_path = rospackage.get_path("kyon_srdf")
+        srdf_path = descr_path + "/srdf"
+        kyon_xacro_name = "kyon"
+        xacro_path = srdf_path + "/" + kyon_xacro_name + ".srdf.xacro"
+        self._srdf_path = srdf_path + "/" + kyon_xacro_name + ".srdf"
+        
+        wheel_cmd_val = "true"
+        arms_cmd_val = "false"
+        payload_cmd_val = "false"
+        if wheels:
+            wheel_cmd_val = "true"
+        else:
+            wheel_cmd_val = "false"
+        if arms:
+            arms_cmd_val = "true"
+        else:
+            arms_cmd_val = "false"
+        if payload:
+            payload_cmd_val = "true"
+        else:
+            payload_cmd_val = "false"
+
+        add_wheels = "wheels:=" + wheel_cmd_val
+        add_arms = "upper_body:=" + arms_cmd_val
+        remove_sensors = "sensors:=" + "false"
+        remove_floating_joint = "floating_joint:=" + "false"
+        no_payload = "payload:=" + payload_cmd_val
+        
+        import subprocess
+        try:
+
+            xacro_gen = subprocess.check_call(["xacro",\
+                                            xacro_path, \
+                                            add_wheels, \
+                                            add_arms, \
+                                            remove_sensors, \
+                                            no_payload, \
+                                            remove_floating_joint, \
+                                            "-o", 
+                                            self._srdf_path])
+
+        except:
+
+            raise Exception('\nFAILED TO GENERATE KYON\'S URDF!!!.\n')
+        
     def _generate_urdf(self, 
                     wheels: bool = True, 
                     arms: bool = False):
@@ -118,6 +171,7 @@ class KyonRlSteppingTask(BaseTask):
 
         remove_floating_joint = "floating_joint:=" + "false"
         remove_sensors = "sensors:=" + "false"
+        no_payload = "payload:=" + "false"
 
         import subprocess
         try:
@@ -128,12 +182,22 @@ class KyonRlSteppingTask(BaseTask):
                                             add_arms, \
                                             remove_floating_joint, \
                                             remove_sensors, \
+                                            no_payload, \
                                             "-o", 
                                             self._urdf_path])
+            
+            # we also generate an updated SRDF (used by controllers)
 
         except:
 
             raise Exception('\nFAILED TO GENERATE KYON\'S URDF!!!.\n')
+
+    def _generate_description(self):
+
+        self._generate_urdf()
+        
+        # we also generate SRDF files, which are useful for control
+        self._generate_srdf()
 
     def _import_urdf(self, 
                     import_config: omni.isaac.urdf._urdf.ImportConfig = _urdf.ImportConfig(), 
@@ -326,7 +390,7 @@ class KyonRlSteppingTask(BaseTask):
     def set_up_scene(self, 
                     scene: Scene) -> None:
 
-        self._generate_urdf()
+        self._generate_description()
 
         self._import_urdf()
         
