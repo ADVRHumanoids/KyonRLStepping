@@ -1,18 +1,17 @@
 import numpy as np
 
 from kyonrlstepping.gym.omni_vect_env.vec_envs import RobotVecEnv
-from kyon_rhc.kyonrhc import KyonRHCluster, KyonRHC, KyonClusterCmd
-from kyon_rhc.interface.control_cluster import RobotClusterState
 
 #from stable_baselines3 import PPO
 
-env = RobotVecEnv(headless=True, 
+env = RobotVecEnv(headless=False, 
                 enable_livestream=False, 
                 enable_viewport=False) # create environment
 
 # now we can import the task (not before, since Omni plugins are loaded 
 # upon environment initialization)
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
+from kyon_rhc.interface.control_cluster import ControlClusterClient
 
 num_envs = 5
 task = KyonRlSteppingTask(name="KyonRLStepping", 
@@ -46,31 +45,12 @@ obs = env.reset()
 
 cmd_size = 2
 n_jnts = env._task._robot_n_dofs
-cluster_cmds = KyonClusterCmd(cluster_size = num_envs, 
-                            cmd_size = cmd_size, 
-                            device = device)
 
-cluster_state = RobotClusterState(n_dofs = n_jnts, 
-                            cluster_size = num_envs, 
-                            device = device)
+cluster_client = ControlClusterClient()
+cluster_client.connect() # blocking, does not return 
+# until connection with the server is established
 
-control_cluster = KyonRHCluster(cluster_size = num_envs, 
-                            n_dofs = n_jnts,
-                            cmd_size = cmd_size, 
-                            device = device)
-for i in range(0, num_envs):
-
-    result = control_cluster.add_controller(KyonRHC(urdf_path = "", 
-                                        config_path = "", 
-                                        trigger_pipe = control_cluster.trigger_pipes[i][0],
-                                        success_pipe = control_cluster.success_pipes[i][1]))
-control_cluster.setup()
-control_cluster.update(cluster_state) # we set the initial control cluster state
-# using the observations from the first reset call
-
-import torch
 import time
-
 rt_time_reset = 100
 rt_factor = 1.0
 real_time = 0.0
@@ -88,9 +68,9 @@ while env._simulation_app.is_running():
 
     # rhc_cmds = rhc_get_cmds_fromjoy() or from agent
 
-    control_cluster.set_commands(cluster_cmds)
+    # control_cluster.set_commands(cluster_cmds)
 
-    control_cluster.solve()
+    # control_cluster.solve()
 
     # print("Cluster solution time: " + str(control_cluster.solution_time))
 
@@ -111,5 +91,5 @@ while env._simulation_app.is_running():
     print("\nreal_time: " + str(real_time))
     print("\nsim_time: " + str(sim_time))
 
-control_cluster.terminate() # closes all processes
+cluster_client.terminate() # closes all processes
 env.close()
