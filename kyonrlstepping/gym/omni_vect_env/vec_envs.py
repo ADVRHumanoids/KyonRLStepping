@@ -34,15 +34,26 @@ class RobotVecEnv(gym.Env):
             enable_livestream (bool): Whether to enable running with livestream.
             enable_viewport (bool): Whether to enable rendering in headless mode.
         """
-
-        experience = ""
+        experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.kyonrlstepping.kit'
         # if headless:
         #     if enable_livestream:
         #         experience = ""
         #     elif enable_viewport:
+        #         experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.kyonrlstepping.headless.render.kit'
         #         experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.gym.headless.render.kit'
         #     else:
+        #         experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.kyonrlstepping.headless.kit'
         #         experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.gym.headless.kit'
+
+        # kit_dir = os.path.join(os.path.dirname(os.getcwd()), "cfg/omni_kit")
+        # experience = kit_dir + '/omni.isaac.sim.python.kyonrlstepping.kit' 
+        # if headless:
+        #     if enable_livestream:
+        #         experience = ""
+        #     elif enable_viewport:
+        #         experience = kit_dir + '/omni.isaac.sim.python.kyonrlstepping.headless.render.kit'
+        #     else:
+        #         experience = kit_dir +  '/omni.isaac.sim.python.kyonrlstepping.headless.kit'
 
         self._simulation_app = SimulationApp({"headless": headless, "physics_gpu": sim_device}, experience=experience)
         carb.settings.get_settings().set("/persistent/omnihydra/useSceneGraphInstancing", True)
@@ -269,7 +280,9 @@ class RobotVecEnv(gym.Env):
             dones(Union[numpy.ndarray, torch.Tensor]): Buffer of resets/dones data.
             info(dict): Dictionary of extras data.
         """
+
         self._task.pre_physics_step(actions)
+
         self._world.step(render=self._render)
 
         self.sim_frame_count += 1
