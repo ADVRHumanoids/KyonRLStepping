@@ -28,6 +28,8 @@ dependencies:
     - protobuf
     - rospkg
     - matplotlib
+    - scipy
+    - urdf-parser-py
     # - pip install urdf-parser-py
     - empy
     # - numpy-quaternion
