@@ -4,16 +4,16 @@ from kyonrlstepping.gym.omni_vect_env.vec_envs import RobotVecEnv
 
 #from stable_baselines3 import PPO
 
-env = RobotVecEnv(headless=False, 
+env = RobotVecEnv(headless=True, 
                 enable_livestream=False, 
                 enable_viewport=False) # create environment
 
 # now we can import the task (not before, since Omni plugins are loaded 
 # upon environment initialization)
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
-from kyon_rhc.interface.control_cluster import ControlClusterClient
+from kyon_rhc.kyonrhc_cluster_client import KyonRHClusterClient
 
-num_envs = 5
+num_envs = 15
 task = KyonRlSteppingTask(name="KyonRLStepping", 
                         num_envs = num_envs, 
                         robot_offset = np.array([0.0, 0.0, 2.0])) # create task
@@ -46,8 +46,9 @@ obs = env.reset()
 cmd_size = 2
 n_jnts = env._task._robot_n_dofs
 
-cluster_client = ControlClusterClient()
-cluster_client.connect() # blocking, does not return 
+cluster_client = KyonRHClusterClient(cluster_size=num_envs, 
+                                    device=device)
+# cluster_client.connect() # blocking, does not return 
 # until connection with the server is established
 
 import time
@@ -72,7 +73,8 @@ while env._simulation_app.is_running():
 
     # control_cluster.solve()
 
-    # print("Cluster solution time: " + str(control_cluster.solution_time))
+    cluster_client.solve()
+    print("Cumulative cluster solution time: " + str(cluster_client.solution_time))
 
     obs, rewards, dones, info = env.step() 
     # control_cluster.update() # open loop update of the internal control cluster
