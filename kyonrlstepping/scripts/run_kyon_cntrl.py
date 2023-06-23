@@ -22,6 +22,9 @@ for i in range(0, control_cluster_srvr.cluster_size):
     result = control_cluster_srvr.add_controller(KyonRHC(
                                         trigger_pipename = control_cluster_srvr.trigger_pipes[i],
                                         success_pipename = control_cluster_srvr.success_pipes[i], 
+                                        jnt_q_pipename = control_cluster_srvr.jnt_q_pipes[i],
+                                        jnt_v_pipename = control_cluster_srvr.jnt_v_pipes[i],
+                                        jnt_eff_pipename = control_cluster_srvr.jnt_eff_pipes[i],
                                         urdf_path=control_cluster_srvr._urdf_path, 
                                         srdf_path=control_cluster_srvr._srdf_path,
                                         config_path = "/home/apatrizi/RL_ws/kyon/src/kyon_controller/python/KyonRHC/kyon_rhc/config/kyon_horizon_wheel_config.yaml", 

@@ -13,7 +13,7 @@ env = RobotVecEnv(headless=True,
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
 from kyon_rhc.kyonrhc_cluster_client import KyonRHClusterClient
 
-num_envs = 15
+num_envs = 3
 task = KyonRlSteppingTask(name="KyonRLStepping", 
                         num_envs = num_envs, 
                         robot_offset = np.array([0.0, 0.0, 2.0])) # create task
