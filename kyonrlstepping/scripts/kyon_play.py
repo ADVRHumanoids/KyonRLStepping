@@ -93,5 +93,4 @@ while env._simulation_app.is_running():
     print("\nreal_time: " + str(real_time))
     print("\nsim_time: " + str(sim_time))
 
-cluster_client.terminate() # closes all processes
 env.close()
