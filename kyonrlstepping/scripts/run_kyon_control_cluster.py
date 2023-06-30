@@ -1,15 +1,3 @@
-import signal
-# Define a flag variable to control the loop
-running = True
-
-# Define a signal handler for the keyboard interrupt
-def signal_handler(signal, frame):
-    global running
-    running = False
-
-# Register the signal handler
-signal.signal(signal.SIGINT, signal_handler)
-
 from kyon_rhc.kyonrhc import KyonRHC
 from kyon_rhc.kyonrhc_cluster_srvr import KyonRHClusterSrvr
 cmd_size = 2
@@ -29,8 +17,21 @@ for i in range(0, control_cluster_srvr.cluster_size):
                                         srdf_path=control_cluster_srvr._srdf_path,
                                         config_path = "/home/apatrizi/RL_ws/kyon/src/kyon_controller/python/KyonRHC/kyon_rhc/config/kyon_horizon_wheel_config.yaml", 
                                         verbose = verbose, 
-                                        name = "KyonRHController" + str(i)))
+                                        name = "KyonRHController" + str(i), 
+                                        termination_flag = control_cluster_srvr.termination_flag))
 
 control_cluster_srvr.start() 
 
-control_cluster_srvr.terminate() # closes all processes
+try:
+
+    while True:
+        
+        pass
+
+except KeyboardInterrupt:
+
+    # This block will execute when Control-C is pressed
+    control_cluster_srvr.terminate() # closes all processes
+
+    import sys
+    sys.exit()
