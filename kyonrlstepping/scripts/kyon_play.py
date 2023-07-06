@@ -46,10 +46,11 @@ obs = env.reset()
 cmd_size = 2
 n_jnts = env._task._robot_n_dofs
 
+control_clust_dt = sim_params["integration_dt"] * 2
 cluster_client = KyonRHClusterClient(cluster_size=num_envs, 
-                                    device=device)
-# cluster_client.connect() # blocking, does not return 
-# until connection with the server is established
+                                    device=device, 
+                                    cluster_dt=control_clust_dt, 
+                                    control_dt=sim_params["integration_dt"])
 
 import time
 rt_time_reset = 100
@@ -59,22 +60,21 @@ sim_time = 0.0
 i = 0
 while env._simulation_app.is_running():
 
-    if (i >= rt_time_reset):
+    # if (i >= rt_time_reset):
 
-        real_time = 0.0
-        sim_time = 0.0
+    #     real_time = 0.0
+    #     sim_time = 0.0
 
-    start_time = time.time()
     # action, _states = model.predict(obs)
+    start_time = time.time()
 
     # rhc_cmds = rhc_get_cmds_fromjoy() or from agent
 
-    # control_cluster.set_commands(cluster_cmds)
+    if cluster_client.is_cluster_instant(i):
 
-    # control_cluster.solve()
+        cluster_client.solve()
 
-    cluster_client.solve()
-    print("Cumulative cluster solution time: " + str(cluster_client.solution_time))
+        print("Cumulative cluster solution time: " + str(cluster_client.solution_time))
 
     obs, rewards, dones, info = env.step() 
     # control_cluster.update() # open loop update of the internal control cluster
@@ -82,12 +82,14 @@ while env._simulation_app.is_running():
     
     loop_exec_time = time.time() - start_time
 
+    print("Loop execution time: " + str(loop_exec_time))
+
     real_time = real_time + loop_exec_time
-    sim_time = sim_time + sim_params["integration_dt"]
+    sim_time += sim_params["integration_dt"]
 
     rt_factor = sim_time / real_time
     
-    i=+1
+    i+=1
 
     print("\nCurrent RT factor: " + str(rt_factor))
     print("\nreal_time: " + str(real_time))
