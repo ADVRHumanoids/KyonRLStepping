@@ -21,8 +21,8 @@ task = KyonRlSteppingTask(name="KyonRLStepping",
 device = "cuda"
 
 sim_params = {}
-sim_params["integration_dt"] = 1.0/100.0
-sim_params["rendering_dt"] = 1.0/60.0
+sim_params["integration_dt"] = 1.0/200.0
+sim_params["rendering_dt"] = 1.0/50.0
 sim_params["substeps"] = 1
 sim_params["gravity"] = np.array([0.0, 0.0, -9.81])
 sim_params["enable_scene_query_support"] = True
