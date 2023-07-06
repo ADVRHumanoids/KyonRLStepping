@@ -16,6 +16,7 @@ dependencies:
   - cmake
   - make
   - quaternion
+  - anaconda-client
   - pip:
     - nvidia-cublas-cu11==11.11.3.6
     # - torch==1.12.0
