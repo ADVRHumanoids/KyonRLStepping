@@ -34,33 +34,36 @@ class RobotVecEnv(gym.Env):
             enable_livestream (bool): Whether to enable running with livestream.
             enable_viewport (bool): Whether to enable rendering in headless mode.
         """
+
         experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.kyonrlstepping.kit'
-        # if headless:
-        #     if enable_livestream:
-        #         experience = ""
-        #     elif enable_viewport:
-        #         experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.kyonrlstepping.headless.render.kit'
-        #         experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.gym.headless.render.kit'
-        #     else:
-        #         experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.kyonrlstepping.headless.kit'
-        #         experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.gym.headless.kit'
+        # experience = ""
+        if headless:
 
-        # kit_dir = os.path.join(os.path.dirname(os.getcwd()), "cfg/omni_kit")
-        # experience = kit_dir + '/omni.isaac.sim.python.kyonrlstepping.kit' 
-        # if headless:
-        #     if enable_livestream:
-        #         experience = ""
-        #     elif enable_viewport:
-        #         experience = kit_dir + '/omni.isaac.sim.python.kyonrlstepping.headless.render.kit'
-        #     else:
-        #         experience = kit_dir +  '/omni.isaac.sim.python.kyonrlstepping.headless.kit'
+            print("[RobotVecEnv][info]: will run in headless mode")
+            
+            if enable_livestream:
+                experience = ""
+            elif enable_viewport:
+                experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.kyonrlstepping.headless.render.kit'
+                # experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.gym.headless.render.kit'
+            else:
+                experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.kyonrlstepping.headless.kit'
+                # experience = f'{os.environ["EXP_PATH"]}/omni.isaac.sim.python.gym.headless.kit'
 
-        self._simulation_app = SimulationApp({"headless": headless, "physics_gpu": sim_device}, experience=experience)
+        self._simulation_app = SimulationApp({"headless": headless,
+                                            "physics_gpu": sim_device}, 
+                                            experience=experience)
+
+        print("[RobotVecEnv][info]: using IsaacSim experience file @ " + experience)
+
         carb.settings.get_settings().set("/persistent/omnihydra/useSceneGraphInstancing", True)
         self._render = not headless or enable_livestream or enable_viewport
         self.sim_frame_count = 0
 
         if enable_livestream:
+
+            print("[RobotVecEnv][info]: livestream enabled")
+
             from omni.isaac.core.utils.extensions import enable_extension
 
             self._simulation_app.set_setting("/app/livestream/enabled", True)
@@ -95,19 +98,28 @@ class RobotVecEnv(gym.Env):
         if sim_params and "use_gpu_pipeline" in sim_params:
             if sim_params["use_gpu_pipeline"]:
                 device = "cuda" # 
-        
-        if (sim_params is None):
+        print("[RobotVecEnv][info]: using device: " + device)
+        print("[RobotVecEnv][info]: using backend: " + backend)
 
+        if (sim_params is None):
+            
+            print("[RobotVecEnv][info]: no sim params provided -> defaults will be used")
             sim_params = {}
 
         # defaults for integration and rendering dt
         if not("integration_dt" in sim_params):
-
+    
             sim_params["integration_dt"] = 1.0/60.0
+
+            print("[RobotVecEnv][info]: using default integration_dt of " + 
+                sim_params["integration_dt"] + " s.")
             
         if not("rendering_dt" in sim_params):
 
             sim_params["rendering_dt"] = 1.0/60.0
+
+            print("[RobotVecEnv][info]: using default rendering_dt of " + 
+                sim_params["rendering_dt"] + " s.")
 
         self._world = World(
             stage_units_in_meters=1.0, 
@@ -121,9 +133,9 @@ class RobotVecEnv(gym.Env):
 
         self._sim_params = sim_params
 
-        print("CREATING TASK: " + task.name + "\n")
+        print("[RobotVecEnv][status]: creating task " + task.name + "\n")
 
-        print("WORLD INFO: ")
+        print("[RobotVecEnv][info][world]:")
         print("use_gpu_pipeline: " + str(sim_params["use_gpu_pipeline"]))
         print("device: " + str(device))
         print("backend: " + str(backend))
@@ -173,7 +185,7 @@ class RobotVecEnv(gym.Env):
         self._gpu_temp_buffer_capacity = self._physics_context.get_gpu_temp_buffer_capacity()
         # self._gpu_max_num_partitions = physics_context.get_gpu_max_num_partitions() # BROKEN->method does not exist
 
-        print("PHYSICS CONTEXT INFO: ")
+        print("[RobotVecEnv][info][physics context]:")
         print("gpu_max_rigid_contact_count: " + str(self._gpu_max_rigid_contact_count))
         print("gpu_max_rigid_patch_count: " + str(self._gpu_max_rigid_patch_count))
         print("gpu_found_lost_pairs_capacity: " + str(self._gpu_found_lost_pairs_capacity))
@@ -209,6 +221,8 @@ class RobotVecEnv(gym.Env):
 
         if sim_params and "enable_viewport" in sim_params:
             self._render = sim_params["enable_viewport"]
+
+        print("[RobotVecEnv][info][render]: " + str(self._render))
 
         if init_sim:
 

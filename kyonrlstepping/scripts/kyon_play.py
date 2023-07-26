@@ -4,7 +4,7 @@ from kyonrlstepping.gym.omni_vect_env.vec_envs import RobotVecEnv
 
 #from stable_baselines3 import PPO
 
-env = RobotVecEnv(headless=True, 
+env = RobotVecEnv(headless=False, 
                 enable_livestream=False, 
                 enable_viewport=False) # create environment
 
@@ -21,7 +21,7 @@ task = KyonRlSteppingTask(name="KyonRLStepping",
 device = "cuda"
 
 sim_params = {}
-sim_params["integration_dt"] = 1.0/200.0
+sim_params["integration_dt"] = 1.0/100.0
 sim_params["rendering_dt"] = 1.0/50.0
 sim_params["substeps"] = 1
 sim_params["gravity"] = np.array([0.0, 0.0, -9.81])
@@ -58,7 +58,12 @@ rt_factor = 1.0
 real_time = 0.0
 sim_time = 0.0
 i = 0
+start_time = time.time()
+start_time_loop = 0
+
 while env._simulation_app.is_running():
+    
+    start_time_loop = time.time()
 
     # if (i >= rt_time_reset):
 
@@ -66,7 +71,7 @@ while env._simulation_app.is_running():
     #     sim_time = 0.0
 
     # action, _states = model.predict(obs)
-    start_time = time.time()
+    
 
     # rhc_cmds = rhc_get_cmds_fromjoy() or from agent
 
@@ -74,25 +79,24 @@ while env._simulation_app.is_running():
 
         cluster_client.solve()
 
-        print("Cumulative cluster solution time: " + str(cluster_client.solution_time))
+        print("[simulation][info]: cumulative cluster solution time:-> " + str(cluster_client.solution_time))
 
     obs, rewards, dones, info = env.step() 
     # control_cluster.update() # open loop update of the internal control cluster
     # control_cluster.update(cluster_state) # closed loop update of the internal control cluster
     
-    loop_exec_time = time.time() - start_time
-
-    print("Loop execution time: " + str(loop_exec_time))
-
-    real_time = real_time + loop_exec_time
+    now = time.time()
+    real_time = now - start_time
     sim_time += sim_params["integration_dt"]
-
     rt_factor = sim_time / real_time
     
-    i+=1
+    i+=1 # updating simulation iteration number
 
-    print("\nCurrent RT factor: " + str(rt_factor))
-    print("\nreal_time: " + str(real_time))
-    print("\nsim_time: " + str(sim_time))
+    print("[simulation][info]: current RT factor-> " + str(rt_factor))
+    print("[simulation][info]: current training RT factor-> " + str(rt_factor * num_envs))
+    print("[simulation][info]: real_time-> " + str(real_time))
+    print("[simulation][info]: sim_time-> " + str(sim_time))
+    print("[simulation][info]: loop execution time-> " + str(now - start_time_loop))
 
-env.close()
+print("[simulation][info]: closing")
+# env.close()

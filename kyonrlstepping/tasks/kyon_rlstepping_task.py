@@ -50,7 +50,7 @@ class KyonRlSteppingTask(BaseTask):
         # task-specific parameters
         if len(robot_offset) != 3:
             robot_offset = np.array([0.0, 0.0, 0.0])
-            print("KyonRlSteppingTask:  the provided robot_offset is not of the correct shape. A null offset will be used instead.")
+            print("[KyonRlSteppingTask][warning]:  the provided robot_offset is not of the correct shape. A null offset will be used instead.")
 
         self._robot_offset = robot_offset
 
@@ -141,7 +141,7 @@ class KyonRlSteppingTask(BaseTask):
 
         except:
 
-            raise Exception('\nFAILED TO GENERATE KYON\'S URDF!!!.\n')
+            raise Exception('[KyonRlSteppingTask][exception]: failed to generate kyon\'S SRDF!!!')
         
     def _generate_urdf(self, 
                     wheels: bool = True, 
@@ -190,18 +190,24 @@ class KyonRlSteppingTask(BaseTask):
 
         except:
 
-            raise Exception('\nFAILED TO GENERATE KYON\'S URDF!!!.\n')
+            raise Exception('[KyonRlSteppingTask][exception]: failed to generate kyon\'S URDF!!!')
 
     def _generate_description(self):
-
-        self._generate_urdf()
         
+        print("[KyonRlSteppingTask][status]: generating URDF...")
+        self._generate_urdf()
+        print("[KyonRlSteppingTask][status]: done")
+
+        print("[KyonRlSteppingTask][status]: generating SRDF...")
         # we also generate SRDF files, which are useful for control
         self._generate_srdf()
+        print("[KyonRlSteppingTask][status]: done")
 
     def _import_urdf(self, 
                     import_config: omni.isaac.urdf._urdf.ImportConfig = _urdf.ImportConfig(), 
                     robot_prim_name: str = "Kyon"):
+
+        print("[KyonRlSteppingTask][status]: importing robot URDF")
 
         self._urdf_import_config = import_config
         # we overwrite some settings which are bound to be fixed
@@ -224,6 +230,8 @@ class KyonRlSteppingTask(BaseTask):
         self._robot_base_prim_path = self._template_env_ns + "/" + self._robot_prim_name
         move_prim(robot_prim_path_default, self._robot_base_prim_path)# we move the prim
         # from the default one of the URDF importer to the prescribed one
+
+        print("[KyonRlSteppingTask][status]: done")
 
         return success
     
@@ -382,7 +390,7 @@ class KyonRlSteppingTask(BaseTask):
 
         else:
 
-            raise Exception(str("You should reset the World at least once and call the ") +  
+            raise Exception(str("[KyonRlStepping][exception]: you should reset the World at least once and call the ") +  
                             str("world_was_initialized() method before initializing the ") + 
                             str("joint impedance controller.")
                             )
@@ -398,13 +406,16 @@ class KyonRlSteppingTask(BaseTask):
         for i in range(0, self.num_envs):
             pos_offsets[i, :] = self._robot_offset
         
+        print("[KyonRlSteppingTask][status]: cloning environments")
         envs_positions = self._cloner.clone(
             source_prim_path=self._template_env_ns,
             prim_paths=self._envs_prim_paths,
             replicate_physics=self._replicate_physics,
             position_offsets = pos_offsets
         ) # robot is now at the default env prim --> we can clone the environment
+        print("[KyonRlSteppingTask][status]: done")
 
+        print("[KyonRlSteppingTask][status]: finishing scene setup...")
         self._robots_art_view = ArticulationView(self._env_ns + "/env*"+ "/" + self._robot_prim_name, 
                                 reset_xform_properties=False)
 
@@ -421,6 +432,7 @@ class KyonRlSteppingTask(BaseTask):
         
         # set default camera viewport position and target
         self.set_initial_camera_params()
+        print("[KyonRlSteppingTask][status]: done")
 
     def set_initial_camera_params(self, 
                                 camera_position=[10, 10, 3], 
