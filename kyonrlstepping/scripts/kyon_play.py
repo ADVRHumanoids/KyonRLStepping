@@ -79,7 +79,7 @@ while env._simulation_app.is_running():
 
         cluster_client.solve()
 
-        print("[simulation][info]: cumulative cluster solution time:-> " + str(cluster_client.solution_time))
+        print("[main][info]: cumulative cluster solution time:-> " + str(cluster_client.solution_time))
 
     obs, rewards, dones, info = env.step() 
     # control_cluster.update() # open loop update of the internal control cluster
@@ -92,11 +92,12 @@ while env._simulation_app.is_running():
     
     i+=1 # updating simulation iteration number
 
-    print("[simulation][info]: current RT factor-> " + str(rt_factor))
-    print("[simulation][info]: current training RT factor-> " + str(rt_factor * num_envs))
-    print("[simulation][info]: real_time-> " + str(real_time))
-    print("[simulation][info]: sim_time-> " + str(sim_time))
-    print("[simulation][info]: loop execution time-> " + str(now - start_time_loop))
+    print("[main][info]: current RT factor-> " + str(rt_factor))
+    print("[main][info]: current training RT factor-> " + str(rt_factor * num_envs))
+    print("[main][info]: real_time-> " + str(real_time))
+    print("[main][info]: sim_time-> " + str(sim_time))
+    print("[main][info]: loop execution time-> " + str(now - start_time_loop))
 
-print("[simulation][info]: closing")
-# env.close()
+print("[main][info]: closing environment and simulation")
+cluster_client.close()
+env.close()
