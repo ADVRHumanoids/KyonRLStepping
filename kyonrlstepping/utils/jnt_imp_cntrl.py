@@ -112,7 +112,7 @@ class JntImpCntrl:
         
         if not (len(jnts_names) == len(set(jnts_names))):
 
-            raise Exception(f"[{self.__class__.__name__}]" + f"[{exception}]" + ": the provided joints names are not unique!")
+            raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + ": the provided joints names are not unique!")
         
         self.jnts_names = jnts_names
         self.jnt_idxs = torch.tensor([i for i in range(0, self.n_dofs)], 
@@ -121,7 +121,7 @@ class JntImpCntrl:
 
         if (backend != "torch"):
 
-            print(f"[{self.__class__.__name__}]"  + f"[{exception}]" + ": forcing torch backend. Other backends are not yet supported.")
+            print(f"[{self.__class__.__name__}]"  + f"[{self.exception}]" + ": forcing torch backend. Other backends are not yet supported.")
         
         self._backend = "torch"
 
@@ -159,7 +159,7 @@ class JntImpCntrl:
         self._filter_BW = filter_BW
         self._disable_filter = disable_filter
         
-        self.eff_filter = SimpleFilter(dt=dt, 
+        self.eff_filter = FirstOrderFilter(dt=dt, 
                                 filter_BW=self._filter_BW, 
                                 rows=self.num_robots, 
                                 cols=self.n_dofs, 
@@ -680,7 +680,9 @@ class OmniJntImpCntrl:
                 default_pgain = 300.0, 
                 default_vgain = 30.0, 
                 backend = "torch", 
-                device = "cpu"):
+                device = "cpu", 
+                filter_BW = 50.0, # [Hz]
+                filter_dt = None): # [s]
         
         self.info = "info"
         self.status = "status"
@@ -689,7 +691,7 @@ class OmniJntImpCntrl:
         
         if not articulation.initialized:
 
-            raise Exception(f"[{self.__class__.__name__}]" + f"[{exception}]" + ": the provided articulation is not initialized properly!!")
+            raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + ": the provided articulation is not initialized properly!!")
         
         self._articulation = articulation
 
@@ -734,6 +736,39 @@ class OmniJntImpCntrl:
         self._initialize_gains()
 
         self._initialize_refs()
+
+        self._filter_available = False
+        if filter_dt is not None:
+
+            self._filter_BW = filter_BW
+            self.filter_dt = filter_dt
+
+            self._pos_ref_filter = FirstOrderFilter(dt=self.filter_dt, 
+                                    filter_BW=self._filter_BW, 
+                                    rows=self.num_robots, 
+                                    cols=self.n_dofs, 
+                                    device=self._device)
+            self._vel_ref_filter = FirstOrderFilter(dt=self.filter_dt, 
+                                    filter_BW=self._filter_BW, 
+                                    rows=self.num_robots, 
+                                    cols=self.n_dofs, 
+                                    device=self._device)
+            self._eff_ref_filter = FirstOrderFilter(dt=self.filter_dt, 
+                                    filter_BW=self._filter_BW, 
+                                    rows=self.num_robots, 
+                                    cols=self.n_dofs, 
+                                    device=self._device)
+            
+            self._pos_ref_filter.reset()
+            self._vel_ref_filter.reset()
+            self._eff_ref_filter.reset()
+
+            self._filter_available = True
+        
+        else:
+
+            print(f"[{self.__class__.__name__}]"  + f"[{self.warning}]" + \
+                    ": no filter dt provided -> reference filter will not be available")
 
     def _initialize_gains(self):
 
@@ -1010,11 +1045,24 @@ class OmniJntImpCntrl:
 
         return success
     
-    def apply_refs(self):
+    def apply_refs(self, 
+            filter = False):
 
-        self._articulation.set_joint_efforts(self._eff_ref)
-        self._articulation.set_joint_position_targets(self._pos_ref)
-        self._articulation.set_joint_velocity_targets(self._vel_ref)
+        if filter and self._filter_available:
+            
+            self._pos_ref_filter.update(self._pos_ref)
+            self._vel_ref_filter.update(self._vel_ref)
+            self._eff_ref_filter.update(self._eff_ref)
+
+            self._articulation.set_joint_position_targets(self._pos_ref_filter.get())
+            self._articulation.set_joint_velocity_targets(self.vel_ref_filter.get())
+            self._articulation.set_joint_efforts(self._eff_ref_filter.get())
+
+        else:
+
+            self._articulation.set_joint_efforts(self._eff_ref)
+            self._articulation.set_joint_position_targets(self._pos_ref)
+            self._articulation.set_joint_velocity_targets(self._vel_ref)
 
     def set_refs(self, 
                 eff_ref: torch.Tensor = None, 
