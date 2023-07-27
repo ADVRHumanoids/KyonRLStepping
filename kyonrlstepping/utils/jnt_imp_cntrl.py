@@ -663,8 +663,6 @@ class JntImpCntrl:
                             device=self._device, 
                             dtype=torch.float32)
     
-
-
 class OmniJntImpCntrl:
 
     # Exploits IsaacSim's low level articulation joint impedance controller

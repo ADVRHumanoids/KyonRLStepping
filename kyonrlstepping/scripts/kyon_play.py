@@ -4,7 +4,7 @@ from kyonrlstepping.gym.omni_vect_env.vec_envs import RobotVecEnv
 
 #from stable_baselines3 import PPO
 
-env = RobotVecEnv(headless=True, 
+env = RobotVecEnv(headless=False, 
                 enable_livestream=False, 
                 enable_viewport=False) # create environment
 
@@ -15,7 +15,7 @@ from kyon_rhc.kyonrhc_cluster_client import KyonRHClusterClient
 
 num_envs = 1
 sim_params = {}
-sim_params["use_gpu_pipeline"] = False
+sim_params["use_gpu_pipeline"] = True
 sim_params["integration_dt"] = 1.0/100.0
 sim_params["rendering_dt"] = 1.0/50.0
 sim_params["substeps"] = 1
@@ -47,7 +47,6 @@ env._world.reset()
 obs = env.reset()
 # env._world.pause()
 
-cmd_size = 2
 n_jnts = env._task._robot_n_dofs
 
 control_clust_dt = sim_params["integration_dt"] * 2
@@ -86,8 +85,6 @@ while env._simulation_app.is_running():
         print("[main][info]: cumulative cluster solution time:-> " + str(cluster_client.solution_time))
 
     obs, rewards, dones, info = env.step() 
-    # control_cluster.update() # open loop update of the internal control cluster
-    # control_cluster.update(cluster_state) # closed loop update of the internal control cluster
     
     now = time.time()
     real_time = now - start_time
