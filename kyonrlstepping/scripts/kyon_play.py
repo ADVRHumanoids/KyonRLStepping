@@ -4,7 +4,7 @@ from kyonrlstepping.gym.omni_vect_env.vec_envs import RobotVecEnv
 
 #from stable_baselines3 import PPO
 
-env = RobotVecEnv(headless=False, 
+env = RobotVecEnv(headless=True, 
                 enable_livestream=False, 
                 enable_viewport=False) # create environment
 
@@ -13,14 +13,9 @@ env = RobotVecEnv(headless=False,
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
 from kyon_rhc.kyonrhc_cluster_client import KyonRHClusterClient
 
-num_envs = 3
-task = KyonRlSteppingTask(name="KyonRLStepping", 
-                        num_envs = num_envs, 
-                        robot_offset = np.array([0.0, 0.0, 2.0])) # create task
-
-device = "cuda"
-
+num_envs = 1
 sim_params = {}
+sim_params["use_gpu_pipeline"] = False
 sim_params["integration_dt"] = 1.0/100.0
 sim_params["rendering_dt"] = 1.0/50.0
 sim_params["substeps"] = 1
@@ -29,8 +24,17 @@ sim_params["enable_scene_query_support"] = True
 sim_params["replicate_physics"] = True
 sim_params["use_flatcache"] = True
 sim_params["disable_contact_processing"] = False
-sim_params["use_gpu_pipeline"] = True
-sim_params["device"] = device
+if sim_params["use_gpu_pipeline"]:
+    sim_params["device"] = "cuda"
+else:
+    sim_params["device"] = "cpu"
+
+device = sim_params["device"]
+
+task = KyonRlSteppingTask(name="KyonRLStepping", 
+                        num_envs = num_envs, 
+                        robot_offset = np.array([0.0, 0.0, 2.0]), 
+                        device = device) # create task
 
 env.set_task(task, 
         backend="torch", 
