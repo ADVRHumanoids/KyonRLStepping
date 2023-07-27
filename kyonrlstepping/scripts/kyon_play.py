@@ -53,7 +53,9 @@ control_clust_dt = sim_params["integration_dt"] * 2
 cluster_client = KyonRHClusterClient(cluster_size=num_envs, 
                                     device=device, 
                                     cluster_dt=control_clust_dt, 
-                                    control_dt=sim_params["integration_dt"])
+                                    control_dt=sim_params["integration_dt"], 
+                                    pipes_config_path = 
+            "/home/apatrizi/RL_ws/kyon/src/ControlClusterUtils/control_cluster_utils/config/pipes/pipes_config.yaml")
 
 import time
 rt_time_reset = 100

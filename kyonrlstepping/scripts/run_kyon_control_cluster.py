@@ -8,29 +8,20 @@ def generate_controllers():
     for i in range(0, control_cluster_srvr.cluster_size):
 
         cluster_controllers.append(KyonRHC(
-                                    trigger_pipename = control_cluster_srvr.trigger_pipenames[i],
-                                    success_pipename = control_cluster_srvr.success_pipenames[i], 
-                                    cmd_jnt_q_pipename = control_cluster_srvr.cmd_jnt_q_pipenames[i],
-                                    cmd_jnt_v_pipename = control_cluster_srvr.cmd_jnt_v_pipenames[i],
-                                    cmd_jnt_eff_pipename = control_cluster_srvr.cmd_jnt_eff_pipenames[i],
-                                    rhc_info_pipename = control_cluster_srvr.rhc_info_pipenames[i], 
-                                    state_root_q_pipename = control_cluster_srvr.state_root_q_pipenames[i], 
-                                    state_root_v_pipename = control_cluster_srvr.state_root_v_pipenames[i], 
-                                    state_jnt_q_pipename = control_cluster_srvr.state_jnt_q_pipenames[i], 
-                                    state_jnt_v_pipename = control_cluster_srvr.state_jnt_v_pipenames[i], 
+                                    controller_index = i,
                                     urdf_path=control_cluster_srvr._urdf_path, 
                                     srdf_path=control_cluster_srvr._srdf_path,
                                     config_path = "/home/apatrizi/RL_ws/kyon/src/kyon_controller/python/KyonRHC/kyon_rhc/config/kyon_horizon_wheel_config.yaml", 
+                                    pipes_manager = control_cluster_srvr.pipes_manager, 
                                     verbose = verbose, 
                                     name = "KyonRHController" + str(i), 
                                     termination_flag = control_cluster_srvr.termination_flag))
     
     return cluster_controllers
 
-cmd_size = 2
 verbose = True
-
-control_cluster_srvr = KyonRHClusterSrvr(cmd_size = cmd_size)
+control_cluster_srvr = KyonRHClusterSrvr(pipes_config_path = 
+            "/home/apatrizi/RL_ws/kyon/src/ControlClusterUtils/control_cluster_utils/config/pipes/pipes_config.yaml")
 controllers = generate_controllers()
 
 for i in range(0, control_cluster_srvr.cluster_size):
