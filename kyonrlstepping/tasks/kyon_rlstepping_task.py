@@ -271,7 +271,8 @@ class KyonRlSteppingTask(BaseTask):
 
         if (self._world_initialized):
 
-            self._default_jnt_positions = torch.zeros((self.num_envs, self._robot_n_dofs))
+            self._default_jnt_positions = torch.zeros((self.num_envs, self._robot_n_dofs), 
+                                                device=self._device)
             
             default_jnt_positions = torch.cat((hip_roll, 
                                                 hip_pitch, 
