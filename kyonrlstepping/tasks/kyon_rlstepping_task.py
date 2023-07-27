@@ -34,6 +34,11 @@ class KyonRlSteppingTask(BaseTask):
                 offset=None, 
                 env_spacing = 5.0) -> None:
 
+        self.info = "info"
+        self.status = "status"
+        self.warning = "warning"
+        self.exception = "exception"
+        
         # cloning stuff
         self.num_envs = num_envs
         self._env_ns = "/World/envs"
@@ -50,7 +55,7 @@ class KyonRlSteppingTask(BaseTask):
         # task-specific parameters
         if len(robot_offset) != 3:
             robot_offset = np.array([0.0, 0.0, 0.0])
-            print("[KyonRlSteppingTask][warning]:  the provided robot_offset is not of the correct shape. A null offset will be used instead.")
+            print(f"[{self.__class__.__name__}]" + f"[{self.warning}]" + ":  the provided robot_offset is not of the correct shape. A null offset will be used instead.")
 
         self._robot_offset = robot_offset
 
@@ -141,7 +146,7 @@ class KyonRlSteppingTask(BaseTask):
 
         except:
 
-            raise Exception('[KyonRlSteppingTask][exception]: failed to generate kyon\'S SRDF!!!')
+            raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + ": failed to generate kyon\'S SRDF!!!")
         
     def _generate_urdf(self, 
                     wheels: bool = True, 
@@ -190,24 +195,24 @@ class KyonRlSteppingTask(BaseTask):
 
         except:
 
-            raise Exception('[KyonRlSteppingTask][exception]: failed to generate kyon\'S URDF!!!')
+            raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + ": failed to generate kyon\'S URDF!!!")
 
     def _generate_description(self):
         
-        print("[KyonRlSteppingTask][status]: generating URDF...")
+        print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": generating URDF...")
         self._generate_urdf()
-        print("[KyonRlSteppingTask][status]: done")
+        print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": done")
 
-        print("[KyonRlSteppingTask][status]: generating SRDF...")
+        print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": generating SRDF...")
         # we also generate SRDF files, which are useful for control
         self._generate_srdf()
-        print("[KyonRlSteppingTask][status]: done")
+        print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": done")
 
     def _import_urdf(self, 
                     import_config: omni.isaac.urdf._urdf.ImportConfig = _urdf.ImportConfig(), 
                     robot_prim_name: str = "Kyon"):
 
-        print("[KyonRlSteppingTask][status]: importing robot URDF")
+        print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": importing robot URDF")
 
         self._urdf_import_config = import_config
         # we overwrite some settings which are bound to be fixed
@@ -231,7 +236,7 @@ class KyonRlSteppingTask(BaseTask):
         move_prim(robot_prim_path_default, self._robot_base_prim_path)# we move the prim
         # from the default one of the URDF importer to the prescribed one
 
-        print("[KyonRlSteppingTask][status]: done")
+        print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": done")
 
         return success
     
@@ -278,17 +283,13 @@ class KyonRlSteppingTask(BaseTask):
 
                 self._default_jnt_positions[i, :] = default_jnt_positions
 
-            self._default_jnt_positions = torch.cat((hip_roll, 
-                                                hip_pitch, 
-                                                knee_pitch, 
-                                                wheels),
-                                                0)
-
             self._robots_art_view.set_joints_default_state(positions= self._default_jnt_positions)
             
         else:
 
-            raise Exception("Before calling _set_robot_default_jnt_config(), you need to reset the World at least once and call _world_was_initialized()")
+            raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + \
+                        "Before calling _set_robot_default_jnt_config(), you need to reset the World" + \
+                        " at least once and call _world_was_initialized()")
 
     def set_robot_root_default_config(self):
         
@@ -338,7 +339,8 @@ class KyonRlSteppingTask(BaseTask):
 
         else:
 
-            raise Exception("Before calling _print_envs_info(), you need to reset the World at least once!")
+            raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + \
+                            "Before calling _print_envs_info(), you need to reset the World at least once!")
 
     def fill_robot_info_from_world(self):
 
@@ -351,13 +353,14 @@ class KyonRlSteppingTask(BaseTask):
         
         else:
 
-            raise Exception("Before calling _get_robot_info_from_world(), you need to reset the World at least once!")
+            raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + \
+                        "Before calling _get_robot_info_from_world(), you need to reset the World at least once!")
 
     def init_imp_control(self, 
                 default_jnt_pgain = 300.0, 
                 default_jnt_vgain = 30.0, 
                 default_wheel_pgain = 0.0, 
-                default_wheel_vgain = 0.0):
+                default_wheel_vgain = 10.0):
         
         if self.world_was_initialized:
 
@@ -379,20 +382,23 @@ class KyonRlSteppingTask(BaseTask):
                                         device = self._device, 
                                         dtype=torch.float32)
 
-            self._jnt_imp_controller.set_gains(pos_gains = wheels_pos_gains,
+            success_imp_gains = self._jnt_imp_controller.set_gains(pos_gains = wheels_pos_gains,
                                         vel_gains = wheels_vel_gains,
                                         jnt_indxs=wheels_indxs)
 
+            success_set_refs = self._jnt_imp_controller.set_refs(pos_ref=self._default_jnt_positions)
+
+            print(self._default_jnt_positions.shape)
             # we update the internal references on the imp. controller using 
             # measured states, for smoothness sake
-            print("set_ref_success:" )
-            print(self._jnt_imp_controller.set_refs(pos_ref=self._default_jnt_positions)) 
+            print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": set_ref success [eff, pos, vel, idx, assign] -> " + str(success_set_refs))
+            print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": set_gains success [pos, vel, idx, assign] -> " + str(success_imp_gains))
 
         else:
 
-            raise Exception(str("[KyonRlStepping][exception]: you should reset the World at least once and call the ") +  
-                            str("world_was_initialized() method before initializing the ") + 
-                            str("joint impedance controller.")
+            raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + ": you should reset the World at least once and call the " + \
+                            "world_was_initialized() method before initializing the " + \
+                            "joint impedance controller."
                             )
         
     def set_up_scene(self, 
@@ -406,16 +412,16 @@ class KyonRlSteppingTask(BaseTask):
         for i in range(0, self.num_envs):
             pos_offsets[i, :] = self._robot_offset
         
-        print("[KyonRlSteppingTask][status]: cloning environments")
+        print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": cloning environments")
         envs_positions = self._cloner.clone(
             source_prim_path=self._template_env_ns,
             prim_paths=self._envs_prim_paths,
             replicate_physics=self._replicate_physics,
             position_offsets = pos_offsets
         ) # robot is now at the default env prim --> we can clone the environment
-        print("[KyonRlSteppingTask][status]: done")
+        print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": done")
 
-        print("[KyonRlSteppingTask][status]: finishing scene setup...")
+        print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": finishing scene setup...")
         self._robots_art_view = ArticulationView(self._env_ns + "/env*"+ "/" + self._robot_prim_name, 
                                 reset_xform_properties=False)
 
@@ -432,7 +438,7 @@ class KyonRlSteppingTask(BaseTask):
         
         # set default camera viewport position and target
         self.set_initial_camera_params()
-        print("[KyonRlSteppingTask][status]: done")
+        print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": done")
 
     def set_initial_camera_params(self, 
                                 camera_position=[10, 10, 3], 
