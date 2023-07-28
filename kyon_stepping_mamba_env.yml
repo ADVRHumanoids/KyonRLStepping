@@ -35,3 +35,4 @@ dependencies:
     - empy
     # - numpy-quaternion
 #    - numpy-ros
+    - multiprocess
