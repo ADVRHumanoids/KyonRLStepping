@@ -1,7 +1,11 @@
 from kyon_rhc.kyonrhc import KyonRHC
 from kyon_rhc.kyonrhc_cluster_srvr import KyonRHClusterSrvr
+from kyon_rhc.utils.sysutils import PathsGetter
+kyonrhc_paths = PathsGetter
 
 def generate_controllers():
+
+    kyonrhc_config_path = kyonrhc_paths().CONFIGPATH
 
     # create controllers
     cluster_controllers = []
@@ -11,7 +15,7 @@ def generate_controllers():
                                     controller_index = i,
                                     urdf_path=control_cluster_srvr._urdf_path, 
                                     srdf_path=control_cluster_srvr._srdf_path,
-                                    config_path = "/home/apatrizi/RL_ws/kyon/src/kyon_controller/python/KyonRHC/kyon_rhc/config/kyon_horizon_wheel_config.yaml", 
+                                    config_path = kyonrhc_config_path, 
                                     pipes_manager = control_cluster_srvr.pipes_manager, 
                                     verbose = verbose, 
                                     name = "KyonRHController" + str(i), 
@@ -20,8 +24,8 @@ def generate_controllers():
     return cluster_controllers
 
 verbose = True
-control_cluster_srvr = KyonRHClusterSrvr(pipes_config_path = 
-            "/home/apatrizi/RL_ws/kyon/src/ControlClusterUtils/control_cluster_utils/config/pipes/pipes_config.yaml")
+
+control_cluster_srvr = KyonRHClusterSrvr()
 controllers = generate_controllers()
 
 for i in range(0, control_cluster_srvr.cluster_size):
