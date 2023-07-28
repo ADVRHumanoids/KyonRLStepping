@@ -13,7 +13,7 @@ env = RobotVecEnv(headless=False,
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
 from kyon_rhc.kyonrhc_cluster_client import KyonRHClusterClient
 
-num_envs = 1
+num_envs = 3
 sim_params = {}
 sim_params["use_gpu_pipeline"] = True
 sim_params["integration_dt"] = 1.0/100.0
