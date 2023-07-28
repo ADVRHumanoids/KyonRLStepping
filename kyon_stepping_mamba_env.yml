@@ -17,6 +17,7 @@ dependencies:
   - make
   - quaternion
   - anaconda-client
+  - yaml-cpp
   - pip:
     - nvidia-cublas-cu11==11.11.3.6
     # - torch==1.12.0
