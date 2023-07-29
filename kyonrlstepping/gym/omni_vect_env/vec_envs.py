@@ -241,6 +241,8 @@ class RobotVecEnv(gym.Env):
             self._task.fill_robot_info_from_world() # populates robot info fields
             # in task
 
+            self._task.init_homing_manager() 
+
             self._task.set_robot_default_jnt_config()
             # self._task.set_robot_root_default_config()
 

@@ -23,6 +23,7 @@ from omni.isaac.core.utils.types import ArticulationActions
 from omni.isaac.core.scenes.scene import Scene
 
 from kyonrlstepping.utils.jnt_imp_cntrl import OmniJntImpCntrl
+from kyonrlstepping.utils.homing import OmniRobotHomer
 
 class KyonRlSteppingTask(BaseTask):
     def __init__(self, 
@@ -94,6 +95,8 @@ class KyonRlSteppingTask(BaseTask):
                         offset=offset)
         
         self._jnt_imp_controller = None 
+
+        self._homer = None 
     
     def _generate_srdf(self,
                     wheels: bool = True, 
@@ -261,31 +264,9 @@ class KyonRlSteppingTask(BaseTask):
                                 knee_pitch = None, 
                                 wheels = None):
         
-        if hip_roll is None:
-            hip_roll = torch.tensor([0.3, -0.3, 0.3, -0.3], device=self._device)
-        if hip_pitch is None:
-            hip_pitch = torch.tensor([-0.3, -0.3, 0.3, 0.3], device=self._device)
-        if knee_pitch is None:
-            knee_pitch = torch.tensor([0.3, 0.3, -0.3, -0.3], device=self._device)
-        if wheels is None:
-            wheels = torch.tensor([0.0, 0.0, 0.0, 0.0], device=self._device)
-
         if (self._world_initialized):
 
-            self._default_jnt_positions = torch.zeros((self.num_envs, self._robot_n_dofs), 
-                                                device=self._device)
-            
-            default_jnt_positions = torch.cat((hip_roll, 
-                                                hip_pitch, 
-                                                knee_pitch, 
-                                                wheels),
-                                                0)
-
-            for i in range(0,  self.num_envs):
-
-                self._default_jnt_positions[i, :] = default_jnt_positions
-
-            self._robots_art_view.set_joints_default_state(positions= self._default_jnt_positions)
+            self._robots_art_view.set_joints_default_state(positions= self._homer.get_homing())
             
         else:
 
@@ -358,12 +339,27 @@ class KyonRlSteppingTask(BaseTask):
             raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + \
                         "Before calling _get_robot_info_from_world(), you need to reset the World at least once!")
 
+    def init_homing_manager(self):
+
+        if self.world_was_initialized:
+
+            self._homer = OmniRobotHomer(articulation=self._robots_art_view, 
+                                srdf_path=self._srdf_path, 
+                                device=self._device)
+            
+        else:
+
+            raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + ": you should reset the World at least once and call the " + \
+                            "world_was_initialized() method before initializing the " + \
+                            "homing manager."
+                            )
+        
     def init_imp_control(self, 
                 default_jnt_pgain = 300.0, 
                 default_jnt_vgain = 30.0, 
                 default_wheel_pgain = 0.0, 
                 default_wheel_vgain = 10.0):
-        
+
         if self.world_was_initialized:
 
             self._jnt_imp_controller = OmniJntImpCntrl(articulation=self._robots_art_view,
@@ -388,7 +384,7 @@ class KyonRlSteppingTask(BaseTask):
                             vel_gains = wheels_vel_gains,
                             jnt_indxs=wheels_indxs)
 
-            self._jnt_imp_controller.set_refs(pos_ref=self._default_jnt_positions)
+            self._jnt_imp_controller.set_refs(pos_ref=self._homer.get_homing())
 
         else:
 
