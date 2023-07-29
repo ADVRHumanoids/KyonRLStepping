@@ -3,8 +3,9 @@ channels:
   - defaults
   - pytorch
   - nvidia
-  - francesco_ruscelli
   - omnia
+  - francesco_ruscelli
+  - AndPatr
 dependencies: 
   - python=3.7
   - pip
@@ -22,6 +23,8 @@ dependencies:
   - pybind11
   - gtest
   - eigen3
+  - control_cluster_utils
+  - omnicustomgym
   - pip:
     - nvidia-cublas-cu11==11.11.3.6
     # - torch==1.12.0

@@ -23,11 +23,12 @@ Installation instructions:
 
 External dependencies to be installed separately: 
 - [horizon-casadi](https://github.com/ADVRHumanoids/horizon), T.O. tool tailored to robotics, based on [Casadi](https://web.casadi.org/). Branch to be used: ```add_nodes_py37```. Clone this repo at your preferred location and, from its root, run ```pip install --no-deps -e .```. This will install the package in editable mode without its dependencies (this is necessary to avoid circumvent current issues with horizon's pip distribution).
-<!-- - [casadi_kin_dyn](https://github.com/ADVRHumanoids/horizon), generation of symbolic expressions for robot kinematics and dynamics, based on [http://wiki.ros.org/urdf](URDF) and [https://github.com/stack-of-tasks/pinocchio](Pinocchio). This library is automatically installed through mamba config file. -->
 - [phase_manager](https://github.com/FrancescoRuscelli/phase_manager/tree/master). Currently stable branch: ```add_nodes```. Build this CMake package in you workspace (after activating the ```kyonrlstepping``` environment) and set the ```CMAKE_INSTALL_PREFIX``` to ```${HOME}/mambaforge/envs/kyonrlstepping```. 
-<!-- - [Cartesian Interface](https://github.com/ADVRHumanoids/CartesianInterface/tree/2.0-devel) -->
 - [Omniverse Isaac Sim](https://docs.omniverse.nvidia.com/app_isaacsim/app_isaacsim.html), photo-realistic GPU accelerated simulatorfrom NVIDIA.
 
+Other dependencies included in the environment thorough Anaconda which can optionally be installed directly from source for development purposes: 
+- [ControlClusterUtils](https://github.com/AndPatr/ControlClusterUtils): utilities to create a CPU-based controllers cluster to be interfaced with GPU-based simulators 
+- [OmniCustomGym](https://github.com/AndPatr/OmniCustomGym): custom implementations of Tasks and Gyms for for Omniverse Isaac Sim based on Gymnasium. Easy URDF and SRDF import/cloning and simulation configuration exploiting Omniverse API.
 ### Short-term ToDo list:
 
 - [x] Test Stable Baselines3 with Gymnasium to understand exactly the interfaces needed to set up a custom environment and use it
