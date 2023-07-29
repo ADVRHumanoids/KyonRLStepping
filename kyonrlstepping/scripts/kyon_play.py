@@ -1,6 +1,6 @@
 import numpy as np
 
-from kyonrlstepping.gym.omni_vect_env.vec_envs import RobotVecEnv
+from omnicustomgym.gym.omni_vect_env.vec_envs import RobotVecEnv
 
 #from stable_baselines3 import PPO
 
@@ -31,9 +31,8 @@ else:
 
 device = sim_params["device"]
 
-task = KyonRlSteppingTask(name="KyonRLStepping", 
-                        num_envs = num_envs, 
-                        robot_offset = np.array([0.0, 0.0, 2.0]), 
+task = KyonRlSteppingTask(num_envs = num_envs, 
+                        cloning_offset = np.array([0.0, 0.0, 2.0]), 
                         device = device) # create task
 
 env.set_task(task, 
