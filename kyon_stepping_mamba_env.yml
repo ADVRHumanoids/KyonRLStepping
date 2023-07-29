@@ -24,7 +24,7 @@ dependencies:
   - gtest
   - eigen3
   - control_cluster_utils
-  - omnicustomgym
+  - omni_custom_gym
   - pip:
     - nvidia-cublas-cu11==11.11.3.6
     # - torch==1.12.0
