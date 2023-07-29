@@ -11,7 +11,7 @@ env = RobotVecEnv(headless=False,
 # now we can import the task (not before, since Omni plugins are loaded 
 # upon environment initialization)
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
-from kyon_rhc.kyonrhc_cluster_client import KyonRHClusterClient
+from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_client import KyonRHClusterClient
 
 num_envs = 3
 sim_params = {}

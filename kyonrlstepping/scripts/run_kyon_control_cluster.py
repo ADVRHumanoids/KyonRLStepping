@@ -1,6 +1,6 @@
-from kyon_rhc.kyonrhc import KyonRHC
-from kyon_rhc.kyonrhc_cluster_srvr import KyonRHClusterSrvr
-from kyon_rhc.utils.sysutils import PathsGetter
+from kyonrlstepping.controllers.kyon_rhc.kyonrhc import KyonRHC
+from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_srvr import KyonRHClusterSrvr
+from kyonrlstepping.controllers.kyon_rhc.utils.sysutils import PathsGetter
 kyonrhc_paths = PathsGetter
 
 def generate_controllers():

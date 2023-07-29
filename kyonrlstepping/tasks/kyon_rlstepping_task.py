@@ -1,28 +1,6 @@
-from omni.isaac.core.tasks.base_task import BaseTask
-from omni.isaac.core.articulations import ArticulationView
-from omni.isaac.core.utils.viewports import set_camera_view
-
-from omni.isaac.core.utils.rotations import euler_angles_to_quat 
-
-import omni.kit
-
-import gymnasium as gym
-from gym import spaces
-import numpy as np
-import torch
-import math
-
-from omni.isaac.urdf import _urdf
-from omni.isaac.core.utils.prims import move_prim
-from omni.isaac.cloner import GridCloner
-import omni.isaac.core.utils.prims as prim_utils
-from omni.isaac.urdf._urdf import UrdfJointTargetType
-
-from omni.isaac.core.utils.types import ArticulationActions
-
-from omni.isaac.core.scenes.scene import Scene
-
 from omnicustomgym.tasks.custom_task import CustomTask
+
+import numpy as np
 
 class KyonRlSteppingTask(CustomTask):
     def __init__(self, 
@@ -100,16 +78,7 @@ class KyonRlSteppingTask(CustomTask):
 
     def pre_physics_step(self, actions) -> None:
         
-        wheel_idxs = self._jnt_imp_controller.get_jnt_idxs_matching("wheel")
-        # pos_ref = torch.mul(torch.sub(torch.rand((1, len(knee_indxs)), device = self._device), 0.5), 2.0)
-        eff_ref = torch.mul(torch.sub(torch.rand((1, len(wheel_idxs)), device = self._device), 0.5), 5.0)
-        success = self._jnt_imp_controller.set_refs(eff_ref=eff_ref, 
-                                        pos_ref=None, 
-                                        vel_ref=None, 
-                                        jnt_indxs=wheel_idxs, 
-                                        robot_indxs=torch.tensor([0], device=self._device))
-
-        self._jnt_imp_controller.apply_refs()
+        a = 2
 
     def get_observations(self):
 
