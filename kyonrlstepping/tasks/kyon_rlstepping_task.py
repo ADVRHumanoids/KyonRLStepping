@@ -1,4 +1,4 @@
-from omnicustomgym.tasks.custom_task import CustomTask
+from omni_custom_gym.tasks.custom_task import CustomTask
 
 import numpy as np
 
