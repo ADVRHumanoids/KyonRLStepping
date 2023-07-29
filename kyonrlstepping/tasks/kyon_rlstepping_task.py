@@ -107,7 +107,7 @@ class KyonRlSteppingTask(BaseTask):
         srdf_path = descr_path + "/srdf"
         kyon_xacro_name = "kyon"
         xacro_path = srdf_path + "/" + kyon_xacro_name + ".srdf.xacro"
-        self._srdf_path = srdf_path + "/" + kyon_xacro_name + ".srdf"
+        self._srdf_path = self._descr_dump_path + "/" + kyon_xacro_name + ".srdf"
         
         wheel_cmd_val = "true"
         arms_cmd_val = "false"
@@ -159,7 +159,7 @@ class KyonRlSteppingTask(BaseTask):
         urdf_path = descr_path + "/urdf"
         kyon_xacro_name = "kyon"
         xacro_path = urdf_path + "/" + kyon_xacro_name + ".urdf.xacro"
-        self._urdf_path = urdf_path + "/" + kyon_xacro_name + ".urdf"
+        self._urdf_path = self._descr_dump_path + "/" + kyon_xacro_name + ".urdf"
         
         wheel_cmd_val = "true"
         arms_cmd_val = "false"
@@ -199,6 +199,7 @@ class KyonRlSteppingTask(BaseTask):
 
     def _generate_description(self):
         
+        self._descr_dump_path = "/tmp/" + f"{self.__class__.__name__}"
         print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": generating URDF...")
         self._generate_urdf()
         print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": done")
@@ -383,17 +384,11 @@ class KyonRlSteppingTask(BaseTask):
                                         device = self._device, 
                                         dtype=torch.float32)
 
-            success_imp_gains = self._jnt_imp_controller.set_gains(pos_gains = wheels_pos_gains,
-                                        vel_gains = wheels_vel_gains,
-                                        jnt_indxs=wheels_indxs)
+            self._jnt_imp_controller.set_gains(pos_gains = wheels_pos_gains,
+                            vel_gains = wheels_vel_gains,
+                            jnt_indxs=wheels_indxs)
 
-            success_set_refs = self._jnt_imp_controller.set_refs(pos_ref=self._default_jnt_positions)
-
-            print(self._default_jnt_positions.shape)
-            # we update the internal references on the imp. controller using 
-            # measured states, for smoothness sake
-            print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": set_ref success [eff, pos, vel, idx, assign] -> " + str(success_set_refs))
-            print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": set_gains success [pos, vel, idx, assign] -> " + str(success_imp_gains))
+            self._jnt_imp_controller.set_refs(pos_ref=self._default_jnt_positions)
 
         else:
 
