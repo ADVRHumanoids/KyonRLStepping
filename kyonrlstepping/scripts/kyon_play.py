@@ -4,7 +4,7 @@ from omni_custom_gym.gym.omni_vect_env.vec_envs import RobotVecEnv
 
 #from stable_baselines3 import PPO
 
-env = RobotVecEnv(headless=False, 
+env = RobotVecEnv(headless=True, 
                 enable_livestream=False, 
                 enable_viewport=False) # create environment
 
@@ -13,7 +13,7 @@ env = RobotVecEnv(headless=False,
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
 from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_client import KyonRHClusterClient
 
-num_envs = 3
+num_envs = 3 # 9, 3, 5
 sim_params = {}
 sim_params["use_gpu_pipeline"] = True
 sim_params["integration_dt"] = 1.0/100.0

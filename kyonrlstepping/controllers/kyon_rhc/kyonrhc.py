@@ -45,15 +45,11 @@ class KyonRHC(RHController):
                         name = name, 
                         verbose=verbose)
 
-        self.n_dofs = self._get_ndofs()
+        self.n_dofs = self._get_ndofs() # after loading the URDF and creating the controller we
+        # know n_dofs -> we assign it (by default = None)
 
-        self.robot_state = KyonState(self.n_dofs) # used for storing state coming FROM robot
-
-        self.robot_cmds = KyonState(self.n_dofs, 
-                                add_info_size=2) # used for storing internal state (i.e. from TO solution)
-        # to be sent TO the robot. 
-        # Additional solver info: [solution cost, solution time]
-
+        self._init_states() # know that the n_dofs are known, we can call the parent method to init robot states and cmds
+    
     def _init_problem(self):
         
         print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": initializing RHC problem for controller " + self.name)
@@ -269,22 +265,6 @@ class KyonRHC(RHController):
 
         return np.full((2, 1), 78 + random.random(), dtype = np.float32)
 
-    def _send_solution(self):
-        
-        # writes commands from robot state
-        os.write(self.pipes_manager.pipes_fd["cmd_jnt_q"][self.controller_index], self.robot_cmds.jnt_state.q.tobytes())
-        os.write(self.pipes_manager.pipes_fd["cmd_jnt_v"][self.controller_index], self.robot_cmds.jnt_state.v.tobytes())
-        os.write(self.pipes_manager.pipes_fd["cmd_jnt_eff"][self.controller_index], self.robot_cmds.jnt_state.effort.tobytes())
-
-        # write additional info
-        os.write(self.pipes_manager.pipes_fd["rhc_info"][self.controller_index], self.robot_cmds.slvr_state.info.tobytes())
-
-    def _acquire_state(self):
-
-        # reads state from robot
-
-        pass
-
     def _solve(self):
         
         # set initial state and initial guess
@@ -307,10 +287,4 @@ class KyonRHC(RHController):
         
         # self._pub_sol()
 
-        # get data from the solution
-        self.robot_cmds.jnt_state.q = self._get_cmd_jnt_q_from_sol()
-        self.robot_cmds.jnt_state.v = self._get_cmd_jnt_v_from_sol()
-        self.robot_cmds.jnt_state.effort = self._get_cmd_jnt_eff_from_sol()
-
-        self.robot_cmds.slvr_state.info = self._get_additional_slvr_info()
         # time.sleep(0.02)
