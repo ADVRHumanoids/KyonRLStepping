@@ -1,13 +1,9 @@
 from control_cluster_utils.controllers.rhc import RHController, RobotState
 from control_cluster_utils.utilities.pipe_utils import NamedPipesHandler
 
-import time
-
-from kyon_rhc.horizon_imports import * 
+from kyonrlstepping.controllers.kyon_rhc.horizon_imports import * 
 
 import numpy as np
-
-import os
 
 import random
 
@@ -28,7 +24,6 @@ class KyonRHC(RHController):
             termination_flag: mp.Value,
             t_horizon:float = 3.0,
             n_nodes: int = 30,
-            name = "KyonRHC", 
             enable_replay = False, 
             verbose = False):
 
@@ -42,7 +37,6 @@ class KyonRHC(RHController):
                         config_path = config_path, 
                         pipes_manager = pipes_manager,
                         termination_flag = termination_flag,
-                        name = name, 
                         verbose=verbose)
 
         self.n_dofs = self._get_ndofs() # after loading the URDF and creating the controller we
@@ -52,7 +46,7 @@ class KyonRHC(RHController):
     
     def _init_problem(self):
         
-        print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + ": initializing RHC problem for controller " + self.name)
+        print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + f"[{self.status}]" + ": initializing RHC problem")
 
         self.urdf = self.urdf.replace('continuous', 'revolute')
         self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf)
@@ -202,13 +196,13 @@ class KyonRHC(RHController):
 
         xig = np.empty([self._prb.getState().getVars().shape[0], 1])
 
-        from kyon_rhc.kyon_commands import GaitManager, KyonCommands
+        from kyonrlstepping.controllers.kyon_rhc.kyon_commands import GaitManager, KyonCommands
         contact_phase_map = {c: f'{c}_timeline' for c in self._model.cmap.keys()}
         self._gm = GaitManager(self._ti, self._pm, contact_phase_map)
 
         self._jc = KyonCommands(self._gm)
 
-        print(f"[{self.__class__.__name__}]" + f"[{self.status}]" + "Initialized RHC problem for controller " + self.name)
+        print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.status}]" + "Initialized RHC problem")
 
     def _zmp(self, 
             model):

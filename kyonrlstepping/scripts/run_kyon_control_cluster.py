@@ -18,14 +18,13 @@ def generate_controllers():
                                     config_path = kyonrhc_config_path, 
                                     pipes_manager = control_cluster_srvr.pipes_manager, 
                                     verbose = verbose, 
-                                    name = "KyonRHController" + str(i), 
                                     termination_flag = control_cluster_srvr.termination_flag))
     
     return cluster_controllers
 
 verbose = True
 
-control_cluster_srvr = KyonRHClusterSrvr()
+control_cluster_srvr = KyonRHClusterSrvr() # this blocks until connection with the client is established
 controllers = generate_controllers()
 
 for i in range(0, control_cluster_srvr.cluster_size):
@@ -34,7 +33,7 @@ for i in range(0, control_cluster_srvr.cluster_size):
 
     result = control_cluster_srvr.add_controller(controllers[i])
 
-control_cluster_srvr.start() 
+control_cluster_srvr.start() # spawns the controllers on separate processes
 
 try:
 

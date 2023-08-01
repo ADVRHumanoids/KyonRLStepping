@@ -1,6 +1,6 @@
 from control_cluster_utils.cluster_server.control_cluster_srvr import ControlClusterSrvr
 
-from kyon_rhc.kyonrhc_cluster_utils import KyonClusterCmd, JntImpCntrlAction
+from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_utils import KyonClusterCmd, JntImpCntrlAction
 
 class KyonRHClusterSrvr(ControlClusterSrvr):
     

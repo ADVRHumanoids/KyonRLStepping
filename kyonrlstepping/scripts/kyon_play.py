@@ -4,7 +4,7 @@ from omni_custom_gym.gym.omni_vect_env.vec_envs import RobotVecEnv
 
 #from stable_baselines3 import PPO
 
-env = RobotVecEnv(headless=True, 
+env = RobotVecEnv(headless=False, 
                 enable_livestream=False, 
                 enable_viewport=False) # create environment
 
