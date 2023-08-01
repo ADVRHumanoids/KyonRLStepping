@@ -52,37 +52,16 @@ class KyonRlSteppingTask(CustomTask):
         a = 1
     
     def reset(self, env_ids=None):
-        # if env_ids is None:
-        #     env_ids = torch.arange(self.num_envs, device=self._device)
-        # num_resets = len(env_ids)
 
-        # # randomize DOF positions
-        # dof_pos = torch.zeros((num_resets, self._cartpoles.num_dof), device=self._device)
-        # dof_pos[:, self._cart_dof_idx] = 1.0 * (1.0 - 2.0 * torch.rand(num_resets, device=self._device))
-        # dof_pos[:, self._pole_dof_idx] = 0.125 * math.pi * (1.0 - 2.0 * torch.rand(num_resets, device=self._device))
-
-        # # randomize DOF velocities
-        # dof_vel = torch.zeros((num_resets, self._cartpoles.num_dof), device=self._device)
-        # dof_vel[:, self._cart_dof_idx] = 0.5 * (1.0 - 2.0 * torch.rand(num_resets, device=self._device))
-        # dof_vel[:, self._pole_dof_idx] = 0.25 * math.pi * (1.0 - 2.0 * torch.rand(num_resets, device=self._device))
-
-        # # apply resets
-        # indices = env_ids.to(dtype=torch.int32)
-        # self._cartpoles.set_joint_positions(dof_pos, indices=indices)
-        # self._cartpoles.set_joint_velocities(dof_vel, indices=indices)
-
-        # # bookkeeping
-        # self.resets[env_ids] = 0
-
-        a = 1
+        a = 2
 
     def pre_physics_step(self, actions) -> None:
         
-        a = 2
+        self._get_robots_state()
 
     def get_observations(self):
 
-        self._get_jnts_state() # updates joints states
+        self._get_robots_state() # updates joints states
 
         return self.obs
 

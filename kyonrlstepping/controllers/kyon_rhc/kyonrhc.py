@@ -43,13 +43,15 @@ class KyonRHC(RHController):
         # know n_dofs -> we assign it (by default = None)
 
         self._init_states() # know that the n_dofs are known, we can call the parent method to init robot states and cmds
-    
+
     def _init_problem(self):
         
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + f"[{self.status}]" + ": initializing RHC problem")
 
         self.urdf = self.urdf.replace('continuous', 'revolute')
         self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf)
+
+        self._assign_server_side_jnt_names(self._get_robot_jnt_names())
 
         self._dt = self._t_horizon / self._n_nodes
         self._prb = Problem(self._n_nodes, receding=True, casadi_type=cs.SX)
@@ -204,6 +206,23 @@ class KyonRHC(RHController):
 
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.status}]" + "Initialized RHC problem")
 
+    def _get_robot_jnt_names(self):
+
+        joints_names = self._kin_dyn.joint_names()
+
+        to_be_removed = ["universe", 
+                        "reference", 
+                        "world", 
+                        "floating", 
+                        "floating_base"]
+        
+        for name in to_be_removed:
+
+            if name in joints_names:
+                joints_names.remove(name)
+
+        return joints_names
+    
     def _zmp(self, 
             model):
         # formulation in forces

@@ -46,13 +46,12 @@ env._world.reset()
 obs = env.reset()
 # env._world.pause()
 
-n_jnts = env._task._robot_n_dofs
-
 control_clust_dt = sim_params["integration_dt"] * 2
 cluster_client = KyonRHClusterClient(cluster_size=num_envs, 
                                     device=device, 
                                     cluster_dt=control_clust_dt, 
-                                    control_dt=sim_params["integration_dt"])
+                                    control_dt=sim_params["integration_dt"], 
+                                    jnt_names = task.robot_dof_names)
 
 import time
 rt_time_reset = 100
