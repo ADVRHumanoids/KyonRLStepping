@@ -61,15 +61,17 @@ class KyonRlSteppingTask(CustomTask):
     def reset(self, env_ids=None):
 
         self._jnt_imp_controller.set_refs(pos_ref=self._homer.get_homing())
+        
+        self._jnt_imp_controller.apply_refs()
 
     def pre_physics_step(self, 
             actions: RobotClusterCmd) -> None:
         
-        # self._jnt_imp_controller.set_refs(pos_ref = actions.jnt_cmd.q, 
-        #                             vel_ref = actions.jnt_cmd.v,
-        #                             eff_ref = actions.jnt_cmd.eff)
+        self._jnt_imp_controller.set_refs(pos_ref = actions.jnt_cmd.q, 
+                                    vel_ref = actions.jnt_cmd.v,
+                                    eff_ref = actions.jnt_cmd.eff)
 
-        a = 1
+        self._jnt_imp_controller.apply_refs()
 
     def get_observations(self):
         

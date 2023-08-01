@@ -272,7 +272,7 @@ class KyonRHC(RHController):
 
     def _get_cmd_jnt_eff_from_sol(self):
 
-        return np.full((self.robot_cmds.n_dofs, 1), 3 + random.random(), dtype = np.float32)
+        return np.full((self.robot_cmds.n_dofs, 1), 0 + 0.0 * random.random(), dtype = np.float32)
     
     def _get_additional_slvr_info(self):
 

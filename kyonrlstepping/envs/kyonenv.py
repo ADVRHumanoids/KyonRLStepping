@@ -41,7 +41,7 @@ class KyonEnv(RobotVecEnv):
             print(f"[{self.__class__.__name__}]" + f"[{self.info}]: " + \
                 "cumulative cluster solution time -> " + \
                 str(self.cluster_client.solution_time))
-        
+
         self.task.pre_physics_step(self.cluster_client.controllers_cmds)
 
         self._world.step(render=self._render)
