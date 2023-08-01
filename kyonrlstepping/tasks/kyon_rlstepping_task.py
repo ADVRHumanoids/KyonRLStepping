@@ -1,9 +1,13 @@
 from omni_custom_gym.tasks.custom_task import CustomTask
 
+from control_cluster_utils.utilities.control_cluster_utils import RobotClusterCmd
+
 import numpy as np
 
 class KyonRlSteppingTask(CustomTask):
     def __init__(self, 
+                cluster_dt: float, 
+                integration_dt: float,
                 num_envs = 1,
                 device = "cuda", 
                 cloning_offset: np.array = np.array([0.0, 0.0, 0.0]),
@@ -13,17 +17,20 @@ class KyonRlSteppingTask(CustomTask):
 
         # trigger __init__ of parent class
         CustomTask.__init__(self,
-                        name = self.__class__.__name__, 
-                        robot_name = "kyon",
-                        num_envs = num_envs,
-                        device = device, 
-                        cloning_offset = cloning_offset,
-                        replicate_physics = replicate_physics,
-                        offset = offset, 
-                        env_spacing = env_spacing)
+                    name = self.__class__.__name__, 
+                    robot_name = "kyon",
+                    num_envs = num_envs,
+                    device = device, 
+                    cloning_offset = cloning_offset,
+                    replicate_physics = replicate_physics,
+                    offset = offset, 
+                    env_spacing = env_spacing)
         
         self.xrdf_cmd_vals = [True, False, False, False, False] # overrides base class default values
 
+        self.cluster_dt = cluster_dt
+        self.integration_dt = integration_dt
+        
     def _xrdf_cmds(self):
 
         cmds = []
@@ -53,14 +60,19 @@ class KyonRlSteppingTask(CustomTask):
     
     def reset(self, env_ids=None):
 
-        a = 2
+        self._jnt_imp_controller.set_refs(pos_ref=self._homer.get_homing())
 
-    def pre_physics_step(self, actions) -> None:
+    def pre_physics_step(self, 
+            actions: RobotClusterCmd) -> None:
         
-        self._get_robots_state()
+        # self._jnt_imp_controller.set_refs(pos_ref = actions.jnt_cmd.q, 
+        #                             vel_ref = actions.jnt_cmd.v,
+        #                             eff_ref = actions.jnt_cmd.eff)
+
+        a = 1
 
     def get_observations(self):
-
+        
         self._get_robots_state() # updates joints states
 
         return self.obs
