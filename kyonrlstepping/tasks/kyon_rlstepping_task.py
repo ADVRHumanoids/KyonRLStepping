@@ -5,6 +5,8 @@ from control_cluster_utils.utilities.control_cluster_utils import RobotClusterCm
 import numpy as np
 import torch
 
+from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_isaac
+
 class KyonRlSteppingTask(CustomTask):
     def __init__(self, 
                 cluster_dt: float, 
@@ -27,26 +29,12 @@ class KyonRlSteppingTask(CustomTask):
                     offset = offset, 
                     env_spacing = env_spacing)
         
-        self.xrdf_cmd_vals = [True, False, False, False, False] # overrides base class default values
-
         self.cluster_dt = cluster_dt
         self.integration_dt = integration_dt
         
     def _xrdf_cmds(self):
 
-        cmds = []
-        
-        wheels = "true" if self.xrdf_cmd_vals[0] else "false"
-        upper_body = "true" if self.xrdf_cmd_vals[1] else "false"
-        sensors = "true" if self.xrdf_cmd_vals[2] else "false"
-        floating_joint = "true" if self.xrdf_cmd_vals[3] else "false"
-        payload = "true" if self.xrdf_cmd_vals[4] else "false"
-
-        cmds.append("wheels:=" + wheels)
-        cmds.append("upper_body:=" + upper_body)
-        cmds.append("sensors:=" + sensors)
-        cmds.append("floating_joint:=" + floating_joint)
-        cmds.append("payload:=" + payload)
+        cmds = get_xrdf_cmds_isaac()
 
         return cmds
       
@@ -68,19 +56,29 @@ class KyonRlSteppingTask(CustomTask):
     def pre_physics_step(self, 
             actions: RobotClusterCmd) -> None:
         
-        np_gains = torch.full((self.num_envs, self.robot_n_dofs), 
-                    0.0, 
+        no_gains_pos = torch.full((self.num_envs, self.robot_n_dofs), 
+                    1.0, 
                     device = self.torch_device, 
                     dtype=torch.float32)
         
-        self._jnt_imp_controller.set_gains(pos_gains = np_gains,
-                            vel_gains = np_gains)
+        no_gains_vel = torch.full((self.num_envs, self.robot_n_dofs), 
+                    0.1, 
+                    device = self.torch_device, 
+                    dtype=torch.float32)
+
+        self._jnt_imp_controller.set_gains(pos_gains = no_gains_pos,
+                            vel_gains = no_gains_vel)
         
         self._jnt_imp_controller.set_refs(pos_ref = actions.jnt_cmd.q, 
                                     vel_ref = actions.jnt_cmd.v,
                                     eff_ref = actions.jnt_cmd.eff)
                 
         self._jnt_imp_controller.apply_refs()
+
+        print("####################")
+        # print(self._robots_art_view.get_applied_actions().joint_efforts)
+        print(actions.jnt_cmd.eff)
+        print("####################")
 
     def get_observations(self):
         
