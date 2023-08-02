@@ -2,6 +2,7 @@ from control_cluster_utils.controllers.rhc import RHController, RobotState
 from control_cluster_utils.utilities.pipe_utils import NamedPipesHandler
 
 from kyonrlstepping.controllers.kyon_rhc.horizon_imports import * 
+from kyonrlstepping.utils.homing import RobotHomer
 
 import numpy as np
 
@@ -44,6 +45,8 @@ class KyonRHC(RHController):
 
         self._init_states() # know that the n_dofs are known, we can call the parent method to init robot states and cmds
 
+        self._homer: RobotHomer = None
+    
     def _init_problem(self):
         
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + f"[{self.status}]" + ": initializing RHC problem")
@@ -57,34 +60,21 @@ class KyonRHC(RHController):
         self._prb = Problem(self._n_nodes, receding=True, casadi_type=cs.SX)
         self._prb.setDt(self._dt)
 
-        q_init = {'hip_roll_1': 0.0,
-          'hip_pitch_1': 0.7,
-          'knee_pitch_1': -1.4,
-          'hip_roll_2': 0.0,
-          'hip_pitch_2': 0.7,
-          'knee_pitch_2': -1.4,
-          'hip_roll_3': 0.0,
-          'hip_pitch_3': -0.7,
-          'knee_pitch_3': 1.4,
-          'hip_roll_4': 0.0,
-          'hip_pitch_4': -0.7,
-          'knee_pitch_4': 1.4,
-          'wheel_joint_1': 0.0,
-          'wheel_joint_2': 0.0,
-          'wheel_joint_3': 0.0,
-          'wheel_joint_4': 0.0}
+        self._homer = RobotHomer(srdf_path=self.srdf_path, 
+                                jnt_names_prb=self._server_side_jnt_names)
+
         import numpy as np
         base_init = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0])
 
         FK = self._kin_dyn.fk('ball_1')
-        init = base_init.tolist() + list(q_init.values())
-  
+        init = base_init.tolist() + list(self._homer.get_homing())
+
         init_pos_foot = FK(q=init)['ee_pos']
         base_init[2] = -init_pos_foot[2]
 
         self._model = FullModelInverseDynamics(problem=self._prb,
                                 kd=self._kin_dyn,
-                                q_init=q_init,
+                                q_init=self._homer.get_homing_map(),
                                 base_init=base_init)
         
         self._ti = TaskInterface(prb=self._prb, 
@@ -268,11 +258,11 @@ class KyonRHC(RHController):
     
     def _get_cmd_jnt_v_from_sol(self):
 
-        return np.full((self.robot_cmds.n_dofs, 1), 2 + random.random(), dtype = np.float32)
+        return np.full((self.robot_cmds.n_dofs, 1), 0.0, dtype = np.float32)
 
     def _get_cmd_jnt_eff_from_sol(self):
 
-        return np.full((self.robot_cmds.n_dofs, 1), 0 + 0.0 * random.random(), dtype = np.float32)
+        return np.full((self.robot_cmds.n_dofs, 1), 0.0, dtype = np.float32)
     
     def _get_additional_slvr_info(self):
 
