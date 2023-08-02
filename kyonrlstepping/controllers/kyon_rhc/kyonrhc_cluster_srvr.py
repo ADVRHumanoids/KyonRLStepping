@@ -1,7 +1,5 @@
 from control_cluster_utils.cluster_server.control_cluster_srvr import ControlClusterSrvr
 
-from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_utils import KyonClusterCmd, JntImpCntrlAction
-
 from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_horizon
 
 class KyonRHClusterSrvr(ControlClusterSrvr):
@@ -18,7 +16,6 @@ class KyonRHClusterSrvr(ControlClusterSrvr):
 
         self._generate_urdf()
         
-    
     def _xrdf_cmds(self):
         
         cmds = get_xrdf_cmds_horizon()

@@ -10,10 +10,6 @@ import random
 
 import multiprocessing as mp
 
-class KyonState(RobotState):
-
-    pass
-
 class KyonRHC(RHController):
 
     def __init__(self, 
