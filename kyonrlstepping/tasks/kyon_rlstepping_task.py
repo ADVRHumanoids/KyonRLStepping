@@ -3,6 +3,7 @@ from omni_custom_gym.tasks.custom_task import CustomTask
 from control_cluster_utils.utilities.control_cluster_utils import RobotClusterCmd
 
 import numpy as np
+import torch
 
 class KyonRlSteppingTask(CustomTask):
     def __init__(self, 
@@ -67,10 +68,18 @@ class KyonRlSteppingTask(CustomTask):
     def pre_physics_step(self, 
             actions: RobotClusterCmd) -> None:
         
-        # self._jnt_imp_controller.set_refs(pos_ref = actions.jnt_cmd.q, 
-        #                             vel_ref = actions.jnt_cmd.v,
-        #                             eff_ref = actions.jnt_cmd.eff)
-
+        np_gains = torch.full((self.num_envs, self.robot_n_dofs), 
+                    0.0, 
+                    device = self.torch_device, 
+                    dtype=torch.float32)
+        
+        self._jnt_imp_controller.set_gains(pos_gains = np_gains,
+                            vel_gains = np_gains)
+        
+        self._jnt_imp_controller.set_refs(pos_ref = actions.jnt_cmd.q, 
+                                    vel_ref = actions.jnt_cmd.v,
+                                    eff_ref = actions.jnt_cmd.eff)
+                
         self._jnt_imp_controller.apply_refs()
 
     def get_observations(self):

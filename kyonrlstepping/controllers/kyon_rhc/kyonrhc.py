@@ -177,7 +177,7 @@ class KyonRHC(RHController):
         self._ti.model.v.setInitialGuess(self._ti.model.v0)
 
         f0 = [0, 0, self._kin_dyn.mass() / 4 * 9.8]
-        for cname, cforces in self._ti.model.cmap.items():
+        for _, cforces in self._ti.model.cmap.items():
             for c in cforces:
                 c.setInitialGuess(f0)
 
@@ -185,8 +185,6 @@ class KyonRHC(RHController):
 
         self._ti.bootstrap()
         self._ti.load_initial_guess()
-
-        xig = np.empty([self._prb.getState().getVars().shape[0], 1])
 
         from kyonrlstepping.controllers.kyon_rhc.kyon_commands import GaitManager, KyonCommands
         contact_phase_map = {c: f'{c}_timeline' for c in self._model.cmap.keys()}
@@ -254,19 +252,19 @@ class KyonRHC(RHController):
 
     def _get_cmd_jnt_q_from_sol(self):
 
-        return np.full((self.robot_cmds.n_dofs, 1), 1 + random.random(), dtype = np.float32)
+        return self._ti.solution['q'][7:, 0].astype(self.array_dtype)
     
     def _get_cmd_jnt_v_from_sol(self):
 
-        return np.full((self.robot_cmds.n_dofs, 1), 0.0, dtype = np.float32)
+        return self._ti.solution['v'][6:, 0].astype(self.array_dtype)
 
     def _get_cmd_jnt_eff_from_sol(self):
-
-        return np.full((self.robot_cmds.n_dofs, 1), 0.0, dtype = np.float32)
+        
+        return self._ti.eval_tau_on_sol()[6:, 0].astype(self.array_dtype)
     
     def _get_additional_slvr_info(self):
 
-        return np.full((2, 1), 78 + random.random(), dtype = np.float32)
+        return np.full((2, 1), 78 + random.random(), dtype = self.array_dtype)
 
     def _solve(self):
         
@@ -287,7 +285,7 @@ class KyonRHC(RHController):
         self._jc.run(self._ti.solution)
 
         self._ti.rti()
-        
+
         # self._pub_sol()
 
         # time.sleep(0.02)
