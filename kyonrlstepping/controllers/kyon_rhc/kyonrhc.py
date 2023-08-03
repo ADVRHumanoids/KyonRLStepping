@@ -259,9 +259,11 @@ class KyonRHC(RHController):
         return self._ti.eval_tau_on_sol()[6:, 0].astype(self.array_dtype)
     
     def _get_additional_slvr_info(self):
-
-        return np.full((2, 1), 78 + random.random(), dtype = self.array_dtype)
-
+            
+        return np.array([self._ti.solution["opt_cost"], 
+                            self._ti.solution["n_iter2sol"]], 
+                        dtype=self.array_dtype)
+    
     def _solve(self):
         
         # set initial state and initial guess
