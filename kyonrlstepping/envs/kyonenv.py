@@ -2,13 +2,17 @@ from omni_custom_gym.gym.omni_vect_env.vec_envs import RobotVecEnv
 
 from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_client import KyonRHClusterClient
 
+import torch 
+import numpy as np
+
 class KyonEnv(RobotVecEnv):
 
     def set_task(self, 
                 task, 
                 backend="torch", 
                 sim_params=None, 
-                init_sim=True) -> None:
+                init_sim=True, 
+                np_array_dtype = np.float32) -> None:
 
         super().set_task(task, 
                 backend=backend, 
@@ -21,30 +25,47 @@ class KyonEnv(RobotVecEnv):
                         device=task.torch_device, 
                         cluster_dt=task.cluster_dt, 
                         control_dt=task.integration_dt, 
-                        jnt_names = task.robot_dof_names)
+                        jnt_names = task.robot_dof_names, 
+                        np_array_dtype = np_array_dtype)
         
         self.init_cluster_cmd_to_safe_vals()
+
+        self._is_cluster_ready = False
         
     def step(self, 
         index: int, 
         actions = None):
 
-        # assign last robot state observation to the cluster client
-        self.update_cluster_state()
+        is_first_control_step = not self._is_cluster_ready and self.cluster_client.is_cluster_ready.value
+        if is_first_control_step:
+            
+            # first time the cluster is ready (i.e. the controllers are ready and connected)
+
+            self.task.init_root_abs_offsets() # we get the current absolute positions and use them as 
+            # references
+
+        if not self._is_cluster_ready:
+
+            self._is_cluster_ready = self.cluster_client.is_cluster_ready.value
 
         if self.cluster_client.is_cluster_instant(index):
             
+            # assign last robot state observation to the cluster client
+            self.update_cluster_state()
+
             # the control cluster may run at a different rate wrt the simulation
 
             self.cluster_client.solve() # we solve all the underlying TOs in the cluster
+            # (the solve will do nothing unless the cluster is ready)
 
             print(f"[{self.__class__.__name__}]" + f"[{self.info}]: " + \
                 "cumulative cluster solution time -> " + \
                 str(self.cluster_client.solution_time))
 
-        if self.cluster_client.is_cluster_ready.value:
+        if self._is_cluster_ready:
             
-            self.task.pre_physics_step(self.cluster_client.controllers_cmds)
+            self.task.pre_physics_step(self.cluster_client.controllers_cmds, 
+                                    is_first_control_step = is_first_control_step)
 
         self._world.step(render=self._render)
 
@@ -74,7 +95,9 @@ class KyonEnv(RobotVecEnv):
     
     def update_cluster_state(self):
 
-        self.cluster_client.robot_states.root_state.p = self.task.root_p
+        self.cluster_client.robot_states.root_state.p = torch.sub(self.task.root_p, 
+                                                                self.task.root_abs_offsets) # we only get the relative position
+        # w.r.t. the initial spawning pose
         self.cluster_client.robot_states.root_state.q = self.task.root_q
         self.cluster_client.robot_states.root_state.v = self.task.root_v
         self.cluster_client.robot_states.root_state.omega = self.task.root_omega

@@ -22,7 +22,8 @@ class KyonRHC(RHController):
             t_horizon:float = 3.0,
             n_nodes: int = 30,
             enable_replay = False, 
-            verbose = False):
+            verbose = False, 
+            array_dtype = np.float32):
 
         self._enable_replay = enable_replay
         self._t_horizon = t_horizon
@@ -34,7 +35,8 @@ class KyonRHC(RHController):
                         config_path = config_path, 
                         pipes_manager = pipes_manager,
                         termination_flag = termination_flag,
-                        verbose=verbose)
+                        verbose=verbose, 
+                        array_dtype = array_dtype)
 
         self.n_dofs = self._get_ndofs() # after loading the URDF and creating the controller we
         # know n_dofs -> we assign it (by default = None)
@@ -248,24 +250,27 @@ class KyonRHC(RHController):
 
     def _get_cmd_jnt_q_from_sol(self):
 
-        return self._ti.solution['q'][7:, 0].astype(self.array_dtype)
+        return self._ti.solution['q'][7:, 0].reshape(1, 
+                                        self.robot_cmds.jnt_state.q.shape[1]).astype(self.array_dtype)
     
     def _get_cmd_jnt_v_from_sol(self):
 
-        return self._ti.solution['v'][6:, 0].astype(self.array_dtype)
+        return self._ti.solution['v'][6:, 0].reshape(1, 
+                                        self.robot_cmds.jnt_state.v.shape[1]).astype(self.array_dtype)
 
     def _get_cmd_jnt_eff_from_sol(self):
         
-        return self._ti.eval_tau_on_sol()[6:, 0].astype(self.array_dtype)
+        return self._ti.eval_tau_on_sol()[6:, 0].reshape(1, 
+                                        self.robot_cmds.jnt_state.effort.shape[1]).astype(self.array_dtype)
     
     def _get_additional_slvr_info(self):
-            
+
         return np.array([self._ti.solution["opt_cost"], 
                             self._ti.solution["n_iter2sol"]], 
                         dtype=self.array_dtype)
     
-    def _solve(self):
-        
+    def _update_open_loop(self):
+
         # set initial state and initial guess
         shift_num = -1
 
@@ -275,7 +280,49 @@ class KyonRHC(RHController):
             xig[:, -1 - i] = x_opt[:, -1]
 
         self._prb.getState().setInitialGuess(xig)
+        
         self._prb.setInitialState(x0=xig[:, 0])
+    
+    def _update_closed_loop(self):
+
+        # set initial state and initial guess
+        shift_num = -1
+
+        x_opt =  self._ti.solution['x_opt']
+        xig = np.roll(x_opt, shift_num, axis=1)
+        for i in range(abs(shift_num)):
+            xig[:, -1 - i] = x_opt[:, -1]
+
+        self._prb.getState().setInitialGuess(xig)
+
+        # robot_state = np.concatenate((self.robot_state.root_state.p, 
+        #                 self.robot_state.root_state.q, 
+        #                 self.robot_state.jnt_state.q, 
+        #                 self.robot_state.root_state.v, 
+        #                 self.robot_state.root_state.omega, 
+        #                 self.robot_state.jnt_state.v), axis=1).T
+        
+        robot_state = np.concatenate((xig[0:7, 0].reshape(1, len(xig[0:7, 0])), 
+                            self.robot_state.jnt_state.q, 
+                            xig[23:29, 0].reshape(1, len(xig[23:29, 0])), 
+                            self.robot_state.jnt_state.v), axis=1).T
+
+        # print("state debug n." + str(self.controller_index) + "\n" + 
+        #     "solver: " + str(xig[:, 0]) + "\n" + 
+        #     "meas.: " + str(robot_state.flatten()) + "\n", 
+        #     "q cmd: " + str(self.robot_cmds.jnt_state.q))
+        
+        self._prb.setInitialState(x0=
+                        robot_state
+                        )
+
+    def _solve(self):
+        
+        self._update_open_loop() # updates the TO ig and 
+        # initial conditions using data from the solution
+
+        # self._update_closed_loop() # updates the TO ig and 
+        # # initial conditions using robot measurements
 
         # shift phases of phase manager
         self._pm._shift_phases()
@@ -283,7 +330,7 @@ class KyonRHC(RHController):
         self._jc.run(self._ti.solution)
 
         self._ti.rti()
-
+        
         # self._pub_sol()
 
         # time.sleep(0.02)

@@ -1,9 +1,8 @@
 import numpy as np
-
-from omni_custom_gym.gym.omni_vect_env.vec_envs import RobotVecEnv
+import torch
 
 #from stable_baselines3 import PPO
-from kyonrlstepping.envs.kyonenv import KyonEnv
+from kyonrlstepping.envs.kyonenv import KyonEnv 
 
 env = KyonEnv(headless=False, 
             enable_livestream=False, 
@@ -33,15 +32,30 @@ device = sim_params["device"]
 
 control_clust_dt = sim_params["integration_dt"] * 2
 integration_dt = sim_params["integration_dt"]
+
+
+dtype = "float32" # Isaac requires data to be float32, so this should not be touched
+if dtype == "float64":
+    dtype_np = np.float64 
+    dtype_torch = torch.float64
+if dtype == "float32":
+    dtype_np = np.float32
+    dtype_torch = torch.float32
+
+# this has to be the same wrt the cluster server, otherwise
+# messages are not read/written properly
+
 task = KyonRlSteppingTask(cluster_dt = control_clust_dt, 
                         integration_dt = integration_dt,
                         num_envs = num_envs, 
                         cloning_offset = np.array([0.0, 0.0, 2.0]), 
-                        device = device) # create task
+                        device = device, 
+                        dtype=dtype_torch) # create task
 
 env.set_task(task, 
         backend="torch", 
-        sim_params = sim_params) # add the task to the environment 
+        sim_params = sim_params, 
+        np_array_dtype = dtype_np) # add the task to the environment 
 # (includes spawning robots and launching the cluster client for the controllers)
 
 # Run inference on the trained policy

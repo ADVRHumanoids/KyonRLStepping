@@ -16,7 +16,8 @@ class KyonRlSteppingTask(CustomTask):
                 cloning_offset: np.array = np.array([0.0, 0.0, 0.0]),
                 replicate_physics: bool = True,
                 offset=None, 
-                env_spacing = 5.0) -> None:
+                env_spacing = 5.0, 
+                dtype = torch.float64) -> None:
 
         # trigger __init__ of parent class
         CustomTask.__init__(self,
@@ -27,7 +28,8 @@ class KyonRlSteppingTask(CustomTask):
                     cloning_offset = cloning_offset,
                     replicate_physics = replicate_physics,
                     offset = offset, 
-                    env_spacing = env_spacing)
+                    env_spacing = env_spacing, 
+                    dtype = dtype)
         
         self.cluster_dt = cluster_dt
         self.integration_dt = integration_dt
@@ -49,40 +51,49 @@ class KyonRlSteppingTask(CustomTask):
     
     def reset(self, env_ids=None):
 
-        # self._jnt_imp_controller.set_refs(pos_ref=self._homer.get_homing())
-        
-        self._jnt_imp_controller.apply_refs()
+        super().reset()
+
 
     def pre_physics_step(self, 
-            actions: RobotClusterCmd) -> None:
+            actions: RobotClusterCmd, 
+            is_first_control_step = False) -> None:
         
-        no_gains_pos = torch.full((self.num_envs, self.robot_n_dofs), 
-                    1.0, 
-                    device = self.torch_device, 
-                    dtype=torch.float32)
-        
-        no_gains_vel = torch.full((self.num_envs, self.robot_n_dofs), 
-                    0.1, 
-                    device = self.torch_device, 
-                    dtype=torch.float32)
+        if is_first_control_step:
 
-        self._jnt_imp_controller.set_gains(pos_gains = no_gains_pos,
-                            vel_gains = no_gains_vel)
-        
+            no_gains_pos = torch.full((self.num_envs, self.robot_n_dofs), 
+                        50.0, 
+                        device = self.torch_device, 
+                        dtype=self.torch_dtype)
+            no_gains_vel = torch.full((self.num_envs, self.robot_n_dofs), 
+                        5, 
+                        device = self.torch_device, 
+                        dtype=self.torch_dtype)
+            self._jnt_imp_controller.set_gains(pos_gains = no_gains_pos,
+                                vel_gains = no_gains_vel)
+            
+            wheels_indxs = self._jnt_imp_controller.get_jnt_idxs_matching(name_pattern="wheel")
+            wheels_pos_gains = torch.full((self.num_envs, len(wheels_indxs)), 
+                                        0.0, 
+                                        device = self.torch_device, 
+                                        dtype=self.torch_dtype)
+            
+            wheels_vel_gains = torch.full((self.num_envs, len(wheels_indxs)), 
+                                        10.0, 
+                                        device = self.torch_device, 
+                                        dtype=self.torch_dtype)
+            self._jnt_imp_controller.set_gains(pos_gains = wheels_pos_gains,
+                            vel_gains = wheels_vel_gains,
+                            jnt_indxs=wheels_indxs)
+    
         self._jnt_imp_controller.set_refs(pos_ref = actions.jnt_cmd.q, 
                                     vel_ref = actions.jnt_cmd.v,
                                     eff_ref = actions.jnt_cmd.eff)
                 
         self._jnt_imp_controller.apply_refs()
 
-        print("####################")
-        # print(self._robots_art_view.get_applied_actions().joint_efforts)
-        print(actions.jnt_cmd.eff)
-        print("####################")
-
     def get_observations(self):
         
-        self._get_robots_state() # updates joints states
+        self._get_robots_state() # updates robot states
 
         return self.obs
 
