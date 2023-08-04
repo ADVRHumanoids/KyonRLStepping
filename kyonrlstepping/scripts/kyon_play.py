@@ -12,7 +12,7 @@ env = KyonEnv(headless=False,
 # upon environment initialization)
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
 
-num_envs = 3 # 9, 3, 5
+num_envs = 9 # 9, 3, 5
 sim_params = {}
 sim_params["use_gpu_pipeline"] = True
 sim_params["integration_dt"] = 1.0/100.0

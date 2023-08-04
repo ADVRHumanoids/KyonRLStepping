@@ -6,7 +6,7 @@ from kyonrlstepping.utils.homing import RobotHomer
 
 import numpy as np
 
-import random
+import time 
 
 import multiprocessing as mp
 
@@ -182,6 +182,8 @@ class KyonRHC(RHController):
         self._ti.finalize()
 
         self._ti.bootstrap()
+        self._ti.init_inv_dyn_for_res() # we initalize some objects for sol. postprocessing purposes
+
         self._ti.load_initial_guess()
 
         from kyonrlstepping.controllers.kyon_rhc.kyon_commands import GaitManager, KyonCommands
@@ -260,8 +262,10 @@ class KyonRHC(RHController):
 
     def _get_cmd_jnt_eff_from_sol(self):
         
-        return self._ti.eval_tau_on_sol()[6:, 0].reshape(1, 
-                                        self.robot_cmds.jnt_state.effort.shape[1]).astype(self.array_dtype)
+        prova = self._ti.eval_tau_on_first_node()
+
+        return prova[6:, 0].reshape(1, 
+                self.robot_cmds.jnt_state.effort.shape[1]).astype(self.array_dtype)
     
     def _get_additional_slvr_info(self):
 
@@ -295,17 +299,17 @@ class KyonRHC(RHController):
 
         self._prb.getState().setInitialGuess(xig)
 
-        # robot_state = np.concatenate((self.robot_state.root_state.p, 
-        #                 self.robot_state.root_state.q, 
-        #                 self.robot_state.jnt_state.q, 
-        #                 self.robot_state.root_state.v, 
-        #                 self.robot_state.root_state.omega, 
-        #                 self.robot_state.jnt_state.v), axis=1).T
+        robot_state = np.concatenate((self.robot_state.root_state.p, 
+                        self.robot_state.root_state.q, 
+                        self.robot_state.jnt_state.q, 
+                        self.robot_state.root_state.v, 
+                        self.robot_state.root_state.omega, 
+                        self.robot_state.jnt_state.v), axis=1).T
         
-        robot_state = np.concatenate((xig[0:7, 0].reshape(1, len(xig[0:7, 0])), 
-                            self.robot_state.jnt_state.q, 
-                            xig[23:29, 0].reshape(1, len(xig[23:29, 0])), 
-                            self.robot_state.jnt_state.v), axis=1).T
+        # robot_state = np.concatenate((xig[0:7, 0].reshape(1, len(xig[0:7, 0])), 
+        #                     self.robot_state.jnt_state.q, 
+        #                     xig[23:29, 0].reshape(1, len(xig[23:29, 0])), 
+        #                     self.robot_state.jnt_state.v), axis=1).T # only joint states from measurements
 
         # print("state debug n." + str(self.controller_index) + "\n" + 
         #     "solver: " + str(xig[:, 0]) + "\n" + 
@@ -331,6 +335,4 @@ class KyonRHC(RHController):
 
         self._ti.rti()
         
-        # self._pub_sol()
-
         # time.sleep(0.02)

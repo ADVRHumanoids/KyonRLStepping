@@ -5,6 +5,7 @@ from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_client import KyonRHClu
 import torch 
 import numpy as np
 
+import time 
 class KyonEnv(RobotVecEnv):
 
     def set_task(self, 
@@ -37,6 +38,7 @@ class KyonEnv(RobotVecEnv):
         index: int, 
         actions = None):
 
+        
         is_first_control_step = not self._is_cluster_ready and self.cluster_client.is_cluster_ready.value
         if is_first_control_step:
             
@@ -48,6 +50,7 @@ class KyonEnv(RobotVecEnv):
         if not self._is_cluster_ready:
 
             self._is_cluster_ready = self.cluster_client.is_cluster_ready.value
+
 
         if self.cluster_client.is_cluster_instant(index):
             
@@ -68,8 +71,9 @@ class KyonEnv(RobotVecEnv):
             self.task.pre_physics_step(self.cluster_client.controllers_cmds, 
                                     is_first_control_step = is_first_control_step)
 
-        self._world.step(render=self._render)
 
+        self._world.step(render=self._render)
+        
         self.sim_frame_count += 1
 
         observations = self.task.get_observations()
@@ -78,6 +82,7 @@ class KyonEnv(RobotVecEnv):
         dones = self.task.is_done()
         info = {}
 
+        
         return observations, rewards, dones, info
         
     def reset(self):

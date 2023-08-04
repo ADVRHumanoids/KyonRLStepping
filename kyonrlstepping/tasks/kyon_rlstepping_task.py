@@ -7,6 +7,8 @@ import torch
 
 from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_isaac
 
+import time 
+
 class KyonRlSteppingTask(CustomTask):
     def __init__(self, 
                 cluster_dt: float, 
@@ -84,12 +86,17 @@ class KyonRlSteppingTask(CustomTask):
             self._jnt_imp_controller.set_gains(pos_gains = wheels_pos_gains,
                             vel_gains = wheels_vel_gains,
                             jnt_indxs=wheels_indxs)
-    
+
         self._jnt_imp_controller.set_refs(pos_ref = actions.jnt_cmd.q, 
                                     vel_ref = actions.jnt_cmd.v,
                                     eff_ref = actions.jnt_cmd.eff)
                 
         self._jnt_imp_controller.apply_refs()
+
+        # print("cmd debug" + "\n" + 
+        #         "q_cmd: " + str(actions.jnt_cmd.q) + "\n" + 
+        #         "v_cmd: " + str(actions.jnt_cmd.v) + "\n" + 
+        #         "eff_cmd: " + str(actions.jnt_cmd.eff))
 
     def get_observations(self):
         
