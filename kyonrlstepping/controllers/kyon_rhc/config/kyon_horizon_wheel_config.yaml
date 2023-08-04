@@ -1,6 +1,6 @@
 solver:
-  type: ilqr
-  ipopt.linear_solver: mumps # ma57
+  type: ilqr # ilqr/ipopt
+  ipopt.linear_solver: ma57 # mumps
   ipopt.tol: 0.1
   ilqr.tol: 0.01
   ipopt.constr_viol_tol: 0.01
