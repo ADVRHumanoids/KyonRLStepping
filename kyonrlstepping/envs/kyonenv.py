@@ -26,7 +26,8 @@ class KyonEnv(RobotVecEnv):
                         cluster_dt=task.cluster_dt, 
                         control_dt=task.integration_dt, 
                         jnt_names = task.robot_dof_names, 
-                        np_array_dtype = np_array_dtype)
+                        np_array_dtype = np_array_dtype, 
+                        verbose = True)
         
         self.init_cluster_cmd_to_safe_vals()
 
@@ -59,7 +60,7 @@ class KyonEnv(RobotVecEnv):
             # (the solve will do nothing unless the cluster is ready)
 
             print(f"[{self.__class__.__name__}]" + f"[{self.info}]: " + \
-                "cumulative cluster solution time -> " + \
+                "cluster client solve time -> " + \
                 str(self.cluster_client.solution_time))
 
         if self._is_cluster_ready:
