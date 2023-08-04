@@ -72,10 +72,20 @@ sim_time = 0.0
 i = 0
 start_time = time.time()
 start_time_loop = 0
+rt_factor_reset_n = 100 
+rt_factor_counter = 0
 
 while env._simulation_app.is_running():
     
     start_time_loop = time.time()
+    
+    if ((i + 1) % rt_factor_reset_n) == 0:
+
+        rt_factor_counter = 0
+
+        start_time = time.time()
+
+        sim_time = 0
 
     # if (i >= rt_time_reset):
 
@@ -95,6 +105,7 @@ while env._simulation_app.is_running():
     rt_factor = sim_time / real_time
     
     i+=1 # updating simulation iteration number
+    rt_factor_counter = rt_factor_counter + 1
 
     print("[main][info]: current RT factor-> " + str(rt_factor))
     print("[main][info]: current training RT factor-> " + str(rt_factor * num_envs))
