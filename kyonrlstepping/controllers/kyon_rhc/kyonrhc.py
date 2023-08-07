@@ -21,6 +21,7 @@ class KyonRHC(RHController):
             termination_flag: mp.Value,
             t_horizon:float = 3.0,
             n_nodes: int = 30,
+            add_data_lenght: int = 2,
             enable_replay = False, 
             verbose = False, 
             array_dtype = np.float32):
@@ -28,6 +29,8 @@ class KyonRHC(RHController):
         self._enable_replay = enable_replay
         self._t_horizon = t_horizon
         self._n_nodes = n_nodes
+
+        self.add_data_lenght = add_data_lenght # length of the array holding additional info from the solver
 
         super().__init__(controller_index = controller_index, 
                         urdf_path = urdf_path, 
