@@ -4,7 +4,7 @@ import torch
 #from stable_baselines3 import PPO
 from kyonrlstepping.envs.kyonenv import KyonEnv 
 
-env = KyonEnv(headless=False, 
+env = KyonEnv(headless=True, 
             enable_livestream=False, 
             enable_viewport=False) # create environment
 
@@ -12,7 +12,7 @@ env = KyonEnv(headless=False,
 # upon environment initialization)
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
 
-num_envs = 9 # 9, 3, 5
+num_envs = 3 # 9, 3, 5
 sim_params = {}
 sim_params["use_gpu_pipeline"] = True
 sim_params["integration_dt"] = 1.0/100.0
@@ -70,20 +70,20 @@ rt_factor = 1.0
 real_time = 0.0
 sim_time = 0.0
 i = 0
-start_time = time.time()
+start_time = time.monotonic()
 start_time_loop = 0
 rt_factor_reset_n = 100 
 rt_factor_counter = 0
 
 while env._simulation_app.is_running():
     
-    start_time_loop = time.time()
+    start_time_loop = time.monotonic()
     
     if ((i + 1) % rt_factor_reset_n) == 0:
 
         rt_factor_counter = 0
 
-        start_time = time.time()
+        start_time = time.monotonic()
 
         sim_time = 0
 
@@ -99,7 +99,7 @@ while env._simulation_app.is_running():
 
     obs, rewards, dones, info = env.step(index=i) 
     
-    now = time.time()
+    now = time.monotonic()
     real_time = now - start_time
     sim_time += sim_params["integration_dt"]
     rt_factor = sim_time / real_time
