@@ -17,6 +17,7 @@ class KyonRHC(RHController):
             urdf_path: str,
             srdf_path: str,
             config_path: str,
+            cluster_size: int, # needed by shared mem manager
             pipes_manager: NamedPipesHandler,
             termination_flag: mp.Value,
             t_horizon:float = 3.0,
@@ -36,15 +37,11 @@ class KyonRHC(RHController):
                         urdf_path = urdf_path, 
                         srdf_path=  srdf_path, 
                         config_path = config_path, 
+                        cluster_size = cluster_size,
                         pipes_manager = pipes_manager,
                         termination_flag = termination_flag,
                         verbose=verbose, 
                         array_dtype = array_dtype)
-
-        self.n_dofs = self._get_ndofs() # after loading the URDF and creating the controller we
-        # know n_dofs -> we assign it (by default = None)
-
-        self._init_states() # know that the n_dofs are known, we can call the parent method to init robot states and cmds
 
         self._homer: RobotHomer = None
     
@@ -194,6 +191,9 @@ class KyonRHC(RHController):
         self._gm = GaitManager(self._ti, self._pm, contact_phase_map)
 
         self._jc = KyonCommands(self._gm)
+
+        self.n_dofs = self._get_ndofs() # after loading the URDF and creating the controller we
+        # know n_dofs -> we assign it (by default = None)
 
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.status}]" + "Initialized RHC problem")
 
