@@ -6,7 +6,7 @@ from kyonrlstepping.utils.homing import RobotHomer
 
 import numpy as np
 
-import time 
+import torch
 
 import multiprocessing as mp
 
@@ -24,7 +24,7 @@ class KyonRHC(RHController):
             add_data_lenght: int = 2,
             enable_replay = False, 
             verbose = False, 
-            array_dtype = np.float32):
+            array_dtype = torch.float32):
 
         self._enable_replay = enable_replay
         self._t_horizon = t_horizon
@@ -255,24 +255,27 @@ class KyonRHC(RHController):
 
     def _get_cmd_jnt_q_from_sol(self):
 
-        return self._ti.solution['q'][7:, 0].reshape(1, 
-                                        self.robot_cmds.jnt_state.q.shape[1]).astype(self.array_dtype)
+        return torch.tensor(self._ti.solution['q'][7:, 0], 
+                        dtype=self.array_dtype).reshape(1, 
+                                        self.robot_cmds.jnt_cmd.q.shape[1])
     
     def _get_cmd_jnt_v_from_sol(self):
 
-        return self._ti.solution['v'][6:, 0].reshape(1, 
-                                        self.robot_cmds.jnt_state.v.shape[1]).astype(self.array_dtype)
+        return torch.tensor(self._ti.solution['v'][6:, 0], 
+                        dtype=self.array_dtype).reshape(1, 
+                                        self.robot_cmds.jnt_cmd.v.shape[1])
 
     def _get_cmd_jnt_eff_from_sol(self):
         
         prova = self._ti.eval_tau_on_first_node()
 
-        return prova[6:, 0].reshape(1, 
-                self.robot_cmds.jnt_state.effort.shape[1]).astype(self.array_dtype)
+        return torch.tensor(prova[6:, 0], 
+                        dtype=self.array_dtype).reshape(1, 
+                self.robot_cmds.jnt_cmd.eff.shape[1])
     
     def _get_additional_slvr_info(self):
 
-        return np.array([self._ti.solution["opt_cost"], 
+        return torch.tensor([self._ti.solution["opt_cost"], 
                             self._ti.solution["n_iter2sol"]], 
                         dtype=self.array_dtype)
     
@@ -302,12 +305,12 @@ class KyonRHC(RHController):
 
         self._prb.getState().setInitialGuess(xig)
 
-        robot_state = np.concatenate((self.robot_state.root_state.p, 
+        robot_state = torch.cat((self.robot_state.root_state.p, 
                         self.robot_state.root_state.q, 
                         self.robot_state.jnt_state.q, 
                         self.robot_state.root_state.v, 
                         self.robot_state.root_state.omega, 
-                        self.robot_state.jnt_state.v), axis=1).T
+                        self.robot_state.jnt_state.v), dim=1)
         
         # robot_state = np.concatenate((xig[0:7, 0].reshape(1, len(xig[0:7, 0])), 
         #                     self.robot_state.jnt_state.q, 
@@ -320,7 +323,7 @@ class KyonRHC(RHController):
         #     "q cmd: " + str(self.robot_cmds.jnt_state.q))
         
         self._prb.setInitialState(x0=
-                        robot_state
+                        robot_state.numpy().T
                         )
 
     def _solve(self):

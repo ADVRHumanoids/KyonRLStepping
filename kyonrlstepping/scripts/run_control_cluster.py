@@ -3,8 +3,7 @@ from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_srvr import KyonRHClust
 from kyonrlstepping.controllers.kyon_rhc.utils.sysutils import PathsGetter
 kyonrhc_paths = PathsGetter
 
-import numpy as np
-
+import torch
 def generate_controllers():
 
     kyonrhc_config_path = kyonrhc_paths().CONFIGPATH
@@ -27,7 +26,7 @@ def generate_controllers():
 
 verbose = True
 
-dtype = np.float32 # this has to be the same wrt the cluster client, otherwise
+dtype = torch.float32 # this has to be the same wrt the cluster client, otherwise
 # messages are not read properly
 
 control_cluster_srvr = KyonRHClusterSrvr() # this blocks until connection with the client is established

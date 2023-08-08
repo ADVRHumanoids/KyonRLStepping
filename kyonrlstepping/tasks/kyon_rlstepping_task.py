@@ -1,6 +1,6 @@
 from omni_custom_gym.tasks.custom_task import CustomTask
 
-from control_cluster_utils.utilities.control_cluster_utils import RobotClusterCmd
+from control_cluster_utils.utilities.control_cluster_defs import RobotClusterCmd
 
 import numpy as np
 import torch
