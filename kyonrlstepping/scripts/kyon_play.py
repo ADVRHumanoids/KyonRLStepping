@@ -70,20 +70,20 @@ rt_factor = 1.0
 real_time = 0.0
 sim_time = 0.0
 i = 0
-start_time = time.monotonic()
+start_time = time.perf_counter()
 start_time_loop = 0
 rt_factor_reset_n = 100 
 rt_factor_counter = 0
 
 while env._simulation_app.is_running():
     
-    start_time_loop = time.monotonic()
+    start_time_loop = time.perf_counter()
     
     if ((i + 1) % rt_factor_reset_n) == 0:
 
         rt_factor_counter = 0
 
-        start_time = time.monotonic()
+        start_time = time.perf_counter()
 
         sim_time = 0
 
@@ -99,7 +99,7 @@ while env._simulation_app.is_running():
 
     obs, rewards, dones, info = env.step(index=i) 
     
-    now = time.monotonic()
+    now = time.perf_counter()
     real_time = now - start_time
     sim_time += sim_params["integration_dt"]
     rt_factor = sim_time / real_time
