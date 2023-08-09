@@ -37,20 +37,14 @@ class KyonEnv(RobotVecEnv):
     def step(self, 
         index: int, 
         actions = None):
-
         
-        is_first_control_step = not self._is_cluster_ready and self.cluster_client.is_cluster_ready.value
-        if is_first_control_step:
+        if self.cluster_client.is_first_control_step():
             
+            print("AAAAAAAAAAAAAAAAAA")
             # first time the cluster is ready (i.e. the controllers are ready and connected)
 
             self.task.init_root_abs_offsets() # we get the current absolute positions and use them as 
             # references
-
-        if not self._is_cluster_ready:
-
-            self._is_cluster_ready = self.cluster_client.is_cluster_ready.value
-
 
         if self.cluster_client.is_cluster_instant(index):
             
@@ -66,10 +60,10 @@ class KyonEnv(RobotVecEnv):
                 "cluster client solve time -> " + \
                 str(self.cluster_client.solution_time))
 
-        if self._is_cluster_ready:
+        if self.cluster_client.cluster_ready():
             
             self.task.pre_physics_step(self.cluster_client.controllers_cmds, 
-                                    is_first_control_step = is_first_control_step)
+                        is_first_control_step = self.cluster_client.is_first_control_step())
 
 
         self._world.step(render=self._render)
@@ -101,18 +95,16 @@ class KyonEnv(RobotVecEnv):
     
     def update_cluster_state(self):
 
-        self.cluster_client.robot_states.root_state.p = torch.sub(self.task.root_p, 
+        self.cluster_client.robot_states.root_state.p[:, :] = torch.sub(self.task.root_p, 
                                                                 self.task.root_abs_offsets) # we only get the relative position
         # w.r.t. the initial spawning pose
-        self.cluster_client.robot_states.root_state.q = self.task.root_q
-        self.cluster_client.robot_states.root_state.v = self.task.root_v
-        self.cluster_client.robot_states.root_state.omega = self.task.root_omega
-        self.cluster_client.robot_states.jnt_state.q = self.task.jnts_q
-        self.cluster_client.robot_states.jnt_state.v = self.task.jnts_v
+        self.cluster_client.robot_states.root_state.q[:, :] = self.task.root_q
+        self.cluster_client.robot_states.root_state.v[:, :] = self.task.root_v
+        self.cluster_client.robot_states.root_state.omega[:, :] = self.task.root_omega
+        self.cluster_client.robot_states.jnt_state.q[:, :] = self.task.jnts_q
+        self.cluster_client.robot_states.jnt_state.v[:, :] = self.task.jnts_v
 
     def init_cluster_cmd_to_safe_vals(self):
-
-        self.cluster_client.controllers_cmds.jnt_cmd.q = self.task._homer.get_homing()
-
-        # self.cluster_client.controllers_cmds.jnt_cmd.v = 
-        # self.cluster_client.controllers_cmds.jnt_cmd.eff = 
+        
+        self.task._jnt_imp_controller.set_refs(pos_ref = self.task._homer.get_homing())
+        self.task._jnt_imp_controller.apply_refs()

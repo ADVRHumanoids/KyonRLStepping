@@ -43,6 +43,8 @@ class KyonRHC(RHController):
                         verbose=verbose, 
                         array_dtype = array_dtype)
 
+        self._quat_remap = [1, 2, 3, 0] # mapping from robot quat. to Horizon's quaternion convention
+        
         self._homer: RobotHomer = None
     
     def _init_problem(self):
@@ -254,7 +256,7 @@ class KyonRHC(RHController):
         return len(self._model.joint_names)
 
     def _get_cmd_jnt_q_from_sol(self):
-
+    
         return torch.tensor(self._ti.solution['q'][7:, 0], 
                         dtype=self.array_dtype).reshape(1, 
                                         self.robot_cmds.jnt_cmd.q.shape[1])
@@ -305,13 +307,14 @@ class KyonRHC(RHController):
 
         self._prb.getState().setInitialGuess(xig)
 
-        robot_state = torch.cat((self.robot_state.root_state.p, 
-                        self.robot_state.root_state.q, 
-                        self.robot_state.jnt_state.q, 
-                        self.robot_state.root_state.v, 
-                        self.robot_state.root_state.omega, 
-                        self.robot_state.jnt_state.v), dim=1)
-        
+        robot_state = torch.cat((self.robot_state.root_state.get_p(), 
+                        self.robot_state.root_state.get_q(), 
+                        self.robot_state.jnt_state.get_q(), 
+                        self.robot_state.root_state.get_v(), 
+                        self.robot_state.root_state.get_omega(), 
+                        self.robot_state.jnt_state.get_v()), 
+                        dim=1
+                        )
         # robot_state = np.concatenate((xig[0:7, 0].reshape(1, len(xig[0:7, 0])), 
         #                     self.robot_state.jnt_state.q, 
         #                     xig[23:29, 0].reshape(1, len(xig[23:29, 0])), 
@@ -340,5 +343,5 @@ class KyonRHC(RHController):
         self._jc.run(self._ti.solution)
 
         self._ti.rti()
-        
+
         # time.sleep(0.02)

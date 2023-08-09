@@ -55,7 +55,6 @@ class KyonRlSteppingTask(CustomTask):
 
         super().reset()
 
-
     def pre_physics_step(self, 
             actions: RobotClusterCmd, 
             is_first_control_step = False) -> None:
@@ -63,11 +62,11 @@ class KyonRlSteppingTask(CustomTask):
         if is_first_control_step:
 
             no_gains_pos = torch.full((self.num_envs, self.robot_n_dofs), 
-                        50.0, 
+                        100.0, 
                         device = self.torch_device, 
                         dtype=self.torch_dtype)
             no_gains_vel = torch.full((self.num_envs, self.robot_n_dofs), 
-                        5, 
+                        10, 
                         device = self.torch_device, 
                         dtype=self.torch_dtype)
             self._jnt_imp_controller.set_gains(pos_gains = no_gains_pos,
@@ -86,9 +85,9 @@ class KyonRlSteppingTask(CustomTask):
             self._jnt_imp_controller.set_gains(pos_gains = wheels_pos_gains,
                             vel_gains = wheels_vel_gains,
                             jnt_indxs=wheels_indxs)
-
+            
         self._jnt_imp_controller.set_refs(pos_ref = actions.jnt_cmd.q, 
-                                    vel_ref = actions.jnt_cmd.v,
+                                    vel_ref = actions.jnt_cmd.v, 
                                     eff_ref = actions.jnt_cmd.eff)
                 
         self._jnt_imp_controller.apply_refs()
