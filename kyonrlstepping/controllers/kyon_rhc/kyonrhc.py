@@ -18,13 +18,12 @@ class KyonRHC(RHController):
             srdf_path: str,
             config_path: str,
             cluster_size: int, # needed by shared mem manager
-            pipes_manager: NamedPipesHandler,
-            termination_flag: mp.Value,
             t_horizon:float = 3.0,
             n_nodes: int = 30,
             add_data_lenght: int = 2,
             enable_replay = False, 
             verbose = False, 
+            debug = False, 
             array_dtype = torch.float32):
 
         self._enable_replay = enable_replay
@@ -38,9 +37,8 @@ class KyonRHC(RHController):
                         srdf_path=  srdf_path, 
                         config_path = config_path, 
                         cluster_size = cluster_size,
-                        pipes_manager = pipes_manager,
-                        termination_flag = termination_flag,
-                        verbose=verbose, 
+                        verbose = verbose, 
+                        debug = debug,
                         array_dtype = array_dtype)
 
         self._quat_remap = [1, 2, 3, 0] # mapping from robot quat. to Horizon's quaternion convention

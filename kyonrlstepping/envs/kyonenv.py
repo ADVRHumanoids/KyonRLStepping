@@ -13,7 +13,9 @@ class KyonEnv(RobotVecEnv):
                 backend="torch", 
                 sim_params=None, 
                 init_sim=True, 
-                np_array_dtype = np.float32) -> None:
+                np_array_dtype = np.float32, 
+                verbose = False, 
+                debug = False) -> None:
 
         super().set_task(task, 
                 backend=backend, 
@@ -28,7 +30,8 @@ class KyonEnv(RobotVecEnv):
                         control_dt=task.integration_dt, 
                         jnt_names = task.robot_dof_names, 
                         np_array_dtype = np_array_dtype, 
-                        verbose = True)
+                        verbose = verbose, 
+                        debug = debug)
         
         self.init_cluster_cmd_to_safe_vals()
 
@@ -40,7 +43,6 @@ class KyonEnv(RobotVecEnv):
         
         if self.cluster_client.is_first_control_step():
             
-            print("AAAAAAAAAAAAAAAAAA")
             # first time the cluster is ready (i.e. the controllers are ready and connected)
 
             self.task.init_root_abs_offsets() # we get the current absolute positions and use them as 

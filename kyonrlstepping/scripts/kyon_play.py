@@ -1,3 +1,6 @@
+import os
+script_name = os.path.splitext(os.path.basename(os.path.abspath(__file__)))[0]
+
 import numpy as np
 import torch
 
@@ -55,7 +58,9 @@ task = KyonRlSteppingTask(cluster_dt = control_clust_dt,
 env.set_task(task, 
         backend="torch", 
         sim_params = sim_params, 
-        np_array_dtype = dtype_np) # add the task to the environment 
+        np_array_dtype = dtype_np, 
+        verbose=True, 
+        debug=True) # add the task to the environment 
 # (includes spawning robots and launching the cluster client for the controllers)
 
 # Run inference on the trained policy
@@ -107,12 +112,18 @@ while env._simulation_app.is_running():
     i+=1 # updating simulation iteration number
     rt_factor_counter = rt_factor_counter + 1
 
-    print("[main][info]: current RT factor-> " + str(rt_factor))
-    print("[main][info]: current training RT factor-> " + str(rt_factor * num_envs))
-    print("[main][info]: real_time-> " + str(real_time))
-    print("[main][info]: sim_time-> " + str(sim_time))
-    print("[main][info]: loop execution time-> " + str(now - start_time_loop))
+    print(f"[{script_name}]" + "[info]: current RT factor-> " + str(rt_factor))
+    print(f"[{script_name}]" + "[info]: current training RT factor-> " + str(rt_factor * num_envs))
+    print(f"[{script_name}]" + "[info]: real_time-> " + str(real_time))
+    print(f"[{script_name}]" + "[info]: sim_time-> " + str(sim_time))
+    print(f"[{script_name}]" + "[info]: loop execution time-> " + str(now - start_time_loop))
 
-print("[main][info]: closing environment and simulation")
+    # except KeyboardInterrupt:
+
+    #     print(f"[{script_name}]" + "[info]: KeyboardInterrupt detected. Cleaning up...")
+
 env.cluster_client.close()
 env.close()
+
+        # import sys
+        # sys.exit()
