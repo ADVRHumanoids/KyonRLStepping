@@ -30,8 +30,6 @@ class KyonRHC(RHController):
         self._t_horizon = t_horizon
         self._n_nodes = n_nodes
 
-        self.add_data_lenght = add_data_lenght # length of the array holding additional info from the solver
-
         super().__init__(controller_index = controller_index, 
                         urdf_path = urdf_path, 
                         srdf_path=  srdf_path, 
@@ -40,6 +38,8 @@ class KyonRHC(RHController):
                         verbose = verbose, 
                         debug = debug,
                         array_dtype = array_dtype)
+
+        self.add_data_lenght = add_data_lenght # length of the array holding additional info from the solver
 
         self._quat_remap = [1, 2, 3, 0] # mapping from robot quat. to Horizon's quaternion convention
         
