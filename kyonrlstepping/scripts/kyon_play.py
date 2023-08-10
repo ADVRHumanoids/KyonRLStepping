@@ -7,7 +7,7 @@ import torch
 #from stable_baselines3 import PPO
 from kyonrlstepping.envs.kyonenv import KyonEnv 
 
-env = KyonEnv(headless=True, 
+env = KyonEnv(headless=False, 
             enable_livestream=False, 
             enable_viewport=False) # create environment
 
@@ -118,12 +118,6 @@ while env._simulation_app.is_running():
     print(f"[{script_name}]" + "[info]: sim_time-> " + str(sim_time))
     print(f"[{script_name}]" + "[info]: loop execution time-> " + str(now - start_time_loop))
 
-    # except KeyboardInterrupt:
-
-    #     print(f"[{script_name}]" + "[info]: KeyboardInterrupt detected. Cleaning up...")
-
+print(f"[{script_name}]" + "[info]: KeyboardInterrupt detected. Cleaning up...")
 env.cluster_client.close()
 env.close()
-
-        # import sys
-        # sys.exit()
