@@ -110,3 +110,12 @@ class KyonEnv(RobotVecEnv):
         
         self.task._jnt_imp_controller.set_refs(pos_ref = self.task._homer.get_homing())
         self.task._jnt_imp_controller.apply_refs()
+
+    def close(self):
+
+        self.cluster_client.close()
+        
+        super().close() # this has to be called last 
+        # so that isaac's simulation is close properly
+
+        

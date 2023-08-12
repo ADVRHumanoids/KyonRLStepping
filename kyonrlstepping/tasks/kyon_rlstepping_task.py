@@ -87,8 +87,8 @@ class KyonRlSteppingTask(CustomTask):
                             jnt_indxs=wheels_indxs)
             
         self._jnt_imp_controller.set_refs(pos_ref = actions.jnt_cmd.q, 
-                                    vel_ref = actions.jnt_cmd.v, 
-                                    eff_ref = actions.jnt_cmd.eff)
+                                        vel_ref = actions.jnt_cmd.v, 
+                                        eff_ref = actions.jnt_cmd.eff)
                 
         self._jnt_imp_controller.apply_refs()
 

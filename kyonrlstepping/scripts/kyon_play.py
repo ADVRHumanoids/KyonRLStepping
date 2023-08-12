@@ -7,7 +7,7 @@ import torch
 #from stable_baselines3 import PPO
 from kyonrlstepping.envs.kyonenv import KyonEnv 
 
-env = KyonEnv(headless=False, 
+env = KyonEnv(headless=True, 
             enable_livestream=False, 
             enable_viewport=False) # create environment
 
@@ -80,8 +80,9 @@ start_time_loop = 0
 rt_factor_reset_n = 100 
 rt_factor_counter = 0
 
+        
 while env._simulation_app.is_running():
-    
+
     start_time_loop = time.perf_counter()
     
     if ((i + 1) % rt_factor_reset_n) == 0:
@@ -99,7 +100,6 @@ while env._simulation_app.is_running():
 
     # action, _states = model.predict(obs)
     
-
     # rhc_cmds = rhc_get_cmds_fromjoy() or from agent
 
     obs, rewards, dones, info = env.step(index=i) 
@@ -118,6 +118,4 @@ while env._simulation_app.is_running():
     print(f"[{script_name}]" + "[info]: sim_time-> " + str(sim_time))
     print(f"[{script_name}]" + "[info]: loop execution time-> " + str(now - start_time_loop))
 
-print(f"[{script_name}]" + "[info]: KeyboardInterrupt detected. Cleaning up...")
-env.cluster_client.close()
 env.close()
