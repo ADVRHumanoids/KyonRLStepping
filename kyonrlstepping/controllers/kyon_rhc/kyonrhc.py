@@ -1,5 +1,4 @@
-from control_cluster_utils.controllers.rhc import RHController, RobotState
-from control_cluster_utils.utilities.pipe_utils import NamedPipesHandler
+from control_cluster_utils.controllers.rhc import RHController
 
 from kyonrlstepping.controllers.kyon_rhc.horizon_imports import * 
 from kyonrlstepping.utils.homing import RobotHomer
@@ -8,7 +7,7 @@ import numpy as np
 
 import torch
 
-import multiprocessing as mp
+import time
 
 class KyonRHC(RHController):
 
@@ -76,7 +75,10 @@ class KyonRHC(RHController):
                                 base_init=base_init)
         
         self._ti = TaskInterface(prb=self._prb, 
-                                model=self._model)
+                                model=self._model, 
+                                debug = self._debug, 
+                                verbose = self._verbose)
+        
         self._ti.setTaskFromYaml(self.config_path)
 
         com_height = self._ti.getTask('com_height')
@@ -267,9 +269,9 @@ class KyonRHC(RHController):
 
     def _get_cmd_jnt_eff_from_sol(self):
         
-        prova = self._ti.eval_tau_on_first_node()
+        efforts_on_first_node = self._ti.eval_efforts_on_first_node()
 
-        return torch.tensor(prova[6:, 0], 
+        return torch.tensor(efforts_on_first_node[6:, 0], 
                         dtype=self.array_dtype).reshape(1, 
                 self.robot_cmds.jnt_cmd.eff.shape[1])
     
@@ -334,12 +336,11 @@ class KyonRHC(RHController):
 
         # self._update_closed_loop() # updates the TO ig and 
         # # initial conditions using robot measurements
-
-        # shift phases of phase manager
-        self._pm._shift_phases()
-
-        self._jc.run(self._ti.solution)
-
-        self._ti.rti()
+        
+        self._pm._shift_phases() # shifts phases of one dt
+        
+        self._jc.run(self._ti.solution) # updatedthe high-level commands to the RHC
+        
+        self._ti.rti() # solves the problem
 
         # time.sleep(0.02)
