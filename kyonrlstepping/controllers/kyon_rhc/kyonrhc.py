@@ -3,11 +3,12 @@ from control_cluster_utils.controllers.rhc import RHController
 from kyonrlstepping.controllers.kyon_rhc.horizon_imports import * 
 from kyonrlstepping.utils.homing import RobotHomer
 
+from kyonrlstepping.controllers.kyon_rhc.kyonrhc_taskref import KyonRhcTaskRef
+from kyonrlstepping.controllers.kyon_rhc.gait_manager import GaitManager
+
 import numpy as np
 
 import torch
-
-import time
 
 class KyonRHC(RHController):
 
@@ -188,17 +189,24 @@ class KyonRHC(RHController):
 
         self._ti.load_initial_guess()
 
-        from kyonrlstepping.controllers.kyon_rhc.kyon_commands import GaitManager, KyonCommands
         contact_phase_map = {c: f'{c}_timeline' for c in self._model.cmap.keys()}
         self._gm = GaitManager(self._ti, self._pm, contact_phase_map)
-
-        self._jc = KyonCommands(self._gm)
 
         self.n_dofs = self._get_ndofs() # after loading the URDF and creating the controller we
         # know n_dofs -> we assign it (by default = None)
 
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.status}]" + "Initialized RHC problem")
 
+    def _init_rhc_task_cmds(self) -> KyonRhcTaskRef:
+
+        return KyonRhcTaskRef(gait_manager=self._gm, 
+                        cluster_size=self.cluster_size, 
+                        n_contacts=len(self._model.cmap.keys()), 
+                        index=self.controller_index, 
+                        q_remapping=self._quat_remap, 
+                        dtype=self.array_dtype, 
+                        verbose=self._verbose)
+    
     def _get_robot_jnt_names(self):
 
         joints_names = self._kin_dyn.joint_names()
@@ -339,7 +347,10 @@ class KyonRHC(RHController):
         
         self._pm._shift_phases() # shifts phases of one dt
         
-        self._jc.run(self._ti.solution) # updatedthe high-level commands to the RHC
+        self.rhc_task_refs.update() # updates rhc references
+        # with the latests available
+
+        # self._jc.run(self._ti.solution) # updatedthe high-level commands to the RHC
         
         self._ti.rti() # solves the problem
 
