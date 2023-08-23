@@ -6,7 +6,7 @@ channels:
   - conda-forge
   - omnia
   - francesco_ruscelli
-  - AndePatri
+  - AndrePatri
 dependencies: 
   - python=3.7
   - pip
@@ -27,8 +27,12 @@ dependencies:
   - posix_ipc=1.0.4
   - rospkg=1.5.0
   - empy 
-  - control_cluster_utils
-  - omni_custom_gym
+  - python-devtools
+  - perf_sleep
+  - pyqt
+  - pyqtgraph
+  # - control_cluster_utils
+  # - omni_custom_gym
   - pip:
     - nvidia-cublas-cu11==11.11.3.6
     - gym==0.26.2
