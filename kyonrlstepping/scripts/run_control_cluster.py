@@ -8,7 +8,7 @@ kyonrhc_paths = PathsGetter
 
 import torch
 
-import time 
+from perf_sleep.pyperfsleep import PerfSleep
 
 def generate_controllers():
 
@@ -33,6 +33,8 @@ def generate_controllers():
 verbose = True
 debug = True
 
+perf_timer = PerfSleep()
+
 dtype = torch.float32 # this has to be the same wrt the cluster client, otherwise
 # messages are not read properly
 
@@ -51,8 +53,9 @@ try:
 
     while True:
         
-        time.sleep(0.1) # we don't want to drain all the CPU
-        # for a while True
+        nsecs = int(0.1 * 1e9)
+        self.perf_timer.clock_sleep(nsecs) # we don't want to drain all the CPU
+        # with a busy wait
 
         pass
 
