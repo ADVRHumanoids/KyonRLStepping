@@ -58,7 +58,7 @@ class KyonEnv(RobotVecEnv):
             self.cluster_client.solve() # we solve all the underlying TOs in the cluster
             # (the solve will do nothing unless the cluster is ready)
 
-            print(f"[{self.__class__.__name__}]" + f"[{self.info}]: " + \
+            print(f"[{self.__class__.__name__}]" + f"[{self.journal.info}]: " + \
                 "cluster client solve time -> " + \
                 str(self.cluster_client.solution_time))
 

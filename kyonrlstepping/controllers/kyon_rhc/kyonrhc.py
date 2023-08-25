@@ -47,7 +47,8 @@ class KyonRHC(RHController):
     
     def _init_problem(self):
         
-        print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + f"[{self.status}]" + ": initializing RHC problem")
+        print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + \
+              f"[{self.journal.status}]" + ": initializing RHC problem")
 
         self.urdf = self.urdf.replace('continuous', 'revolute')
         self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf)
@@ -123,7 +124,7 @@ class KyonRHC(RHController):
             if self._ti.getTask(f'{c}_contact') is not None:
                 stance_phase.addItem(self._ti.getTask(f'{c}_contact'))
             else:
-                raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + ": task not found")
+                raise Exception(f"[{self.__class__.__name__}]" + f"[{self.journal.exception}]" + ": task not found")
 
             c_phases[c].registerPhase(stance_phase)
 
@@ -195,7 +196,7 @@ class KyonRHC(RHController):
         self.n_dofs = self._get_ndofs() # after loading the URDF and creating the controller we
         # know n_dofs -> we assign it (by default = None)
 
-        print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.status}]" + "Initialized RHC problem")
+        print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.journal.status}]" + "Initialized RHC problem")
 
     def _init_rhc_task_cmds(self) -> KyonRhcTaskRef:
 

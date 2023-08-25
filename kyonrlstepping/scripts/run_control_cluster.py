@@ -54,7 +54,7 @@ try:
     while True:
         
         nsecs = int(0.1 * 1e9)
-        self.perf_timer.clock_sleep(nsecs) # we don't want to drain all the CPU
+        perf_timer.clock_sleep(nsecs) # we don't want to drain all the CPU
         # with a busy wait
 
         pass

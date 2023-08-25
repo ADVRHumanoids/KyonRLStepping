@@ -4,9 +4,6 @@ from horizon.rhc.taskInterface import TaskInterface
 
 from phase_manager import pymanager
 
-from kyonrlstepping.controllers.kyon_rhc.math_utils import incremental_rotate, quaternion_multiply 
-from kyonrlstepping.controllers.kyon_rhc.math_utils import conjugate_quaternion, rotate_vector, quat_to_eul 
-
 from typing import List
 
 class GaitManager:

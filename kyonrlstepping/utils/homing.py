@@ -4,16 +4,15 @@ import xml.etree.ElementTree as ET
 
 from typing import List
 
+from control_cluster_utils.utilities.defs import Journal
+
 class RobotHomer:
 
     def __init__(self, 
             srdf_path: str, 
             jnt_names_prb: List[str]):
 
-        self._info = "info"
-        self._status = "status"
-        self._warning = "warning" 
-        self._exception = "exception"
+        self.journal = Journal()
 
         self.srdf_path = srdf_path
 
@@ -53,7 +52,7 @@ class RobotHomer:
 
         except ET.ParseError as e:
         
-            print(f"[{self.__class__.__name__}]" + f"[{self._exception}]" + ": could not read SRDF properly!!")
+            print(f"[{self.__class__.__name__}]" + f"[{self.journal.exception}]" + ": could not read SRDF properly!!")
 
         # Find all the 'joint' elements within 'group_state' with the name attribute and their values
         joints = self._srdf_root.findall(".//group_state[@name='home']/joint")
