@@ -80,7 +80,6 @@ start_time_loop = 0
 rt_factor_reset_n = 100 
 rt_factor_counter = 0
 
-        
 while env._simulation_app.is_running():
 
     start_time_loop = time.perf_counter()

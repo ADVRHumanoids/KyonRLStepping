@@ -56,7 +56,7 @@ class KyonRlSteppingTask(CustomTask):
         super().reset()
 
     def pre_physics_step(self, 
-            actions: RobotClusterCmd, 
+            actions: RobotClusterCmd = None, 
             is_first_control_step = False) -> None:
         
         if is_first_control_step:
@@ -82,20 +82,23 @@ class KyonRlSteppingTask(CustomTask):
                                         10.0, 
                                         device = self.torch_device, 
                                         dtype=self.torch_dtype)
+            
             self._jnt_imp_controller.set_gains(pos_gains = wheels_pos_gains,
                             vel_gains = wheels_vel_gains,
                             jnt_indxs=wheels_indxs)
+        
+        if actions is not None:
             
-        self._jnt_imp_controller.set_refs(pos_ref = actions.jnt_cmd.q, 
-                                        vel_ref = actions.jnt_cmd.v, 
-                                        eff_ref = actions.jnt_cmd.eff)
-                
-        self._jnt_imp_controller.apply_refs()
+            self._jnt_imp_controller.set_refs(pos_ref = actions.jnt_cmd.q, 
+                                            vel_ref = actions.jnt_cmd.v, 
+                                            eff_ref = actions.jnt_cmd.eff)
+                    
+            self._jnt_imp_controller.apply_refs()
 
-        # print("cmd debug" + "\n" + 
-        #         "q_cmd: " + str(actions.jnt_cmd.q) + "\n" + 
-        #         "v_cmd: " + str(actions.jnt_cmd.v) + "\n" + 
-        #         "eff_cmd: " + str(actions.jnt_cmd.eff))
+            # print("cmd debug" + "\n" + 
+            #         "q_cmd: " + str(actions.jnt_cmd.q) + "\n" + 
+            #         "v_cmd: " + str(actions.jnt_cmd.v) + "\n" + 
+            #         "eff_cmd: " + str(actions.jnt_cmd.eff))
 
     def get_observations(self):
         
