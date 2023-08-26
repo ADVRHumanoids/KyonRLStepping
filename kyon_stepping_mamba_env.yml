@@ -31,7 +31,7 @@ dependencies:
   - perf_sleep
   - pyqt
   - pyqtgraph
-  - pyin
+  - poetry
   # - control_cluster_utils
   # - omni_custom_gym
   - pip:
