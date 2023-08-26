@@ -1,7 +1,7 @@
 from control_cluster_utils.controllers.rhc import RHController
+from control_cluster_utils.utilities.homing import RobotHomer
 
 from kyonrlstepping.controllers.kyon_rhc.horizon_imports import * 
-from kyonrlstepping.utils.homing import RobotHomer
 
 from kyonrlstepping.controllers.kyon_rhc.kyonrhc_taskref import KyonRhcTaskRef
 from kyonrlstepping.controllers.kyon_rhc.gait_manager import GaitManager
@@ -14,8 +14,8 @@ class KyonRHC(RHController):
 
     def __init__(self, 
             controller_index: int,
-            urdf_path: str,
             srdf_path: str,
+            urdf_path: str,
             config_path: str,
             cluster_size: int, # needed by shared mem manager
             t_horizon:float = 3.0,
@@ -30,11 +30,17 @@ class KyonRHC(RHController):
         self._t_horizon = t_horizon
         self._n_nodes = n_nodes
 
+        self.config_path = config_path
+
+        self.urdf_path = urdf_path
+        # read urdf and srdf files
+        with open(self.urdf_path, 'r') as file:
+
+            self.urdf = file.read()
+
         super().__init__(controller_index = controller_index, 
-                        urdf_path = urdf_path, 
-                        srdf_path=  srdf_path, 
-                        config_path = config_path, 
                         cluster_size = cluster_size,
+                        srdf_path = srdf_path,
                         verbose = verbose, 
                         debug = debug,
                         array_dtype = array_dtype)
@@ -42,8 +48,6 @@ class KyonRHC(RHController):
         self.add_data_lenght = add_data_lenght # length of the array holding additional info from the solver
 
         self._quat_remap = [1, 2, 3, 0] # mapping from robot quat. to Horizon's quaternion convention
-        
-        self._homer: RobotHomer = None
     
     def _init_problem(self):
         
@@ -196,6 +200,7 @@ class KyonRHC(RHController):
         self.n_dofs = self._get_ndofs() # after loading the URDF and creating the controller we
         # know n_dofs -> we assign it (by default = None)
 
+        self.n_contacts = len(self._model.cmap.keys())
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.journal.status}]" + "Initialized RHC problem")
 
     def _init_rhc_task_cmds(self) -> KyonRhcTaskRef:
