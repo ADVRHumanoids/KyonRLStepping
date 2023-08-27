@@ -12,7 +12,6 @@ class KyonRhcTaskRef(RhcTaskRefs):
 
     def __init__(self, 
             gait_manager: GaitManager, 
-            cluster_size: int,
             n_contacts: int,
             index: int,
             q_remapping: List[int] = None,
@@ -20,7 +19,6 @@ class KyonRhcTaskRef(RhcTaskRefs):
             verbose=False):
         
         super().__init__( 
-                cluster_size=cluster_size,
                 n_contacts=n_contacts,
                 index=index,
                 q_remapping=q_remapping,

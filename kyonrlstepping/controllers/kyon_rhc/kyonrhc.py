@@ -201,12 +201,12 @@ class KyonRHC(RHController):
         # know n_dofs -> we assign it (by default = None)
 
         self.n_contacts = len(self._model.cmap.keys())
+        
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.journal.status}]" + "Initialized RHC problem")
 
     def _init_rhc_task_cmds(self) -> KyonRhcTaskRef:
 
         return KyonRhcTaskRef(gait_manager=self._gm, 
-                        cluster_size=self.cluster_size, 
                         n_contacts=len(self._model.cmap.keys()), 
                         index=self.controller_index, 
                         q_remapping=self._quat_remap, 
