@@ -1,0 +1,23 @@
+package:
+  name: kyonrlstepping 
+  version: 0.1.0  
+
+source:
+  path: .     # Path to the directory containing your built distribution artifacts
+
+requirements:
+  build:
+    - python=3.7
+    - flit
+  run:
+    - python=3.7
+
+about:
+  home: https://github.com/AndrePatri/ControlClusterUtils
+  license: MIT
+  summary: Package implementing hybrid RL-MPC stepping strategies for a quadruped robot.
+extra:
+  recipe-maintainers:  
+    - AndrePatri
+    
+    

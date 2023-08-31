@@ -1,12 +1,12 @@
-[tool.poetry]
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
 name = "kyonrlstepping"
 version = "0.1.0"
 description = ""
-authors = ["Andrea Patrizi <andreapatrizi1b6e6@gmail.com>"]
-
-[tool.poetry.dependencies]
-python = "^3.7"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+authors = [{name = "AndrePatri", email = "andreapatrizi1b6e6@gmail.com"}]
+readme = "README.md"
+license = {file = "LICENSE"}
+classifiers = ["License :: OSI Approved :: MIT License"]
