@@ -48,6 +48,9 @@ class KyonEnv(RobotVecEnv):
             self.task.init_root_abs_offsets() # we get the current absolute positions and use them as 
             # references
 
+            self.task.synch_default_root_states() # we update the default root state now, so that we
+            # can use it at the next call to reset
+
         if self.cluster_client.is_cluster_instant(index):
             
             # assign last robot state observation to the cluster client
