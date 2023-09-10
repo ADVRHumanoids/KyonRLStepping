@@ -103,6 +103,8 @@ while env._simulation_app.is_running():
 
     obs, rewards, dones, info = env.step(index=i) 
     
+    # print(f"[{script_name}]" + "[info]: current RT factor-> " + str(env.task.contact_sensors[0].get_current_frame()))
+
     now = time.perf_counter()
     real_time = now - start_time
     sim_time += sim_params["integration_dt"]
