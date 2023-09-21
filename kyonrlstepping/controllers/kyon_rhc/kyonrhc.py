@@ -140,7 +140,7 @@ class KyonRHC(RHController):
             if self._ti.getTask(f'z_{c}') is not None:
                 flight_phase.addItemReference(self._ti.getTask(f'z_{c}'), ref_trj)
             else:
-                raise Exception('task not found')
+                 raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + f": task {c}_contact not found")
             # flight_phase.addConstraint(prb.getConstraints(f'{c}_vert'), nodes=[0 ,flight_duration-1])  # nodes=[0, 1, 2]
             c_phases[c].registerPhase(flight_phase)
 
@@ -190,11 +190,13 @@ class KyonRHC(RHController):
         self._ti.finalize()
 
         self._ti.bootstrap()
+
         self._ti.init_inv_dyn_for_res() # we initalize some objects for sol. postprocessing purposes
 
         self._ti.load_initial_guess()
 
         contact_phase_map = {c: f'{c}_timeline' for c in self._model.cmap.keys()}
+        
         self._gm = GaitManager(self._ti, self._pm, contact_phase_map)
 
         self.n_dofs = self._get_ndofs() # after loading the URDF and creating the controller we

@@ -119,4 +119,6 @@ while env._simulation_app.is_running():
     print(f"[{script_name}]" + "[info]: sim_time-> " + str(sim_time))
     print(f"[{script_name}]" + "[info]: loop execution time-> " + str(now - start_time_loop))
 
+    # print(task.contact_sensors[0].get_current_frame())
+
 env.close()
