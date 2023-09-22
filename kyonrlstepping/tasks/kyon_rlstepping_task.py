@@ -19,6 +19,9 @@ class KyonRlSteppingTask(CustomTask):
                 replicate_physics: bool = True,
                 offset=None, 
                 env_spacing = 5.0, 
+                use_flat_ground = True,
+                default_jnt_stiffness = 100.0,
+                default_jnt_damping = 10.0,
                 dtype = torch.float64) -> None:
 
         # trigger __init__ of parent class
@@ -31,6 +34,9 @@ class KyonRlSteppingTask(CustomTask):
                     replicate_physics = replicate_physics,
                     offset = offset, 
                     env_spacing = env_spacing, 
+                    use_flat_ground = use_flat_ground,
+                    default_jnt_stiffness = default_jnt_stiffness,
+                    default_jnt_damping = default_jnt_damping,
                     dtype = dtype)
         
         self.cluster_dt = cluster_dt
