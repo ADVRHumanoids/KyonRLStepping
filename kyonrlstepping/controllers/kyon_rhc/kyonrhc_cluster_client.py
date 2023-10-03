@@ -10,9 +10,10 @@ class KyonRHClusterClient(ControlClusterClient):
             jnt_names, 
             np_array_dtype, 
             verbose, 
-            debug):
+            debug,
+            robot_name = "kyon0"):
 
-        self.robot_name = "kyon"
+        self.robot_name = robot_name
                 
         super().__init__( 
             cluster_size=cluster_size, 

@@ -19,18 +19,23 @@ class KyonRlSteppingTask(CustomTask):
                 replicate_physics: bool = True,
                 offset=None, 
                 env_spacing = 5.0, 
+                spawning_radius = 1.0, 
                 use_flat_ground = True,
                 default_jnt_stiffness = 100.0,
                 default_jnt_damping = 10.0,
+                robot_names = ["kyon0"],
+                robot_pkg_names = ["kyon"],
                 dtype = torch.float64) -> None:
 
         # trigger __init__ of parent class
         CustomTask.__init__(self,
                     name = self.__class__.__name__, 
-                    robot_name = "kyon",
+                    robot_names = robot_names,
+                    robot_pkg_names = robot_pkg_names,
                     num_envs = num_envs,
                     device = device, 
                     cloning_offset = cloning_offset,
+                    spawning_radius = spawning_radius,
                     replicate_physics = replicate_physics,
                     offset = offset, 
                     env_spacing = env_spacing, 
@@ -44,7 +49,9 @@ class KyonRlSteppingTask(CustomTask):
         
     def _xrdf_cmds(self):
 
-        cmds = get_xrdf_cmds_isaac()
+        n_robots = len(self.robot_names)
+
+        cmds = get_xrdf_cmds_isaac(n_robots=n_robots)
 
         return cmds
       
@@ -62,42 +69,15 @@ class KyonRlSteppingTask(CustomTask):
         super().reset()
 
     def pre_physics_step(self, 
-            actions: RobotClusterCmd = None, 
-            is_first_control_step = False) -> None:
-        
-        if is_first_control_step:
-
-            no_gains_pos = torch.full((self.num_envs, self.robot_n_dofs), 
-                        100.0, 
-                        device = self.torch_device, 
-                        dtype=self.torch_dtype)
-            no_gains_vel = torch.full((self.num_envs, self.robot_n_dofs), 
-                        10, 
-                        device = self.torch_device, 
-                        dtype=self.torch_dtype)
-            self._jnt_imp_controller.set_gains(pos_gains = no_gains_pos,
-                                vel_gains = no_gains_vel)
-            
-            wheels_indxs = self._jnt_imp_controller.get_jnt_idxs_matching(name_pattern="wheel")
-            wheels_pos_gains = torch.full((self.num_envs, len(wheels_indxs)), 
-                                        0.0, 
-                                        device = self.torch_device, 
-                                        dtype=self.torch_dtype)
-            
-            wheels_vel_gains = torch.full((self.num_envs, len(wheels_indxs)), 
-                                        10.0, 
-                                        device = self.torch_device, 
-                                        dtype=self.torch_dtype)
-            
-            self._jnt_imp_controller.set_gains(pos_gains = wheels_pos_gains,
-                            vel_gains = wheels_vel_gains,
-                            jnt_indxs=wheels_indxs)
+            robot_name: str, 
+            actions: RobotClusterCmd = None) -> None:
         
         if actions is not None:
             
-            self._jnt_imp_controller.set_refs(pos_ref = actions.jnt_cmd.q, 
-                                            vel_ref = actions.jnt_cmd.v, 
-                                            eff_ref = actions.jnt_cmd.eff)
+            self._jnt_imp_controllers[robot_name].set_refs(
+                                        pos_ref = actions.jnt_cmd.q, 
+                                        vel_ref = actions.jnt_cmd.v, 
+                                        eff_ref = actions.jnt_cmd.eff)
                     
             self._jnt_imp_controller.apply_refs()
 

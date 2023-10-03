@@ -36,7 +36,6 @@ device = sim_params["device"]
 control_clust_dt = sim_params["integration_dt"] * 2
 integration_dt = sim_params["integration_dt"]
 
-
 dtype = "float32" # Isaac requires data to be float32, so this should not be touched
 if dtype == "float64":
     dtype_np = np.float64 
@@ -44,7 +43,6 @@ if dtype == "float64":
 if dtype == "float32":
     dtype_np = np.float32
     dtype_torch = torch.float32
-
 # this has to be the same wrt the cluster server, otherwise
 # messages are not read/written properly
 
@@ -52,7 +50,13 @@ task = KyonRlSteppingTask(cluster_dt = control_clust_dt,
                         integration_dt = integration_dt,
                         num_envs = num_envs, 
                         cloning_offset = np.array([0.0, 0.0, 2.0]), 
-                        use_flat_ground=True,
+                        env_spacing=6,
+                        spawning_radius=1.0, 
+                        use_flat_ground=True, 
+                        default_jnt_stiffness=100.0, 
+                        default_jnt_damping=10.0, 
+                        robot_names = ["kyon0"],
+                        robot_pkg_names = ["kyon"],
                         device = device, 
                         dtype=dtype_torch) # create task
 
@@ -121,5 +125,7 @@ while env._simulation_app.is_running():
     print(f"[{script_name}]" + "[info]: loop execution time-> " + str(now - start_time_loop))
 
     # print(task.contact_sensors[0].get_current_frame())
+
+print("[main][info]: closing environment and simulation")
 
 env.close()

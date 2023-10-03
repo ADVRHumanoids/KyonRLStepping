@@ -16,15 +16,14 @@ class KyonRhcTaskRef(RhcTaskRefs):
             index: int,
             q_remapping: List[int] = None,
             dtype = torch.float32, 
-            verbose=False):
+            verbose=False, 
+            namespace = "kyon0"):
         
-        self.robot_name = "kyon"
-
         super().__init__( 
                 n_contacts=n_contacts,
                 index=index,
                 q_remapping=q_remapping,
-                namespace=self.robot_name,
+                namespace=namespace,
                 dtype=dtype, 
                 verbose=verbose)
 

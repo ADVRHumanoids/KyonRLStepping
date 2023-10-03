@@ -1,6 +1,8 @@
-def get_xrdf_cmds_isaac():
+def get_xrdf_cmds_isaac(n_robots: int, 
+                basename = "kyon"):
 
-        cmds = []
+        cmds = {}
+        cmds_aux = []
         
         xrdf_cmd_vals = [True, False, False, False, False]
 
@@ -10,11 +12,15 @@ def get_xrdf_cmds_isaac():
         floating_joint = "true" if xrdf_cmd_vals[3] else "false"
         payload = "true" if xrdf_cmd_vals[4] else "false"
 
-        cmds.append("wheels:=" + wheels)
-        cmds.append("upper_body:=" + upper_body)
-        cmds.append("sensors:=" + sensors)
-        cmds.append("floating_joint:=" + floating_joint)
-        cmds.append("payload:=" + payload)
+        cmds_aux.append("wheels:=" + wheels)
+        cmds_aux.append("upper_body:=" + upper_body)
+        cmds_aux.append("sensors:=" + sensors)
+        cmds_aux.append("floating_joint:=" + floating_joint)
+        cmds_aux.append("payload:=" + payload)
+
+        for i in range(n_robots):
+                # we use the same settings for all robots
+                cmds[basename + str(i)] = cmds_aux
 
         return cmds
 

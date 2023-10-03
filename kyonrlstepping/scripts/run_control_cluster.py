@@ -10,7 +10,7 @@ import torch
 
 from perf_sleep.pyperfsleep import PerfSleep
 
-def generate_controllers():
+def generate_controllers(robot_name: str):
 
     kyonrhc_config_path = kyonrhc_paths().CONFIGPATH
 
@@ -23,6 +23,7 @@ def generate_controllers():
                                     urdf_path=control_cluster_srvr._urdf_path, 
                                     srdf_path=control_cluster_srvr._srdf_path,
                                     cluster_size=control_cluster_srvr.cluster_size,
+                                    robot_name=robot_name,
                                     config_path = kyonrhc_config_path, 
                                     verbose = verbose, 
                                     debug = debug,
@@ -38,8 +39,9 @@ perf_timer = PerfSleep()
 dtype = torch.float32 # this has to be the same wrt the cluster client, otherwise
 # messages are not read properly
 
-control_cluster_srvr = KyonRHClusterSrvr() # this blocks until connection with the client is established
-controllers = generate_controllers()
+robot_name = "kyon0"
+control_cluster_srvr = KyonRHClusterSrvr(robot_name) # this blocks until connection with the client is established
+controllers = generate_controllers(robot_name)
 
 for i in range(0, control_cluster_srvr.cluster_size):
     
