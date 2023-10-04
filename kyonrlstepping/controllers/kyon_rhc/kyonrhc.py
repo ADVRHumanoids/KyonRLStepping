@@ -326,8 +326,6 @@ class KyonRHC(RHController):
         for i in range(abs(shift_num)):
             xig[:, -1 - i] = x_opt[:, -1]
 
-        self._prb.getState().setInitialGuess(xig)
-
         robot_state = torch.cat((self.robot_state.root_state.get_p(), 
                         self.robot_state.root_state.get_q(), 
                         self.robot_state.jnt_state.get_q(), 
@@ -346,16 +344,18 @@ class KyonRHC(RHController):
         #     "meas.: " + str(robot_state.flatten()) + "\n", 
         #     "q cmd: " + str(self.robot_cmds.jnt_state.q))
         
+        self._prb.getState().setInitialGuess(xig)
+
         self._prb.setInitialState(x0=
                         robot_state.numpy().T
                         )
 
     def _solve(self):
         
-        self._update_open_loop() # updates the TO ig and 
+        # self._update_open_loop() # updates the TO ig and 
         # initial conditions using data from the solution
 
-        # self._update_closed_loop() # updates the TO ig and 
+        self._update_closed_loop() # updates the TO ig and 
         # # initial conditions using robot measurements
         
         self._pm._shift_phases() # shifts phases of one dt

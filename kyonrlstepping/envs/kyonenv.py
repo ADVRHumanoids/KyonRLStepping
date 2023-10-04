@@ -29,11 +29,11 @@ class KyonEnv(RobotVecEnv):
         # -> we have the data to initialize the cluster client
         for i in range(len(self.robot_names)):
 
-            self.cluster_client = KyonRHClusterClient(cluster_size=task.num_envs, 
+            self.cluster_clients[self.robot_names[i]] = KyonRHClusterClient(cluster_size=task.num_envs, 
                             device=task.torch_device, 
                             cluster_dt=task.cluster_dt, 
                             control_dt=task.integration_dt, 
-                            jnt_names = task.robot_dof_names, 
+                            jnt_names = task.robot_dof_names[self.robot_names[i]], 
                             np_array_dtype = np_array_dtype, 
                             verbose = verbose, 
                             debug = debug, 
@@ -106,12 +106,14 @@ class KyonEnv(RobotVecEnv):
                                     pos_gains = wheels_pos_gains,
                                     vel_gains = wheels_vel_gains,
                                     jnt_indxs=wheels_indxs)
-                    
-                self.task.pre_physics_step(self.cluster_clients[self.robot_names[i]].controllers_cmds)
+                
+                self.task.pre_physics_step(robot_name = self.robot_names[i], 
+                                actions = self.cluster_clients[self.robot_names[i]].controllers_cmds)
                 
             else:
 
-                self.task.pre_physics_step(None)
+                self.task.pre_physics_step(robot_name = self.robot_names[i],
+                                actions = None)
                 
         self._world.step(render=self._render)
         

@@ -74,13 +74,13 @@ class KyonRlSteppingTask(CustomTask):
         
         if actions is not None:
             
-            self._jnt_imp_controllers[robot_name].set_refs(
+            self.jnt_imp_controllers[robot_name].set_refs(
                                         pos_ref = actions.jnt_cmd.q, 
                                         vel_ref = actions.jnt_cmd.v, 
                                         eff_ref = actions.jnt_cmd.eff)
                     
-            self._jnt_imp_controller.apply_refs()
-
+            self.jnt_imp_controllers[robot_name].apply_refs()
+            
             # print("cmd debug" + "\n" + 
             #         "q_cmd: " + str(actions.jnt_cmd.q) + "\n" + 
             #         "v_cmd: " + str(actions.jnt_cmd.v) + "\n" + 
