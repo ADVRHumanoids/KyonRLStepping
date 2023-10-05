@@ -1,14 +1,7 @@
 solver:
   type: ilqr # ilqr/ipopt
-  ipopt.linear_solver: ma57 # mumps
-  ipopt.tol: 0.1
   ilqr.tol: 0.01
-  ipopt.constr_viol_tol: 0.01
   ilqr.constr_viol_tol: 0.01
-#  ipopt.hessian_approximation: exact
-  ipopt.print_level: 5
-  ipopt.suppress_all_output: 'yes'
-  ipopt.sb: 'yes'
   ilqr.suppress_all_output: 'yes'
   ilqr.codegen_enabled: true
   ilqr.codegen_workdir: /tmp/tyhio
@@ -27,12 +20,13 @@ constraints:
   - z_ball_3
   - z_ball_4
   - final_base_xy
-  - base_orientation
+  # - base_orientation
 
 costs:
   - com_height
   - joint_regularization
   - joint_posture
+  # - base_orientation
 
 .define:
     - &w_com 1.
@@ -89,6 +83,30 @@ rolling_contact_4:
   frame: wheel_4
   radius: *wheel_radius
 
+# contact_1:
+#   type: Cartesian
+#   distal_link: ball_1
+#   indices: [0, 1, 2]
+#   cartesian_type: velocity
+
+# contact_2:
+#   type: Cartesian
+#   distal_link: ball_2
+#   indices: [0, 1, 2]
+#   cartesian_type: velocity
+
+# contact_3:
+#   type: Cartesian
+#   distal_link: ball_3
+#   indices: [0, 1, 2]
+#   cartesian_type: velocity
+
+# contact_4:
+#   type: Cartesian
+#   distal_link: ball_4
+#   indices: [0, 1, 2]
+#   cartesian_type: velocity
+
 # ==================================
 
 interaction_wheel_1:
@@ -142,7 +160,6 @@ ball_3_contact:
 ball_4_contact:
   type: Contact
   subtask: [interaction_wheel_4, rolling_contact_4]
-
 
 joint_posture:
   type: Postural

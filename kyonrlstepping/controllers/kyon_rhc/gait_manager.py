@@ -8,7 +8,9 @@ from typing import List
 
 class GaitManager:
 
-    def __init__(self, task_interface: TaskInterface, phase_manager: pymanager.PhaseManager, contact_map):
+    def __init__(self, task_interface: TaskInterface, 
+            phase_manager: pymanager.PhaseManager, 
+            contact_map):
 
         # contact_map is not necessary if contact name is the same as the timeline name
         self.task_interface = task_interface

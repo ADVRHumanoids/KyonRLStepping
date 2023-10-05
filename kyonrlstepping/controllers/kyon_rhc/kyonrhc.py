@@ -27,6 +27,8 @@ class KyonRHC(RHController):
             debug = False, 
             array_dtype = torch.float32):
 
+        self.step_counter = 0
+
         self.robot_name = robot_name
         
         self._enable_replay = enable_replay
@@ -64,18 +66,20 @@ class KyonRHC(RHController):
         self._assign_server_side_jnt_names(self._get_robot_jnt_names())
 
         self._dt = self._t_horizon / self._n_nodes
-        self._prb = Problem(self._n_nodes, receding=True, casadi_type=cs.SX)
+        self._prb = Problem(self._n_nodes, 
+                        receding=True, 
+                        casadi_type=cs.SX)
         self._prb.setDt(self._dt)
 
         self._homer = RobotHomer(srdf_path=self.srdf_path, 
-                                jnt_names_prb=self._server_side_jnt_names)
+                            jnt_names_prb=self._server_side_jnt_names)
 
         import numpy as np
         base_init = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0])
 
-        FK = self._kin_dyn.fk('ball_1')
         init = base_init.tolist() + list(self._homer.get_homing())
 
+        FK = self._kin_dyn.fk('ball_1') # just to get robot reference height
         init_pos_foot = FK(q=init)['ee_pos']
         base_init[2] = -init_pos_foot[2]
 
@@ -101,32 +105,10 @@ class KyonRHC(RHController):
         for c in self._model.cmap.keys():
             c_phases[c] = self._pm.addTimeline(f'{c}_timeline')
 
-        zmp_timeline = self._pm.addTimeline('zmp_timeline')
-
-        input_zmp = []
-        input_zmp.append(self._model.q)
-        input_zmp.append(self._model.v)
-        input_zmp.append(self._model.a)
-
-        for f_var in self._model.fmap.values():
-            input_zmp.append(f_var)
-
-        c_mean = cs.SX([0, 0, 0])
-        for c_name, f_var in self._model.fmap.items():
-            fk_c_pos = self._kin_dyn.fk(c_name)(q=self._model.q)['ee_pos']
-            c_mean += fk_c_pos
-        c_mean /= len(self._model.cmap.keys())
-
-        zmp_nominal_weight = 10.
-        zmp_fun = self._zmp(self._model)(*input_zmp)
-        zmp = self._prb.createIntermediateResidual('zmp', 
-                            zmp_nominal_weight * (zmp_fun[0:2] - c_mean[0:2]), nodes=[])
-        zmp_empty = self._prb.createIntermediateResidual('zmp_empty', 
-                                0. * (zmp_fun[0:2] - c_mean[0:2]), nodes=[])
-
         stance_duration = 5
         flight_duration = 5
         for c in self._model.cmap.keys():
+
             # stance phase normal
             stance_phase = pyphase.Phase(stance_duration, f'stance_{c}')
             if self._ti.getTask(f'{c}_contact') is not None:
@@ -140,7 +122,10 @@ class KyonRHC(RHController):
             flight_phase = pyphase.Phase(flight_duration, f'flight_{c}')
             init_z_foot = self._model.kd.fk(c)(q=self._model.q0)['ee_pos'].elements()[2]
             ref_trj = np.zeros(shape=[7, flight_duration])
-            ref_trj[2, :] = np.atleast_2d(self._tg.from_derivatives(flight_duration, init_z_foot, init_z_foot, 0.05, [None, 0, None]))
+            ref_trj[2, :] = np.atleast_2d(self._tg.from_derivatives(flight_duration, 
+                                                        init_z_foot, 
+                                                        init_z_foot, 
+                                                        0.2, [None, 0, None]))
             if self._ti.getTask(f'z_{c}') is not None:
                 flight_phase.addItemReference(self._ti.getTask(f'z_{c}'), ref_trj)
             else:
@@ -148,37 +133,19 @@ class KyonRHC(RHController):
             # flight_phase.addConstraint(prb.getConstraints(f'{c}_vert'), nodes=[0 ,flight_duration-1])  # nodes=[0, 1, 2]
             c_phases[c].registerPhase(flight_phase)
 
-        # register zmp phase
-        zmp_phase = pyphase.Phase(stance_duration, 'zmp_phase')
-        zmp_phase.addCost(zmp)
-        zmp_empty_phase = pyphase.Phase(flight_duration, 'zmp_empty_phase')
-        zmp_empty_phase.addCost(zmp_empty)
-        zmp_timeline.registerPhase(zmp_phase)
-        zmp_timeline.registerPhase(zmp_empty_phase)
-
         for c in self._model.cmap.keys():
             stance = c_phases[c].getRegisteredPhase(f'stance_{c}')
-            flight = c_phases[c].getRegisteredPhase(f'flight_{c}')
+            # flight = c_phases[c].getRegisteredPhase(f'flight_{c}')
             c_phases[c].addPhase(stance)
-            zmp_timeline.addPhase(zmp_phase)
             c_phases[c].addPhase(stance)
-            zmp_timeline.addPhase(zmp_phase)
             c_phases[c].addPhase(stance)
-            zmp_timeline.addPhase(zmp_phase)
             c_phases[c].addPhase(stance)
-            zmp_timeline.addPhase(zmp_phase)
             c_phases[c].addPhase(stance)
-            zmp_timeline.addPhase(zmp_phase)
             c_phases[c].addPhase(stance)
-            zmp_timeline.addPhase(zmp_phase)
             c_phases[c].addPhase(stance)
-            zmp_timeline.addPhase(zmp_phase)
             c_phases[c].addPhase(stance)
-            zmp_timeline.addPhase(zmp_phase)
             c_phases[c].addPhase(stance)
-            zmp_timeline.addPhase(zmp_phase)
             c_phases[c].addPhase(stance)
-            zmp_timeline.addPhase(zmp_phase)
 
         self._ti.model.q.setBounds(self._ti.model.q0, self._ti.model.q0, nodes=0)
         self._ti.model.v.setBounds(self._ti.model.v0, self._ti.model.v0, nodes=0)
@@ -195,7 +162,7 @@ class KyonRHC(RHController):
 
         self._ti.bootstrap()
 
-        self._ti.init_inv_dyn_for_res() # we initalize some objects for sol. postprocessing purposes
+        self._ti.init_inv_dyn_for_res() # we initialize some objects for sol. postprocessing purposes
 
         self._ti.load_initial_guess()
 
@@ -208,6 +175,8 @@ class KyonRHC(RHController):
 
         self.n_contacts = len(self._model.cmap.keys())
         
+        self.horizon_anal = analyzer.ProblemAnalyzer(self._prb)
+
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.journal.status}]" + "Initialized RHC problem")
 
     def _init_rhc_task_cmds(self) -> KyonRhcTaskRef:
@@ -236,41 +205,6 @@ class KyonRHC(RHController):
                 joints_names.remove(name)
 
         return joints_names
-    
-    def _zmp(self, 
-            model):
-        # formulation in forces
-        num = cs.SX([0, 0])
-        den = cs.SX([0])
-
-        q = cs.SX.sym('q', model.nq)
-        v = cs.SX.sym('v', model.nv)
-        a = cs.SX.sym('a', model.nv)
-
-        pos_contact = dict()
-        force_val = dict()
-
-        com = model.kd.centerOfMass()(q=q, v=v, a=a)['com']
-
-        n = cs.SX([0, 0, 1])
-        for c in model.fmap.keys():
-            pos_contact[c] = model.kd.fk(c)(q=q)['ee_pos']
-            force_val[c] = cs.SX.sym('force_val', 3)
-            num += (pos_contact[c][0:2] - com[0:2]) * cs.dot(force_val[c], n)
-            den += cs.dot(force_val[c], n)
-
-        zmp = com[0:2] + (num / den)
-        input_list = []
-        input_list.append(q)
-        input_list.append(v)
-        input_list.append(a)
-
-        for elem in force_val.values():
-            input_list.append(elem)
-
-        f = cs.Function('zmp', input_list, [zmp])
-
-        return f
     
     def _get_ndofs(self):
         
@@ -352,10 +286,10 @@ class KyonRHC(RHController):
 
     def _solve(self):
         
-        # self._update_open_loop() # updates the TO ig and 
+        self._update_open_loop() # updates the TO ig and 
         # initial conditions using data from the solution
 
-        self._update_closed_loop() # updates the TO ig and 
+        # self._update_closed_loop() # updates the TO ig and 
         # # initial conditions using robot measurements
         
         self._pm._shift_phases() # shifts phases of one dt
@@ -363,8 +297,27 @@ class KyonRHC(RHController):
         self.rhc_task_refs.update() # updates rhc references
         # with the latests available
 
-        # self._jc.run(self._ti.solution) # updatedthe high-level commands to the RHC
-        
+        # check what happend as soon as we try to step on the 1st controller
+        if self.controller_index == 0:
+
+            if any((self.rhc_task_refs.phase_id.get_contacts().numpy() < 0.5).flatten().tolist() ):
+            
+                self.step_counter = self.step_counter + 1
+
+                print("OOOOOOOOOO I am trying to steppppppp")
+                print("RHC control index:" + str(self.step_counter))
+
+            # self.horizon_anal.printParameters(elem="f_wheel_1_ref")
+            # self.horizon_anal.printParameters(elem="f_wheel_2_ref")
+            # self.horizon_anal.printParameters(elem="f_wheel_3_ref")
+            # self.horizon_anal.printParameters(elem="f_wheel_4_ref")
+            # self.horizon_anal.printVariables(elem="f_ball_1")
+            # self.horizon_anal.printParameters(elem="f_wheel_1")
+            # self.horizon_anal.printParameters(elem="f_wheel_1")
+            # self.horizon_anal.printParameters(elem="f_wheel_1")
+
+            # self.horizon_anal.print()
+
         self._ti.rti() # solves the problem
 
         # time.sleep(0.02)
