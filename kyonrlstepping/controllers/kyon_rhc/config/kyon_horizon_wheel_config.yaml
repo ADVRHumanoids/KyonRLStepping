@@ -23,7 +23,7 @@ constraints:
   # - base_orientation
 
 costs:
-  - com_height
+  - CoM_pose
   - joint_regularization
   - joint_posture
   # - base_orientation
@@ -32,11 +32,8 @@ costs:
     - &w_com 1.
     - &w_base_ori 20.
     - &w_base_xy 10.
-    - &w_ball_xy 10.
     - &w_ball_z 1.
-    - &w_ball_ori 20.
-    - &w_postural_roll 1.
-    - &w_postural 0.5
+    - &w_postural 0.1
     - &wheel_radius 0.124
 
 final_base_xy:
@@ -47,10 +44,10 @@ final_base_xy:
 #  nodes: all
 #  weight: *w_base_xy
 
-com_height:
+CoM_pose:
   type: Cartesian
   distal_link: base_link
-  indices: [2]
+  indices: [0, 1, 2]
   nodes: all
   weight: *w_com
 

@@ -32,7 +32,7 @@ class KyonRhcTaskRef(RhcTaskRefs):
 
         # task references
         self.final_base_xy = self.gait_manager.task_interface.getTask('final_base_xy')
-        self.com_height = self.gait_manager.task_interface.getTask('com_height')
+        self.CoM_pose = self.gait_manager.task_interface.getTask('CoM_pose')
         # self.base_orientation = self.gait_manager.task_interface.getTask('base_orientation')
 
     def update(self):
@@ -78,4 +78,5 @@ class KyonRhcTaskRef(RhcTaskRefs):
 
         # updated internal references with latest available ones
         self.final_base_xy.setRef(self.base_pose.get_pose().numpy().T)
+        self.CoM_pose.setRef(self.com_pose.get_com_pose().numpy().T)
         # self.base_orientation.setRef(self.base_pose.get_pose().numpy().T)

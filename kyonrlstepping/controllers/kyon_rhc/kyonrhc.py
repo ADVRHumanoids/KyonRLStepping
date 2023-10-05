@@ -95,8 +95,8 @@ class KyonRHC(RHController):
         
         self._ti.setTaskFromYaml(self.config_path)
 
-        com_height = self._ti.getTask('com_height')
-        com_height.setRef(np.atleast_2d(base_init).T)
+        CoM_pose = self._ti.getTask('CoM_pose')
+        CoM_pose.setRef(np.atleast_2d(base_init).T)
 
         self._tg = trajectoryGenerator.TrajectoryGenerator()
 
