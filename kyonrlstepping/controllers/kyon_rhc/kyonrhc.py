@@ -28,6 +28,7 @@ class KyonRHC(RHController):
             array_dtype = torch.float32):
 
         self.step_counter = 0
+        self.sol_counter = 0
 
         self.robot_name = robot_name
         
@@ -284,6 +285,49 @@ class KyonRHC(RHController):
                         robot_state.numpy().T
                         )
 
+    def _update_semiclosed_loop(self):
+
+        # set initial state and initial guess
+        shift_num = -1
+
+        x_opt =  self._ti.solution['x_opt']
+        xig = np.roll(x_opt, shift_num, axis=1)
+        for i in range(abs(shift_num)):
+            xig[:, -1 - i] = x_opt[:, -1]
+
+        # robot_state = torch.cat((self.robot_state.root_state.get_p(), 
+        #                 self.robot_state.root_state.get_q(), 
+        #                 self.robot_state.jnt_state.get_q(), 
+        #                 self.robot_state.root_state.get_v(), 
+        #                 self.robot_state.root_state.get_omega(), 
+        #                 self.robot_state.jnt_state.get_v()), 
+        #                 dim=1
+        #                 )
+        
+        # using only jnt state from simulator
+        robot_state = np.concatenate((xig[0:7, 0].reshape(1, len(xig[0:7, 0])), 
+                            self.robot_state.jnt_state.q, 
+                            xig[23:29, 0].reshape(1, len(xig[23:29, 0])), 
+                            self.robot_state.jnt_state.v), axis=1).T # only joint states from measurements
+
+        # print("state debug n." + str(self.controller_index) + "\n" + 
+        #     "solver: " + str(xig[:, 0]) + "\n" + 
+        #     "meas.: " + str(robot_state.flatten()) + "\n", 
+        #     "q cmd: " + str(self.robot_cmds.jnt_state.q))
+        
+        self._prb.getState().setInitialGuess(xig)
+        
+        if self.sol_counter == 0:
+            
+            # we only use the real state at the first solution instant
+            self._prb.setInitialState(x0=
+                            robot_state
+                            )
+        else:
+
+            # after, we only use the internal RHC state
+            self._prb.setInitialState(x0=xig[:, 0])
+            
     def _solve(self):
         
         self._update_open_loop() # updates the TO ig and 
@@ -292,20 +336,22 @@ class KyonRHC(RHController):
         # self._update_closed_loop() # updates the TO ig and 
         # # initial conditions using robot measurements
         
+        # self._update_semiclosed_loop()
+
         self._pm._shift_phases() # shifts phases of one dt
         
         self.rhc_task_refs.update() # updates rhc references
         # with the latests available
 
         # check what happend as soon as we try to step on the 1st controller
-        if self.controller_index == 0:
+        # if self.controller_index == 0:
 
-            if any((self.rhc_task_refs.phase_id.get_contacts().numpy() < 0.5).flatten().tolist() ):
+        #     if any((self.rhc_task_refs.phase_id.get_contacts().numpy() < 0.5).flatten().tolist() ):
             
-                self.step_counter = self.step_counter + 1
+        #         self.step_counter = self.step_counter + 1
 
-                print("OOOOOOOOOO I am trying to steppppppp")
-                print("RHC control index:" + str(self.step_counter))
+        #         print("OOOOOOOOOO I am trying to steppppppp")
+        #         print("RHC control index:" + str(self.step_counter))
 
             # self.horizon_anal.printParameters(elem="f_wheel_1_ref")
             # self.horizon_anal.printParameters(elem="f_wheel_2_ref")
@@ -319,5 +365,7 @@ class KyonRHC(RHController):
             # self.horizon_anal.print()
 
         self._ti.rti() # solves the problem
+
+        self.sol_counter = self.sol_counter + 1
 
         # time.sleep(0.02)
