@@ -19,7 +19,7 @@ constraints:
   - z_ball_2
   - z_ball_3
   - z_ball_4
-  - final_base_xy
+  # - final_base_xy
   # - base_orientation
 
 costs:
@@ -36,13 +36,13 @@ costs:
     - &w_postural 0.1
     - &wheel_radius 0.124
 
-final_base_xy:
-  type: Cartesian
-  distal_link: base_link
-  indices: [0, 1]
-  nodes: ${range(N-5, N)}
-#  nodes: all
-#  weight: *w_base_xy
+# final_base_xy:
+#   type: Cartesian
+#   distal_link: base_link
+#   indices: [0, 1]
+#   nodes: ${range(N-5, N)}
+# #  nodes: all
+# #  weight: *w_base_xy
 
 CoM_pose:
   type: Cartesian
