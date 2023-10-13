@@ -15,7 +15,7 @@ env = KyonEnv(headless=False,
 # upon environment initialization)
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
 
-num_envs = 3 # 9, 3, 5
+num_envs = 5 # 9, 3, 5
 sim_params = {}
 sim_params["use_gpu_pipeline"] = True
 sim_params["integration_dt"] = 1.0/100.0
@@ -53,8 +53,8 @@ task = KyonRlSteppingTask(cluster_dt = control_clust_dt,
                         env_spacing=6,
                         spawning_radius=1.0, 
                         use_flat_ground=True, 
-                        default_jnt_stiffness=100.0, 
-                        default_jnt_damping=10.0, 
+                        default_jnt_stiffness=200.0, 
+                        default_jnt_damping=15.0, 
                         robot_names = ["kyon0"],
                         robot_pkg_names = ["kyon"],
                         device = device, 
