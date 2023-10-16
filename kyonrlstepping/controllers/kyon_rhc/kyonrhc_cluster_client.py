@@ -1,4 +1,4 @@
-from control_cluster_utils.cluster_client.control_cluster_client import ControlClusterClient
+from control_cluster_bridge.cluster_client.control_cluster_client import ControlClusterClient
 
 class KyonRHClusterClient(ControlClusterClient):
 

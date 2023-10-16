@@ -1,6 +1,6 @@
 import numpy as np
 
-from omni_custom_gym.gym.omni_vect_env.vec_envs import RobotVecEnv
+from omni_robo_gym.gym.omni_vect_env.vec_envs import RobotVecEnv
 
 #from stable_baselines3 import PPO
 

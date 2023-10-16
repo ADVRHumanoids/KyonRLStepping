@@ -1,4 +1,4 @@
-from control_cluster_utils.utilities.keyboard_cmds import RhcRefsFromKeyboard
+from control_cluster_bridge.utilities.keyboard_cmds import RhcRefsFromKeyboard
 
 if __name__ == "__main__":  
 

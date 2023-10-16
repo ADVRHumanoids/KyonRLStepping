@@ -1,4 +1,4 @@
-from control_cluster_utils.cluster_server.control_cluster_srvr import ControlClusterSrvr
+from control_cluster_bridge.cluster_server.control_cluster_srvr import ControlClusterSrvr
 
 from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_horizon
 

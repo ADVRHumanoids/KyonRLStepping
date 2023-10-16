@@ -13,7 +13,7 @@ requirements:
     - python=3.7
 
 about:
-  home: https://github.com/AndrePatri/ControlClusterUtils
+  home: https://github.com/AndrePatri/CoClusterBridge
   license: MIT
   summary: Package implementing hybrid RL-MPC stepping strategies for a quadruped robot.
 extra:

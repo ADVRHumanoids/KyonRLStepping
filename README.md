@@ -27,8 +27,8 @@ External dependencies to be installed separately:
 - [Omniverse Isaac Sim](https://docs.omniverse.nvidia.com/app_isaacsim/app_isaacsim.html), photo-realistic GPU accelerated simulatorfrom NVIDIA.
 
 Other dependencies included in the environment thorough Anaconda which can optionally be installed directly from source for development purposes: 
-- [ControlClusterUtils](https://github.com/AndPatr/ControlClusterUtils): utilities to create a CPU-based controllers cluster to be interfaced with GPU-based simulators 
-- [OmniCustomGym](https://github.com/AndPatr/OmniCustomGym): custom implementations of Tasks and Gyms for for Omniverse Isaac Sim based on Gymnasium. Easy URDF and SRDF import/cloning and simulation configuration exploiting Omniverse API.
+- [CoClusterBridge](https://github.com/AndPatr/CoClusterBridge): utilities to create a CPU-based controllers cluster to be interfaced with GPU-based simulators 
+- [OmniRoboGym](https://github.com/AndPatr/OmniRoboGym): custom implementations of Tasks and Gyms for for Omniverse Isaac Sim based on Gymnasium. Easy URDF and SRDF import/cloning and simulation configuration exploiting Omniverse API.
 ### Short-term ToDo list:
 
 - [x] Test Stable Baselines3 with Gymnasium to understand exactly the interfaces needed to set up a custom environment and use it

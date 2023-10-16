@@ -1,5 +1,5 @@
-from control_cluster_utils.controllers.rhc import RHController
-from control_cluster_utils.utilities.homing import RobotHomer
+from control_cluster_bridge.controllers.rhc import RHController
+from control_cluster_bridge.utilities.homing import RobotHomer
 
 from kyonrlstepping.controllers.kyon_rhc.horizon_imports import * 
 
