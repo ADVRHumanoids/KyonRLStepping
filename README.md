@@ -13,7 +13,7 @@ Installation instructions:
 
 - Test the Lunar Lander example from StableBaselines3 v2.0 with ```python kyonrlstepping/tests/test_lunar_lander_stable_bs3.py```.
 
-- Download [Omniverse Launcer](https://www.nvidia.com/en-us/omniverse/download/), go to the "exchange" tab and install ``` Omniverse Cache``` and  ```Isaac Sim 2022.2.1```  (might take a while). You can then launch it from the Launcher GUI or by navigating to ```${HOME}/.local/share/ov/pkg/isaac_sim-2022.2.1``` and running the ```isaac-sim.sh``` script. When launching IsaacSim for the first time, compilation of ray tracing shaders will take place and may take a while. If the resources of the workstation/pc are limited (e.g. RAM < 16GB), the compilation may abort after a while. You can still manage to compile them by adding sufficient SWAP memory to the system. Before trying to recompile the shaders, remember however to first delete the cache at ```.cache/ov/Kit/*```.
+- Download [Omniverse Launcer](https://www.nvidia.com/en-us/omniverse/download/), go to the "exchange" tab and install ``` Omniverse Cache``` and  ```Isaac Sim 2023.1.0```  (might take a while). You can then launch it from the Launcher GUI or by navigating to ```${HOME}/.local/share/ov/pkg/isaac_sim-2023.1.0``` and running the ```isaac-sim.sh``` script. When launching IsaacSim for the first time, compilation of ray tracing shaders will take place and may take a while. If the resources of the workstation/pc are limited (e.g. RAM < 16GB), the compilation may abort after a while. You can still manage to compile them by adding sufficient SWAP memory to the system. Before trying to recompile the shaders, remember however to first delete the cache at ```.cache/ov/Kit/*```.
 
 - To be able to run any script with dependencies on Omniverse packages, it's necessary to first source ```${HOME}/.local/share/ov/pkg/isaac_sim-*/setup_conda_env.sh```.
 
@@ -35,7 +35,7 @@ Other dependencies included in the environment thorough Anaconda which can optio
 
 - [x] Decide exactly for simulation environment to use. Options:
     - :x: IsaacGym Preview4 &rarr; this is a standalone distribution. It won't be maintained nor developed by NVIDIA. All development will focus on Omniverse ecosystem.
-    - :heavy_check_mark: Omniverse isaac_sim-2022.2.1 &rarr; this is maintained and actively developed by NVIDIA team. Modular structure and different API from IsaacGym. More complicated but definitely more complete software environment.
+    - :heavy_check_mark: Omniverse isaac_sim-2023.1.0 &rarr; this is maintained and actively developed by NVIDIA team. Modular structure and different API from IsaacGym. More complicated but definitely more complete software environment.
     - :x: No external simulator or Gazebo/Mujoco/Pybullet(CPU) &rarr; might be doable in an initial stage, but requires to setup a custom rendering for visualizing and debugging training, doesn't have realistic dynamics simulation (we should use Horizon's integration) and requires a CPU-based dynamics integration for each environment.
 
 - [x] Decide which gym library to use (defines the environment the learning algorithm runs on). Viable options might be:
