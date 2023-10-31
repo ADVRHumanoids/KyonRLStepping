@@ -3,12 +3,13 @@ from control_cluster_bridge.utilities.homing import RobotHomer
 
 from kyonrlstepping.controllers.kyon_rhc.horizon_imports import * 
 
-from kyonrlstepping.controllers.kyon_rhc.kyonrhc_taskref import KyonRhcTaskRef
 from kyonrlstepping.controllers.kyon_rhc.gait_manager import GaitManager
 
 import numpy as np
 
 import torch
+
+import time 
 
 class KyonRHC(RHController):
 
@@ -181,15 +182,9 @@ class KyonRHC(RHController):
 
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.journal.status}]" + "Initialized RHC problem")
 
-    def _init_rhc_task_cmds(self) -> KyonRhcTaskRef:
+    def _init_rhc_task_cmds(self):
 
-        return KyonRhcTaskRef(gait_manager=self._gm, 
-                        n_contacts=len(self._model.cmap.keys()), 
-                        index=self.controller_index, 
-                        q_remapping=self._quat_remap, 
-                        dtype=self.array_dtype, 
-                        verbose=self._verbose, 
-                        namespace=self.robot_name)
+        a = 6
     
     def _get_robot_jnt_names(self):
 
@@ -216,13 +211,13 @@ class KyonRHC(RHController):
     
         return torch.tensor(self._ti.solution['q'][7:, 0], 
                         dtype=self.array_dtype).reshape(1, 
-                                        self.robot_cmds.jnt_cmd.q.shape[1])
+                                        self.n_dofs)
     
     def _get_cmd_jnt_v_from_sol(self):
 
         return torch.tensor(self._ti.solution['v'][6:, 0], 
                         dtype=self.array_dtype).reshape(1, 
-                                        self.robot_cmds.jnt_cmd.v.shape[1])
+                                        self.n_dofs)
 
     def _get_cmd_jnt_eff_from_sol(self):
         
@@ -230,7 +225,7 @@ class KyonRHC(RHController):
 
         return torch.tensor(efforts_on_first_node[6:, 0], 
                         dtype=self.array_dtype).reshape(1, 
-                self.robot_cmds.jnt_cmd.eff.shape[1])
+                                        self.n_dofs)
     
     def _get_additional_slvr_info(self):
 
@@ -238,6 +233,10 @@ class KyonRHC(RHController):
                             self._ti.solution["n_iter2sol"]], 
                         dtype=self.array_dtype)
     
+    def _update_closed_loop(self):
+
+        a = "Traversaro"
+        
     def _update_open_loop(self):
 
         # set initial state and initial guess
@@ -251,98 +250,23 @@ class KyonRHC(RHController):
         self._prb.getState().setInitialGuess(xig)
         
         self._prb.setInitialState(x0=xig[:, 0])
-    
-    def _update_closed_loop(self):
 
-        # set initial state and initial guess
-        shift_num = -1
-
-        x_opt =  self._ti.solution['x_opt']
-        xig = np.roll(x_opt, shift_num, axis=1)
-        for i in range(abs(shift_num)):
-            xig[:, -1 - i] = x_opt[:, -1]
-
-        robot_state = torch.cat((self.robot_state.root_state.get_p(), 
-                        self.robot_state.root_state.get_q(), 
-                        self.robot_state.jnt_state.get_q(), 
-                        self.robot_state.root_state.get_v(), 
-                        self.robot_state.root_state.get_omega(), 
-                        self.robot_state.jnt_state.get_v()), 
-                        dim=1
-                        )
-        # robot_state = np.concatenate((xig[0:7, 0].reshape(1, len(xig[0:7, 0])), 
-        #                     self.robot_state.jnt_state.q, 
-        #                     xig[23:29, 0].reshape(1, len(xig[23:29, 0])), 
-        #                     self.robot_state.jnt_state.v), axis=1).T # only joint states from measurements
-
-        # print("state debug n." + str(self.controller_index) + "\n" + 
-        #     "solver: " + str(xig[:, 0]) + "\n" + 
-        #     "meas.: " + str(robot_state.flatten()) + "\n", 
-        #     "q cmd: " + str(self.robot_cmds.jnt_state.q))
-        
-        self._prb.getState().setInitialGuess(xig)
-
-        self._prb.setInitialState(x0=
-                        robot_state.numpy().T
-                        )
-
-    def _update_semiclosed_loop(self):
-
-        # set initial state and initial guess
-        shift_num = -1
-
-        x_opt =  self._ti.solution['x_opt']
-        xig = np.roll(x_opt, shift_num, axis=1)
-        for i in range(abs(shift_num)):
-            xig[:, -1 - i] = x_opt[:, -1]
-
-        # robot_state = torch.cat((self.robot_state.root_state.get_p(), 
-        #                 self.robot_state.root_state.get_q(), 
-        #                 self.robot_state.jnt_state.get_q(), 
-        #                 self.robot_state.root_state.get_v(), 
-        #                 self.robot_state.root_state.get_omega(), 
-        #                 self.robot_state.jnt_state.get_v()), 
-        #                 dim=1
-        #                 )
-        
-        # using only jnt state from simulator
-        robot_state = np.concatenate((xig[0:7, 0].reshape(1, len(xig[0:7, 0])), 
-                            self.robot_state.jnt_state.q, 
-                            xig[23:29, 0].reshape(1, len(xig[23:29, 0])), 
-                            self.robot_state.jnt_state.v), axis=1).T # only joint states from measurements
-
-        # print("state debug n." + str(self.controller_index) + "\n" + 
-        #     "solver: " + str(xig[:, 0]) + "\n" + 
-        #     "meas.: " + str(robot_state.flatten()) + "\n", 
-        #     "q cmd: " + str(self.robot_cmds.jnt_state.q))
-        
-        self._prb.getState().setInitialGuess(xig)
-        
-        if self.sol_counter == 0:
-            
-            # we only use the real state at the first solution instant
-            self._prb.setInitialState(x0=
-                            robot_state
-                            )
-        else:
-
-            # after, we only use the internal RHC state
-            self._prb.setInitialState(x0=xig[:, 0])
-            
     def _solve(self):
         
-        self._update_open_loop() # updates the TO ig and 
-        # initial conditions using data from the solution
+        start_time = time.time()
 
-        # self._update_closed_loop() # updates the TO ig and 
-        # # initial conditions using robot measurements
-        
-        # self._update_semiclosed_loop()
+        self._update_open_loop() 
+
+        open_loop_update = time.time() - start_time
+
+        start_time = time.time()
 
         self._pm.shift() # shifts phases of one dt
-        
-        self.rhc_task_refs.update() # updates rhc references
-        # with the latests available
+
+        shift_time = time.time() - start_time
+
+        # self.rhc_task_refs.update() # updates rhc references
+        # # with the latests available
 
         # check what happend as soon as we try to step on the 1st controller
         # if self.controller_index == 0:
@@ -365,8 +289,19 @@ class KyonRHC(RHController):
 
             # self.horizon_anal.print()
 
+        start_time = time.time()
+
         self._ti.rti() # solves the problem
 
-        self.sol_counter = self.sol_counter + 1
+        rti_time = time.time() - start_time
 
+        debug_msg = str(f"Controller n.{self.controller_index}: ") + \
+                    f"Open loop update: {open_loop_update}\n" + \
+                    f"Phase shift: {shift_time}\n" + \
+                    f"rti: {rti_time}\n"
+        
+        print(debug_msg)
+        
+        self.sol_counter = self.sol_counter + 1
+        
         # time.sleep(0.02)
