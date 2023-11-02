@@ -339,7 +339,7 @@ class KyonRHC(RHController):
         
         # self._update_semiclosed_loop()
 
-        self._pm._shift_phases() # shifts phases of one dt
+        self._pm.shift() # shifts phases of one dt
         
         self.rhc_task_refs.update() # updates rhc references
         # with the latests available
