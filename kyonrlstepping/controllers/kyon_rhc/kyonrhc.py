@@ -369,4 +369,10 @@ class KyonRHC(RHController):
 
         self.sol_counter = self.sol_counter + 1
 
-        # time.sleep(0.02)
+        return True
+
+    def reset(self):
+
+        a = 1
+
+        # resets controller to bootstrap 
