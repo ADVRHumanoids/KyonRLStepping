@@ -365,11 +365,22 @@ class KyonRHC(RHController):
 
             # self.horizon_anal.print()
 
-        self._ti.rti() # solves the problem
+        try:
 
-        self.sol_counter = self.sol_counter + 1
+            self._ti.rti() # solves the problem
+            
+            self.sol_counter = self.sol_counter + 1
 
-        return True
+            return True
+        
+        except:
+
+            print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + \
+              f"[{self.journal.exception}]" + ": rti() failed!!")
+
+            self.sol_counter = self.sol_counter + 1
+
+            return False
 
     def reset(self):
 
