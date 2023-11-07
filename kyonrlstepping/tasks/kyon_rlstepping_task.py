@@ -15,7 +15,7 @@ class KyonRlSteppingTask(CustomTask):
                 integration_dt: float,
                 num_envs = 1,
                 device = "cuda", 
-                cloning_offset: np.array = np.array([0.0, 0.0, 0.0]),
+                cloning_offset: np.array = None,
                 replicate_physics: bool = True,
                 offset=None, 
                 env_spacing = 5.0, 
@@ -27,6 +27,10 @@ class KyonRlSteppingTask(CustomTask):
                 robot_pkg_names = ["kyon"],
                 dtype = torch.float64) -> None:
 
+        if cloning_offset is None:
+        
+            cloning_offset = np.array([[0.0, 0.0, 0.0]] * num_envs)
+                                      
         # trigger __init__ of parent class
         CustomTask.__init__(self,
                     name = self.__class__.__name__, 

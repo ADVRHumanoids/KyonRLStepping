@@ -367,7 +367,7 @@ class KyonRHC(RHController):
 
         try:
 
-            self._ti.rti() # solves the problem
+            result = self._ti.rti() # solves the problem
             
             self.sol_counter = self.sol_counter + 1
 
