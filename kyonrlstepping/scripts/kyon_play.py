@@ -17,7 +17,7 @@ from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
 
 num_envs = 1 # 9, 3, 5
 sim_params = {}
-sim_params["use_gpu_pipeline"] = False
+sim_params["use_gpu_pipeline"] = True
 sim_params["integration_dt"] = 1.0/100.0
 sim_params["rendering_dt"] = 1.0/50.0
 sim_params["substeps"] = 1
@@ -49,7 +49,7 @@ if dtype == "float32":
 task = KyonRlSteppingTask(cluster_dt = control_clust_dt, 
                         integration_dt = integration_dt,
                         num_envs = num_envs, 
-                        cloning_offset = np.array([0.0, 0.0, 0.6]), 
+                        cloning_offset = np.array([0.0, 0.0, 2.6]), 
                         env_spacing=6,
                         spawning_radius=1.0, 
                         use_flat_ground=True, 
