@@ -35,7 +35,7 @@ class KyonEnv(RobotVecEnv):
                             control_dt=task.integration_dt, 
                             jnt_names = task.robot_dof_names[self.robot_names[i]], 
                             np_array_dtype = np_array_dtype, 
-                            verbose = verbose, 
+                            verbose = False, 
                             debug = debug, 
                             robot_name=self.robot_names[i])
         
@@ -69,9 +69,9 @@ class KyonEnv(RobotVecEnv):
                 self.cluster_clients[self.robot_names[i]].solve() # we solve all the underlying TOs in the cluster
                 # (the solve will do nothing unless the cluster is ready)
 
-                print(f"[{self.__class__.__name__}]" + f"[{self.journal.info}]: " + \
-                    "cluster client n." + str(i) + " solve time -> " + \
-                    str(self.cluster_clients[self.robot_names[i]].solution_time))
+                # print(f"[{self.__class__.__name__}]" + f"[{self.journal.info}]: " + \
+                #     "cluster client n." + str(i) + " solve time -> " + \
+                #     str(self.cluster_clients[self.robot_names[i]].solution_time))
                 
             if self.cluster_clients[self.robot_names[i]].cluster_ready() and \
                 self.cluster_clients[self.robot_names[i]].controllers_active:

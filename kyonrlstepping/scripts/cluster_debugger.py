@@ -13,6 +13,8 @@ if __name__ == "__main__":
                             window_length=window_length, 
                             window_buffer_factor=window_buffer_factor, 
                             verbose=True, 
-                            namespace="kyon0")
+                            namespace="kyon0",
+                            add_sim_data = True, 
+                            add_cluster_data = True)
 
     main_window.run()
