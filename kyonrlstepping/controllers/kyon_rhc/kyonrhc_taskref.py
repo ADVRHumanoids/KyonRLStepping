@@ -41,6 +41,8 @@ class KyonRhcTaskRef(RhcTaskRefs):
         if self.phase_id.get_phase_id() < 0 and \
             self.gait_manager.contact_phases['ball_1'].getEmptyNodes() > 0:
 
+            # we assume timelines to be synchronized
+
             is_contact = (self.phase_id.get_contacts().numpy() > 0.5).flatten().tolist() 
             # contact if contact_flags[i] > 0.5
             

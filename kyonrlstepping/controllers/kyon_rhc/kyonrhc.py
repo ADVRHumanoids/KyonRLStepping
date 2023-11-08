@@ -102,28 +102,44 @@ class KyonRHC(RHController):
         self._tg = trajectoryGenerator.TrajectoryGenerator()
 
         self._pm = pymanager.PhaseManager(self._n_nodes)
+
+        # adding timelines
         c_phases = dict()
         for c in self._model.cmap.keys():
+
             c_phases[c] = self._pm.addTimeline(f'{c}_timeline')
 
-        stance_duration = 5
-        flight_duration = 5
+        stance_duration_default = 5
+        flight_duration_default = 5
+
         for c in self._model.cmap.keys():
 
             # stance phase normal
-            stance_phase = pyphase.Phase(stance_duration, f'stance_{c}')
-            if self._ti.getTask(f'{c}_contact') is not None:
-                stance_phase.addItem(self._ti.getTask(f'{c}_contact'))
-            else:
-                raise Exception(f"[{self.__class__.__name__}]" + f"[{self.journal.exception}]" + ": task not found")
+            stance_phase = pyphase.Phase(stance_duration_default, f'stance_{c}')
 
+            # add contact constraints to phase
+            if self._ti.getTask(f'{c}_contact') is not None:
+
+                stance_phase.addItem(self._ti.getTask(f'{c}_contact'))
+
+            else:
+
+                raise Exception(f"[{self.__class__.__name__}]" + \
+                                f"[{self.journal.exception}]" + \
+                                ": task not found")
+
+            # register phase to timeline
             c_phases[c].registerPhase(stance_phase)
 
             # flight phase normal
-            flight_phase = pyphase.Phase(flight_duration, f'flight_{c}')
+            flight_phase = pyphase.Phase(flight_duration_default, f'flight_{c}')
+
             init_z_foot = self._model.kd.fk(c)(q=self._model.q0)['ee_pos'].elements()[2]
-            ref_trj = np.zeros(shape=[7, flight_duration])
-            ref_trj[2, :] = np.atleast_2d(self._tg.from_derivatives(flight_duration, 
+
+            ref_trj = np.zeros(shape=[7, flight_duration_default])
+            
+            # trajectory on z
+            ref_trj[2, :] = np.atleast_2d(self._tg.from_derivatives(flight_duration_default, 
                                                         init_z_foot, 
                                                         init_z_foot, 
                                                         0.1, 
@@ -135,7 +151,8 @@ class KyonRHC(RHController):
                 
             else:
                  
-                 raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + f": task {c}_contact not found")
+                raise Exception(f"[{self.__class__.__name__}]" + f"[{self.journal.exception}]" + f": task {c}_contact not found")
+            
             # flight_phase.addConstraint(prb.getConstraints(f'{c}_vert'), nodes=[0 ,flight_duration-1])  # nodes=[0, 1, 2]
             c_phases[c].registerPhase(flight_phase)
 
