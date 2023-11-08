@@ -126,10 +126,15 @@ class KyonRHC(RHController):
             ref_trj[2, :] = np.atleast_2d(self._tg.from_derivatives(flight_duration, 
                                                         init_z_foot, 
                                                         init_z_foot, 
-                                                        0.1, [None, 0, None]))
+                                                        0.1, 
+                                                        [0, 0, 0]))
+            
             if self._ti.getTask(f'z_{c}') is not None:
+
                 flight_phase.addItemReference(self._ti.getTask(f'z_{c}'), ref_trj)
+                
             else:
+                 
                  raise Exception(f"[{self.__class__.__name__}]" + f"[{self.exception}]" + f": task {c}_contact not found")
             # flight_phase.addConstraint(prb.getConstraints(f'{c}_vert'), nodes=[0 ,flight_duration-1])  # nodes=[0, 1, 2]
             c_phases[c].registerPhase(flight_phase)
@@ -177,7 +182,7 @@ class KyonRHC(RHController):
 
         self.n_contacts = len(self._model.cmap.keys())
         
-        self.horizon_anal = analyzer.ProblemAnalyzer(self._prb)
+        # self.horizon_anal = analyzer.ProblemAnalyzer(self._prb)
 
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.journal.status}]" + "Initialized RHC problem")
 
