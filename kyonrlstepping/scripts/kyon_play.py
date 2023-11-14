@@ -16,10 +16,12 @@ env = KyonEnv(headless=False,
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
 
 from omni_robo_gym.utils.shared_sim_info import SharedSimInfo
+from omni_robo_gym.utils.contact_sensor import OmniContactSensors
+from omni.isaac.sensor import _sensor
 
 print_sim_info = False
 
-num_envs = 1 # 9, 3, 5
+num_envs = 2 # 9, 3, 5
 sim_params = {}
 sim_params["use_gpu_pipeline"] = False
 sim_params["integration_dt"] = 1.0/100.0
@@ -64,12 +66,12 @@ for i in range(0, len(contact_prims["kyon0"])):
     contact_offsets["kyon0"][contact_prims["kyon0"][i]] = \
         np.array([0.0, 0.0, 0.0])
     
-sensor_radius = {}
-sensor_radius["kyon0"] = {}
+sensor_radii = {}
+sensor_radii["kyon0"] = {}
 for i in range(0, len(contact_prims["kyon0"])):
     
-    sensor_radius["kyon0"][contact_prims["kyon0"][i]] = 0.3
-
+    sensor_radii["kyon0"][contact_prims["kyon0"][i]] = 0.124
+                            
 task = KyonRlSteppingTask(cluster_dt = control_clust_dt, 
                         integration_dt = integration_dt,
                         num_envs = num_envs, 
@@ -83,7 +85,7 @@ task = KyonRlSteppingTask(cluster_dt = control_clust_dt,
                         robot_pkg_names = robot_pkg_names,
                         contact_prims = contact_prims,
                         contact_offsets = contact_offsets,
-                        sensor_radius = sensor_radius,
+                        sensor_radii = sensor_radii,
                         device = device, 
                         dtype=dtype_torch) # create task
 
@@ -153,10 +155,25 @@ while env._simulation_app.is_running():
         print(f"[{script_name}]" + "[info]: sim_time-> " + str(sim_time))
         print(f"[{script_name}]" + "[info]: time to step full env.-> " + str(now - start_time_step))
 
-    contact_report = task.contact_sensors["kyon0"][0][0].get_current_frame() # LF foot
+    contact_report = task.omni_contact_sensors["kyon0"].contact_sensors[0][0].get_current_frame() 
 
-    print("#############")
+    print("#########")
     print(contact_report)
+    # # print("Normal:")
+    # # print(contact_report['contacts'])
+    # # print(contact_report['normal'].device)
+    # print("In contact:")
+    # print(contact_report['in_contact'])
+    # print("Force:")
+    # print(contact_report['force'])
+    # print("Number of contacts:")
+    # print(contact_report['number_of_contacts'])
+
+    # if i > 5:
+
+        # self.task.finalize_contact_sensors() # finishes initialization
+        # for contact sensors
+
 
 print("[main][info]: closing environment and simulation")
 

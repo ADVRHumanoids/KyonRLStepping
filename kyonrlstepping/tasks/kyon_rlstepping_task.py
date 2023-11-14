@@ -27,7 +27,7 @@ class KyonRlSteppingTask(CustomTask):
                 robot_pkg_names = ["kyon"],
                 contact_prims = None,
                 contact_offsets = None,
-                sensor_radius = None,
+                sensor_radii = None,
                 dtype = torch.float64) -> None:
 
         if cloning_offset is None:
@@ -50,7 +50,7 @@ class KyonRlSteppingTask(CustomTask):
                     num_envs = num_envs,
                     contact_prims = contact_prims,
                     contact_offsets = contact_offsets,
-                    sensor_radius = sensor_radius,
+                    sensor_radii = sensor_radii,
                     device = device, 
                     cloning_offset = cloning_offset,
                     spawning_radius = spawning_radius,
