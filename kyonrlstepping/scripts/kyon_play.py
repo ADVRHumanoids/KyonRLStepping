@@ -50,6 +50,26 @@ if dtype == "float32":
 # this has to be the same wrt the cluster server, otherwise
 # messages are not read/written properly
 
+# create task
+robot_names = ["kyon0"] # robot names
+robot_pkg_names = ["kyon"] # robot type
+
+contact_prims = {} # contact sensors to be added
+contact_prims["kyon0"] = ["wheel_1", "wheel_2", "wheel_3", "wheel_4"] # foot contact sensors
+
+contact_offsets = {}
+contact_offsets["kyon0"] = {}
+for i in range(0, len(contact_prims["kyon0"])):
+    
+    contact_offsets["kyon0"][contact_prims["kyon0"][i]] = \
+        np.array([0.0, 0.0, 0.0])
+    
+sensor_radius = {}
+sensor_radius["kyon0"] = {}
+for i in range(0, len(contact_prims["kyon0"])):
+    
+    sensor_radius["kyon0"][contact_prims["kyon0"][i]] = 0.3
+
 task = KyonRlSteppingTask(cluster_dt = control_clust_dt, 
                         integration_dt = integration_dt,
                         num_envs = num_envs, 
@@ -59,8 +79,11 @@ task = KyonRlSteppingTask(cluster_dt = control_clust_dt,
                         use_flat_ground=True, 
                         default_jnt_stiffness=200.0, 
                         default_jnt_damping=15.0, 
-                        robot_names = ["kyon0"],
-                        robot_pkg_names = ["kyon"],
+                        robot_names = robot_names,
+                        robot_pkg_names = robot_pkg_names,
+                        contact_prims = contact_prims,
+                        contact_offsets = contact_offsets,
+                        sensor_radius = sensor_radius,
                         device = device, 
                         dtype=dtype_torch) # create task
 
@@ -130,7 +153,10 @@ while env._simulation_app.is_running():
         print(f"[{script_name}]" + "[info]: sim_time-> " + str(sim_time))
         print(f"[{script_name}]" + "[info]: time to step full env.-> " + str(now - start_time_step))
 
-    # print(task.contact_sensors[0].get_current_frame())
+    contact_report = task.contact_sensors["kyon0"][0][0].get_current_frame() # LF foot
+
+    print("#############")
+    print(contact_report)
 
 print("[main][info]: closing environment and simulation")
 

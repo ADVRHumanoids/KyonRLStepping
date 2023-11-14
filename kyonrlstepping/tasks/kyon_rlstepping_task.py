@@ -25,18 +25,32 @@ class KyonRlSteppingTask(CustomTask):
                 default_jnt_damping = 10.0,
                 robot_names = ["kyon0"],
                 robot_pkg_names = ["kyon"],
+                contact_prims = None,
+                contact_offsets = None,
+                sensor_radius = None,
                 dtype = torch.float64) -> None:
 
         if cloning_offset is None:
         
             cloning_offset = np.array([[0.0, 0.0, 0.0]] * num_envs)
-                                      
+        
+        if contact_prims is None:
+
+            contact_prims = {}
+
+            for i in range(len(robot_names)):
+                
+                contact_prims[robot_names[i]] = [] # no contact sensors
+
         # trigger __init__ of parent class
         CustomTask.__init__(self,
                     name = self.__class__.__name__, 
                     robot_names = robot_names,
                     robot_pkg_names = robot_pkg_names,
                     num_envs = num_envs,
+                    contact_prims = contact_prims,
+                    contact_offsets = contact_offsets,
+                    sensor_radius = sensor_radius,
                     device = device, 
                     cloning_offset = cloning_offset,
                     spawning_radius = spawning_radius,
@@ -48,7 +62,8 @@ class KyonRlSteppingTask(CustomTask):
                     default_jnt_damping = default_jnt_damping,
                     dtype = dtype, 
                     self_collide = [False] * len(robot_names), 
-                    fix_base = [False] * len(robot_names))
+                    fix_base = [False] * len(robot_names),
+                    merge_fixed = [True] * len(robot_names))
         
         self.cluster_dt = cluster_dt
         self.integration_dt = integration_dt
