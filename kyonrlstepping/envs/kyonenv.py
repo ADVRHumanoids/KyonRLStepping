@@ -28,12 +28,24 @@ class KyonEnv(RobotVecEnv):
         # now the task and the simulation is guaranteed to be initialized
         # -> we have the data to initialize the cluster client
         for i in range(len(self.robot_names)):
+            
+            if self.robot_names[i] in task.omni_contact_sensors:
+
+                n_contact_sensors = task.omni_contact_sensors[self.robot_names[i]].n_sensors
+                contact_names = task.omni_contact_sensors[self.robot_names[i]].contact_prims
+            
+            else:
+                
+                n_contact_sensors = -1
+                contact_names = None
 
             self.cluster_clients[self.robot_names[i]] = KyonRHClusterClient(cluster_size=task.num_envs, 
                             device=task.torch_device, 
                             cluster_dt=task.cluster_dt, 
                             control_dt=task.integration_dt, 
                             jnt_names = task.robot_dof_names[self.robot_names[i]], 
+                            n_contact_sensors = n_contact_sensors,
+                            contact_linknames = contact_names, 
                             np_array_dtype = np_array_dtype, 
                             verbose = False, 
                             debug = debug, 

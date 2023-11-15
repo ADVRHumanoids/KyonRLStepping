@@ -24,17 +24,18 @@ from pxr import UsdPhysics
 
 print_sim_info = False
 
-num_envs = 1 # 9, 3, 5
+num_envs = 3 # 9, 3, 5
 sim_params = {}
 sim_params["use_gpu_pipeline"] = False
 sim_params["integration_dt"] = 1.0/100.0
 sim_params["rendering_dt"] = 1.0/25.0
 sim_params["substeps"] = 1
 sim_params["gravity"] = np.array([0.0, 0.0, -9.81])
-sim_params["enable_scene_query_support"] = True
+sim_params["enable_scene_query_support"] = False
+sim_params["use_fabric"] = True # Enable/disable reading of physics buffers directly. Default is True.
 sim_params["replicate_physics"] = True
-sim_params["use_flatcache"] = True
-sim_params["disable_contact_processing"] = False
+sim_params["enable_stabilization"] = True
+sim_params["disable_contact_processing"] = True
 if sim_params["use_gpu_pipeline"]:
     sim_params["device"] = "cuda"
 else:
@@ -160,8 +161,13 @@ while env._simulation_app.is_running():
 
     # contact_report = task.omni_contact_sensors["kyon0"].contact_sensors[0][0].get_current_frame() 
 
-    # print("#########")
+    print("#########")
     # print(contact_report)
+
+    print(task.omni_contact_sensors["kyon0"].contact_geom_prim_views[0].get_net_contact_forces(clone = False, 
+                                                                                            dt = sim_params["integration_dt"]))
+    # print(task.omni_contact_sensors["kyon0"].contact_geom_prim_views[0].get_contact_force_data(clone = False,
+    #                                                                                         dt = sim_params["integration_dt"]))
     # # print("Normal:")
     # # print(contact_report['contacts'])
     # # print(contact_report['normal'].device)
