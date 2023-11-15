@@ -19,13 +19,16 @@ from omni_robo_gym.utils.shared_sim_info import SharedSimInfo
 from omni_robo_gym.utils.contact_sensor import OmniContactSensors
 from omni.isaac.sensor import _sensor
 
+from omni.isaac.core.utils.prims import get_prim_at_path
+from pxr import UsdPhysics
+
 print_sim_info = False
 
-num_envs = 2 # 9, 3, 5
+num_envs = 1 # 9, 3, 5
 sim_params = {}
 sim_params["use_gpu_pipeline"] = False
 sim_params["integration_dt"] = 1.0/100.0
-sim_params["rendering_dt"] = 1.0/50.0
+sim_params["rendering_dt"] = 1.0/25.0
 sim_params["substeps"] = 1
 sim_params["gravity"] = np.array([0.0, 0.0, -9.81])
 sim_params["enable_scene_query_support"] = True
@@ -155,10 +158,10 @@ while env._simulation_app.is_running():
         print(f"[{script_name}]" + "[info]: sim_time-> " + str(sim_time))
         print(f"[{script_name}]" + "[info]: time to step full env.-> " + str(now - start_time_step))
 
-    contact_report = task.omni_contact_sensors["kyon0"].contact_sensors[0][0].get_current_frame() 
+    # contact_report = task.omni_contact_sensors["kyon0"].contact_sensors[0][0].get_current_frame() 
 
-    print("#########")
-    print(contact_report)
+    # print("#########")
+    # print(contact_report)
     # # print("Normal:")
     # # print(contact_report['contacts'])
     # # print(contact_report['normal'].device)
@@ -168,11 +171,6 @@ while env._simulation_app.is_running():
     # print(contact_report['force'])
     # print("Number of contacts:")
     # print(contact_report['number_of_contacts'])
-
-    # if i > 5:
-
-        # self.task.finalize_contact_sensors() # finishes initialization
-        # for contact sensors
 
 
 print("[main][info]: closing environment and simulation")
