@@ -74,7 +74,7 @@ class KyonEnv(RobotVecEnv):
             if self.cluster_clients[self.robot_names[i]].is_cluster_instant(index):
                 
                 # assign last robot state observation to the cluster client
-                self.update_cluster_state(self.robot_names[i])
+                self.update_cluster_state(self.robot_names[i], index)
 
                 # the control cluster may run at a different rate wrt the simulation
 
@@ -156,7 +156,8 @@ class KyonEnv(RobotVecEnv):
         return observations
     
     def update_cluster_state(self, 
-                        robot_name: str):
+                        robot_name: str, 
+                        step_index: int = -1):
         
         self.cluster_clients[robot_name].robot_states.root_state.p[:, :] = torch.sub(self.task.root_p[robot_name], 
                                                                 self.task.root_abs_offsets[robot_name]) # we only get the relative position
@@ -171,15 +172,27 @@ class KyonEnv(RobotVecEnv):
         # contact state
 
         # for each contact link
+        
         for i in range(0, self.cluster_clients[robot_name].n_contact_sensors):
             
             contact_link = self.cluster_clients[robot_name].contact_linknames[i]
             
-            # assigning measured net contact forces
-            self.cluster_clients[robot_name].contact_states.contact_state.get(contact_link)[:, :] = \
-                self.task.omni_contact_sensors[robot_name].get(dt = self.task.integration_dt, 
-                                                        contact_link = contact_link,
-                                                        clone = False)
+            if not self.gpu_pipeline_enabled:
+
+                # assigning measured net contact forces
+                self.cluster_clients[robot_name].contact_states.contact_state.get(contact_link)[:, :] = \
+                    self.task.omni_contact_sensors[robot_name].get(dt = self.task.integration_dt, 
+                                                            contact_link = contact_link,
+                                                            clone = False)
+
+            else:
+                
+                if ((step_index + 1) % 100) == 0:
+
+                    warning = f"[{self.__class__.__name__}]" + f"[{self.journal.warning}]: " + \
+                        f"Contact state from link {contact_link} cannot be retrieved in IsaacSim if using use_gpu_pipeline is set to True!"
+
+                    print(warning)
 
     def init_jnt_cmd_to_safe_vals(self):
         
