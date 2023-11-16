@@ -166,6 +166,8 @@ while env._simulation_app.is_running():
 
     print(task.omni_contact_sensors["kyon0"].contact_geom_prim_views[0].get_net_contact_forces(clone = False, 
                                                                                             dt = sim_params["integration_dt"]))
+    
+    # print("Detailed:")
     # print(task.omni_contact_sensors["kyon0"].contact_geom_prim_views[0].get_contact_force_data(clone = False,
     #                                                                                         dt = sim_params["integration_dt"]))
     # # print("Normal:")
