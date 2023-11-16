@@ -1,5 +1,5 @@
 from omni_robo_gym.gym.omni_vect_env.vec_envs import RobotVecEnv
-
+from omni_robo_gym.utils.math_utils import quat_to_omega
 from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_client import KyonRHClusterClient
 
 import torch 
@@ -40,16 +40,16 @@ class KyonEnv(RobotVecEnv):
                 contact_names = None
 
             self.cluster_clients[self.robot_names[i]] = KyonRHClusterClient(cluster_size=task.num_envs, 
-                            device=task.torch_device, 
-                            cluster_dt=task.cluster_dt, 
-                            control_dt=task.integration_dt, 
-                            jnt_names = task.robot_dof_names[self.robot_names[i]], 
-                            n_contact_sensors = n_contact_sensors,
-                            contact_linknames = contact_names, 
-                            np_array_dtype = np_array_dtype, 
-                            verbose = False, 
-                            debug = debug, 
-                            robot_name=self.robot_names[i])
+                        device=task.torch_device, 
+                        cluster_dt=task.cluster_dt, 
+                        control_dt=task.integration_dt, 
+                        jnt_names = task.robot_dof_names[self.robot_names[i]], 
+                        n_contact_sensors = n_contact_sensors,
+                        contact_linknames = contact_names, 
+                        np_array_dtype = np_array_dtype, 
+                        verbose = False, 
+                        debug = debug, 
+                        robot_name=self.robot_names[i])
         
         self.init_jnt_cmd_to_safe_vals()
 
@@ -145,7 +145,7 @@ class KyonEnv(RobotVecEnv):
 
         self._world.reset()
 
-        self.task.reset()
+        self.task.reset(self.task.integration_dt)
         
         self._world.step(render=self._render)
 

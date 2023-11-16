@@ -16,11 +16,6 @@ env = KyonEnv(headless=False,
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
 
 from omni_robo_gym.utils.shared_sim_info import SharedSimInfo
-from omni_robo_gym.utils.contact_sensor import OmniContactSensors
-from omni.isaac.sensor import _sensor
-
-from omni.isaac.core.utils.prims import get_prim_at_path
-from pxr import UsdPhysics
 
 print_sim_info = False
 
@@ -161,11 +156,11 @@ while env._simulation_app.is_running():
 
     # contact_report = task.omni_contact_sensors["kyon0"].contact_sensors[0][0].get_current_frame() 
 
-    print("#########")
+    # print("#########")
     # print(contact_report)
 
-    print(task.omni_contact_sensors["kyon0"].contact_geom_prim_views[0].get_net_contact_forces(clone = False, 
-                                                                                            dt = sim_params["integration_dt"]))
+    # print(task.omni_contact_sensors["kyon0"].contact_geom_prim_views[0].get_net_contact_forces(clone = False, 
+                                                                                            # dt = sim_params["integration_dt"]))
     
     # print("Detailed:")
     # print(task.omni_contact_sensors["kyon0"].contact_geom_prim_views[0].get_contact_force_data(clone = False,
