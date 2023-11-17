@@ -19,11 +19,11 @@ from omni_robo_gym.utils.shared_sim_info import SharedSimInfo
 
 print_sim_info = False
 
-num_envs = 3 # 9, 3, 5
+num_envs = 9 # 9, 3, 5
 sim_params = {}
 sim_params["use_gpu_pipeline"] = False
 sim_params["integration_dt"] = 1.0/100.0
-sim_params["rendering_dt"] = 1.0/25.0
+sim_params["rendering_dt"] = sim_params["integration_dt"]
 sim_params["substeps"] = 1
 sim_params["gravity"] = np.array([0.0, 0.0, -9.81])
 sim_params["enable_scene_query_support"] = False
