@@ -21,11 +21,14 @@ class KyonRlSteppingTask(CustomTask):
                 use_flat_ground = True,
                 default_jnt_stiffness = 100.0,
                 default_jnt_damping = 10.0,
+                jnt_stiffness_at_startup = 50,
+                jnt_damping_at_startup = 5,
                 robot_names = ["kyon0"],
                 robot_pkg_names = ["kyon"],
                 contact_prims = None,
                 contact_offsets = None,
                 sensor_radii = None,
+                use_diff_velocities = True,
                 dtype = torch.float64) -> None:
 
         if cloning_offset is None:
@@ -65,6 +68,10 @@ class KyonRlSteppingTask(CustomTask):
                     merge_fixed = [True] * len(robot_names))
         
         self.cluster_dt = cluster_dt
+        self.use_diff_velocities = use_diff_velocities
+
+        self.jnt_stiffness_at_startup = jnt_stiffness_at_startup
+        self.jnt_damping_at_startup = jnt_damping_at_startup
         
     def _xrdf_cmds(self):
 
@@ -107,7 +114,15 @@ class KyonRlSteppingTask(CustomTask):
 
     def get_observations(self):
         
-        self._get_robots_state(self.integration_dt) # updates robot states
+        if self.use_diff_velocities:
+
+            self._get_robots_state(self.integration_dt) # updates robot states
+            # but velocities are obtained via num. differentiation
+        
+        else:
+
+            self._get_robots_state() # velocities directly from simulator (can 
+            # introduce relevant artifacts, making them unrealistic)
 
         return self.obs
 

@@ -8,8 +8,8 @@ import torch
 from kyonrlstepping.envs.kyonenv import KyonEnv 
 
 env = KyonEnv(headless=False, 
-            enable_livestream=False, 
-            enable_viewport=False) # create environment
+        enable_livestream=False, 
+        enable_viewport=False) # create environment
 
 # now we can import the task (not before, since Omni plugins are loaded 
 # upon environment initialization)
@@ -19,7 +19,7 @@ from omni_robo_gym.utils.shared_sim_info import SharedSimInfo
 
 print_sim_info = False
 
-num_envs = 9 # 9, 3, 5
+num_envs = 8 # 9, 3, 5
 sim_params = {}
 sim_params["use_gpu_pipeline"] = False
 sim_params["integration_dt"] = 1.0/100.0
@@ -80,12 +80,15 @@ task = KyonRlSteppingTask(cluster_dt = control_clust_dt,
                         use_flat_ground=True, 
                         default_jnt_stiffness=200.0, 
                         default_jnt_damping=15.0, 
+                        jnt_stiffness_at_startup = 50,
+                        jnt_damping_at_startup = 5,
                         robot_names = robot_names,
                         robot_pkg_names = robot_pkg_names,
                         contact_prims = contact_prims,
                         contact_offsets = contact_offsets,
                         sensor_radii = sensor_radii,
                         device = device, 
+                        use_diff_velocities = True,
                         dtype=dtype_torch) # create task
 
 env.set_task(task, 

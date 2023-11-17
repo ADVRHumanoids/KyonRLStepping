@@ -40,7 +40,10 @@ dtype = torch.float32 # this has to be the same wrt the cluster client, otherwis
 # messages are not read properly
 
 robot_name = "kyon0"
-control_cluster_srvr = KyonRHClusterSrvr(robot_name) # this blocks until connection with the client is established
+control_cluster_srvr = KyonRHClusterSrvr(robot_name, 
+                                    use_isolated_cores=True, 
+                                    verbose=verbose) # this blocks until connection with the client is established
+
 controllers = generate_controllers(robot_name)
 
 for i in range(0, control_cluster_srvr.cluster_size):
