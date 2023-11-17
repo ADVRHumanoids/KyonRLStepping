@@ -5,7 +5,9 @@ from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_horizon
 class KyonRHClusterSrvr(ControlClusterSrvr):
     
     def __init__(self, 
-            robot_name: str):
+            robot_name: str, 
+            use_isolated_cores = False,
+            verbose = False):
 
         self._temp_path = "/tmp/" + f"{self.__class__.__name__}"
         
@@ -13,7 +15,9 @@ class KyonRHClusterSrvr(ControlClusterSrvr):
 
         self.robot_pkg_name = "kyon"
 
-        super().__init__(namespace = self.namespace)
+        super().__init__(namespace = self.namespace, 
+                        use_isolated_cores = use_isolated_cores,
+                        verbose = verbose)
         
         self._generate_srdf()
 
