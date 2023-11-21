@@ -90,7 +90,7 @@ task = KyonRlSteppingTask(cluster_dt = control_clust_dt,
                         contact_offsets = contact_offsets,
                         sensor_radii = sensor_radii,
                         device = device, 
-                        use_diff_velocities = False,
+                        use_diff_velocities = True,
                         dtype=dtype_torch) # create task
 
 env.set_task(task, 
