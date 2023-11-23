@@ -17,7 +17,7 @@ dependencies:
   - torchaudio 
   - cuda-toolkit=11.7
   - casadi_kin_dyn
-  - pinocchio=2.6.18
+  # - pinocchio=2.6.20
   - compilers 
   - cmake
   - make
