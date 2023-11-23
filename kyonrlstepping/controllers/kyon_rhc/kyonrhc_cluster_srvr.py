@@ -25,7 +25,7 @@ class KyonRHClusterSrvr(ControlClusterSrvr):
         
     def _xrdf_cmds(self):
         
-        cmds = get_xrdf_cmds_horizon()
+        cmds = get_xrdf_cmds_horizon(robot_pkg_name = self.robot_pkg_name)
 
         return cmds
         
