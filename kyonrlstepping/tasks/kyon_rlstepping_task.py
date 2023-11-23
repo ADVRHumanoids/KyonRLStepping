@@ -81,7 +81,9 @@ class KyonRlSteppingTask(CustomTask):
 
         n_robots = len(self.robot_names)
 
-        cmds = get_xrdf_cmds_isaac(n_robots=n_robots)
+        cmds = get_xrdf_cmds_isaac(n_robots=n_robots, 
+                                robot_pkg_name=self.robot_pkg_names[0]) # assuming
+        # kyon package path is the first element (true if only one robot type, i.e. Kyon)
 
         return cmds
       
