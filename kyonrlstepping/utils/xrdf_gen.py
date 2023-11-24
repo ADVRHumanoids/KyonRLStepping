@@ -20,7 +20,8 @@ def get_xrdf_cmds_isaac(n_robots: int,
         cmds_aux.append("sensors:=" + sensors)
         cmds_aux.append("floating_joint:=" + floating_joint)
         cmds_aux.append("payload:=" + payload)
-
+        cmds_aux.append("use_abs_mesh_paths:=true") # use absolute paths for meshes
+        
         if robot_pkg_name is not None:
 
                 import rospkg
