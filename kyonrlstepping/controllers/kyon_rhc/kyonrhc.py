@@ -6,6 +6,8 @@ from kyonrlstepping.controllers.kyon_rhc.horizon_imports import *
 from kyonrlstepping.controllers.kyon_rhc.kyonrhc_taskref import KyonRhcTaskRef
 from kyonrlstepping.controllers.kyon_rhc.gait_manager import GaitManager
 
+from kyonrlstepping.utils.rhc2shared import RHC2SharedInternal
+
 import numpy as np
 
 import torch
@@ -20,21 +22,24 @@ class KyonRHC(RHController):
             cluster_size: int, # needed by shared mem manager
             robot_name: str = "kyon0",
             t_horizon:float = 3.0,
-            n_nodes: int = 30,
+            n_intervals: int = 30,
             add_data_lenght: int = 2,
             enable_replay = False, 
             verbose = False, 
             debug = False, 
-            array_dtype = torch.float32):
+            array_dtype = torch.float32, 
+            publish_sol = False):
 
         self.step_counter = 0
         self.sol_counter = 0
+
+        self.publish_sol = publish_sol
 
         self.robot_name = robot_name
         
         self._enable_replay = enable_replay
         self._t_horizon = t_horizon
-        self._n_nodes = n_nodes
+        self._n_intervals = n_intervals
 
         self.config_path = config_path
 
@@ -55,7 +60,25 @@ class KyonRHC(RHController):
         self.add_data_lenght = add_data_lenght # length of the array holding additional info from the solver
 
         self._quat_remap = [1, 2, 3, 0] # mapping from robot quat. to Horizon's quaternion convention
-    
+
+        if self.publish_sol:
+            
+            # object to forward individual internal rhc state to shared memery
+            # for external debugging
+            self.rhc2shared_bridge = RHC2SharedInternal( 
+                                        namespace=self.robot_name,
+                                        index=self.controller_index,
+                                        n_jnts=self.n_dofs,
+                                        n_rhc_nodes=self._n_intervals,
+                                        verbose=self._verbose,
+                                        basename="RHC2SharedInternal")
+            
+            self.rhc2shared_bridge.run()
+        
+        else:
+
+            self.rhc2shared_bridge = None
+            
     def _init_problem(self):
         
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + \
@@ -66,8 +89,8 @@ class KyonRHC(RHController):
 
         self._assign_server_side_jnt_names(self._get_robot_jnt_names())
 
-        self._dt = self._t_horizon / self._n_nodes
-        self._prb = Problem(self._n_nodes, 
+        self._dt = self._t_horizon / self._n_intervals
+        self._prb = Problem(self._n_intervals, 
                         receding=True, 
                         casadi_type=cs.SX)
         self._prb.setDt(self._dt)
@@ -101,7 +124,7 @@ class KyonRHC(RHController):
 
         self._tg = trajectoryGenerator.TrajectoryGenerator()
 
-        self._pm = pymanager.PhaseManager(self._n_nodes)
+        self._pm = pymanager.PhaseManager(self._n_intervals)
 
         # adding timelines
         c_phases = dict()
@@ -352,7 +375,15 @@ class KyonRHC(RHController):
 
             # after, we only use the internal RHC state
             self._prb.setInitialState(x0=xig[:, 0])
-            
+    
+    def _publish_rhc_sol_data(self):
+
+        self.rhc2shared_bridge.update(x_opt=self._ti.solution['x_opt'])
+
+    def _publish_rob_state_data(self):
+
+        a = 2
+        
     def _solve(self):
         
         self._update_open_loop() # updates the TO ig and 
@@ -395,14 +426,30 @@ class KyonRHC(RHController):
             
             self.sol_counter = self.sol_counter + 1
 
+            if self.publish_sol:
+
+                self._publish_rhc_sol_data() 
+                self._publish_rob_state_data()
+
             return True
         
-        except:
-
+        except Exception as e:
+            
+            print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + \
+              f"[{self.journal.exception}]" + ": rti() failed" + 
+              f" with exception{type(e).__name__}")
+            
             print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + \
               f"[{self.journal.exception}]" + ": rti() failed!!")
 
             self.sol_counter = self.sol_counter + 1
+
+            if self.publish_sol:
+                
+                # we publish solution anyway
+
+                self._publish_rhc_sol_data() 
+                self._publish_rob_state_data()
 
             return False
 

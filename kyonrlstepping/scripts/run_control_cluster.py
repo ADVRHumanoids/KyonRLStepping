@@ -19,20 +19,23 @@ def generate_controllers(robot_name: str):
     for i in range(0, control_cluster_srvr.cluster_size):
 
         cluster_controllers.append(KyonRHC(
-                                    controller_index = i,
-                                    urdf_path=control_cluster_srvr._urdf_path, 
-                                    srdf_path=control_cluster_srvr._srdf_path,
-                                    cluster_size=control_cluster_srvr.cluster_size,
-                                    robot_name=robot_name,
-                                    config_path = kyonrhc_config_path, 
-                                    verbose = verbose, 
-                                    debug = debug,
-                                    array_dtype = dtype))
+                                controller_index = i,
+                                urdf_path=control_cluster_srvr._urdf_path, 
+                                srdf_path=control_cluster_srvr._srdf_path,
+                                cluster_size=control_cluster_srvr.cluster_size,
+                                robot_name=robot_name,
+                                config_path = kyonrhc_config_path, 
+                                verbose = verbose, 
+                                debug = debug,
+                                array_dtype = dtype,
+                                publish_sol=debug_solution))
     
     return cluster_controllers
 
 verbose = True
 debug = True
+
+debug_solution = True
 
 perf_timer = PerfSleep()
 

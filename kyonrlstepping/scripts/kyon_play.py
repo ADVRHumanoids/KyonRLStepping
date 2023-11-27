@@ -19,7 +19,7 @@ from omni_robo_gym.utils.shared_sim_info import SharedSimInfo
 
 print_sim_info = False
 
-num_envs = 8 # 9, 3, 5
+num_envs = 1 # 9, 3, 5
 sim_params = {}
 sim_params["use_gpu_pipeline"] = False
 sim_params["integration_dt"] = 1.0/100.0
