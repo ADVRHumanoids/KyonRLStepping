@@ -5,7 +5,11 @@ from SharsorIPCpp.PySharsorIPC import toNumpyDType, dtype
 
 import numpy as np
 
+from rhcviz.utils.handshake import RHCVizHandshake
+from rhcviz.utils.namings import NamingConventions
+
 import rospy
+from std_msgs.msg import Float64MultiArray
 
 class RHC2ROSNamings:
 
@@ -59,6 +63,22 @@ class Shared2ROSInternal:
                         namespace = self.namespace, 
                         index = self.index)
         
+        ros_names = NamingConventions()
+
+        ros_basename = "RHCViz_test"
+        handshake_topicname = ros_names.handshake_topicname(basename=ros_basename, 
+                                            namespace=namespace)
+
+        rhc_q_topic_name = ros_names.rhc_q_topicname(basename=basename, 
+                                        namespace=namespace)
+        
+        self.handshaker = RHCVizHandshake(handshake_topicname, 
+                            is_server=False)
+        
+        self.pub = rospy.Publisher(rhc_q_topic_name, 
+                            Float64MultiArray, 
+                            queue_size=10)
+    
         self.floating_base_q_dim = 7 # orientation quat.
         
         self.dtype = np.float32
@@ -106,6 +126,21 @@ class Shared2ROSInternal:
         for i in range(len(self.client_factories)):
 
             self.client_factories[i].close() # closes servers
+
+    def _ros_handshake(handshaker: RHCVizHandshake):
+        
+        # Wait for handshake to complete
+        while not rospy.is_shutdown() and not handshaker.handshake_done():
+
+            rospy.sleep(0.1)
+
+        if handshaker.n_nodes is None:
+
+            rospy.logerr("Handshake not completed. Exiting.")
+
+            return
+    
+        return handshaker.n_nodes
 
     def _publish(self):
 
