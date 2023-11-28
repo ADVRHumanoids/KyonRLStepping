@@ -4,9 +4,14 @@ from SharsorIPCpp.PySharsorIPC import RowMajor, ColMajor
 from SharsorIPCpp.PySharsorIPC import toNumpyDType, dtype
 
 import numpy as np
+import torch
 
 from rhcviz.utils.handshake import RHCVizHandshake
 from rhcviz.utils.namings import NamingConventions
+
+from control_cluster_bridge.utilities.defs import Journal
+from control_cluster_bridge.utilities.shared_mem import SharedMemClient
+from control_cluster_bridge.utilities.defs import cluster_size_name
 
 import rospy
 from std_msgs.msg import Float64MultiArray
@@ -48,28 +53,40 @@ class Shared2ROSInternal:
     
     def __init__(self, 
             namespace: str, 
-            index: int, 
             verbose = False,
-            basename: str = "RHC2SharedInternal"):
+            shared_mem_basename: str = "RHC2SharedInternal"):
+
+        self.journal = Journal()
 
         self.verbose = verbose
 
-        self.index = index
+        self.shared_mem_basename = shared_mem_basename
+        self.namespace = namespace # defines uniquely the kind of controller 
+        # (associated with a specific robot)
 
-        self.basename = basename
-        self.namespace = namespace
+        self.cluster_size_clnt = SharedMemClient(name=cluster_size_name(), 
+                                    namespace=self.namespace,
+                                    dtype=torch.int64, 
+                                    wait_amount=0.05, 
+                                    verbose=self.verbose)
+        self.cluster_size_clnt.attach()
+        self.cluster_size = self.cluster_size_clnt.tensor_view[0, 0].item()
 
-        self.names = RHC2ROSNamings(basename = self.basename, 
-                        namespace = self.namespace, 
-                        index = self.index)
+        self.names = []
+
+        for i in range(self.cluster_size):
+
+            self.names.append(RHC2ROSNamings(basename = self.shared_mem_basename, 
+                            namespace = self.namespace, 
+                            index = i))
         
-        ros_names = NamingConventions()
+        self.ros_names = NamingConventions()
 
         ros_basename = "RHCViz_test"
-        handshake_topicname = ros_names.handshake_topicname(basename=ros_basename, 
+        handshake_topicname = self.ros_names.handshake_topicname(basename=ros_basename, 
                                             namespace=namespace)
 
-        rhc_q_topic_name = ros_names.rhc_q_topicname(basename=basename, 
+        rhc_q_topic_name = self.ros_names.rhc_q_topicname(basename=ros_basename, 
                                         namespace=namespace)
         
         self.handshaker = RHCVizHandshake(handshake_topicname, 
@@ -103,6 +120,8 @@ class Shared2ROSInternal:
 
             self.client_factories[i].attach() # starts clients
 
+        # we assume all clients to be of the same controller, for
+        # the same robot
         self.n_rows = self.client_factories[0].getNRows()
         self.n_cols = self.client_factories[0].getNCols()
 
@@ -110,16 +129,32 @@ class Shared2ROSInternal:
                                 dtype=toNumpyDType(self.client_factories[0].getScalarType()),
                                 order=self.order)
         
-    def update(self):
+        self._initialized = True
+
+    def update(self, 
+            index: int = 0):
         
+        success = False
+
         if self._initialized:
             
             # first read from shared memory so that rhc_q is updated
-            self.client_factories[0].read(self.rhc_q[:, :], 0, 0)
+            # we read from controller at index index
+            success = self.client_factories[index].read(self.rhc_q[:, :], 0, 0)
 
             # publish it on ROS topic
 
             self._publish()
+        
+        if not success:
+
+            warning = f"[{self.__class__.__name__}" + "]" + \
+                f"[{self.journal.warning}]" + \
+                ": failed to read rhc_q from shared memory"
+            
+            print(warning)
+
+        return success
 
     def close(self):
 
@@ -147,13 +182,19 @@ class Shared2ROSInternal:
         a = 1
 
     def _init_rhc_q_bridge(self):
+        
+        for i in range(self.cluster_size):
 
-        # rhc internal state
-        self.client_factories.append(ClientFactory(
-                                        basename = "",
-                                        namespace = self.names.get_rhc_q_name(), 
-                                        verbose = self.verbose, 
-                                        vlevel = VLevel.V1, 
-                                        dtype = dtype.Float,
-                                        layout = self.layout)
-                                    )
+            # we create a client for each controller in the cluster
+            # at runtime no overhead, since we only update the data with one, 
+            # depending on the requested index
+
+            # rhc internal state
+            self.client_factories.append(ClientFactory(
+                                            basename = "",
+                                            namespace = self.names[i].get_rhc_q_name(), 
+                                            verbose = self.verbose, 
+                                            vlevel = VLevel.V3, 
+                                            dtype = dtype.Float,
+                                            layout = self.layout)
+                                        )
