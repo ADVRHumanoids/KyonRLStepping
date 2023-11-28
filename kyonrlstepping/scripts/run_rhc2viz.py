@@ -10,6 +10,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Multi Robot Visualizer")
     parser.add_argument('--robot_type', type=str, default='kyon')
     parser.add_argument('--robot_name', type=str, default='kyon')
+    parser.add_argument('--nodes_perc', type=int, default=100)
     args = parser.parse_args()
     
     syspaths = PathsGetter()
@@ -26,7 +27,8 @@ if __name__ == '__main__':
            basename="RHCViz", 
            rate = 10,
            cpu_cores = [14, 15],
-           use_only_collisions=False         
+           use_only_collisions=False,
+           nodes_perc = args.nodes_perc       
            )
     
     rhcviz.run()

@@ -99,8 +99,8 @@ class Shared2ROSInternal:
         self.n_cols = self.client_factories[0].getNCols()
 
         self.rhc_q = np.zeros((self.n_rows, self.n_cols),
-                                dtype=toNumpyDType(self.client_factories[0].getScalarType()),
-                                order=self.order)
+                    dtype=toNumpyDType(self.client_factories[0].getScalarType()),
+                    order=self.order)
         
         rospy.init_node('RHC2ROSBridge')
 

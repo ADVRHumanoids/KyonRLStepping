@@ -80,7 +80,9 @@ class RHC2SharedInternal:
         self.rhc_q = np.zeros((self.n_rows, self.n_cols),
                                 dtype=toNumpyDType(self.server_factories[0].getScalarType()),
                                 order=self.order)
-    
+
+        self.rhc_q[6,:] = 1 # initialize to valid quaternion
+
     def run(self):
 
         for i in range(len(self.server_factories)):
