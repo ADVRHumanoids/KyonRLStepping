@@ -104,8 +104,11 @@ class KyonRHC(RHController):
         init = base_init.tolist() + list(self._homer.get_homing())
 
         FK = self._kin_dyn.fk('ball_1') # just to get robot reference height
+        
+        kyon_wheel_radius = 0.124 # hardcoded!!!!
+
         init_pos_foot = FK(q=init)['ee_pos']
-        base_init[2] = -init_pos_foot[2]
+        base_init[2] = -init_pos_foot[2] + kyon_wheel_radius
 
         self._model = FullModelInverseDynamics(problem=self._prb,
                                 kd=self._kin_dyn,
@@ -119,8 +122,13 @@ class KyonRHC(RHController):
         
         self._ti.setTaskFromYaml(self.config_path)
 
+        # setting initial CoM ref, so that it's coherent
+        CoM = self._kin_dyn.centerOfMass()
+        init_CoM_pos = CoM(q=init)['com']
         CoM_pose = self._ti.getTask('CoM_pose')
-        CoM_pose.setRef(np.atleast_2d(base_init).T)
+        CoM_tmp = base_init.copy()
+        CoM_tmp[2] = init_CoM_pos[2] + base_init[2]
+        CoM_pose.setRef(np.atleast_2d(CoM_tmp).T)
 
         self._tg = trajectoryGenerator.TrajectoryGenerator()
 
@@ -223,6 +231,17 @@ class KyonRHC(RHController):
         self.n_contacts = len(self._model.cmap.keys())
         
         # self.horizon_anal = analyzer.ProblemAnalyzer(self._prb)
+
+        print("")
+        print("###############")
+        print("homing map")
+        print(self._homer.get_homing_map())
+        print("init CoM")
+        print(CoM_tmp)
+        print("base init")
+        print(base_init)
+        print("###############")
+        print("")
 
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.journal.status}]" + "Initialized RHC problem")
 
