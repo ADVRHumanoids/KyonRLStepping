@@ -22,13 +22,13 @@ if __name__ == '__main__':
             name= args.robot_type + "Urdf")
     
     rhcviz = RHCViz(urdf_file_path=kyon_urdf_gen.urdf_path, 
-           rviz_config_path=syspaths.DEFAULT_RVIZ_CONFIG_PATH,
-           namespace=args.robot_name, 
-           basename="RHCViz", 
-           rate = 10,
-           cpu_cores = [14, 15],
-           use_only_collisions=False,
-           nodes_perc = args.nodes_perc       
-           )
+        rviz_config_path=syspaths.DEFAULT_RVIZ_CONFIG_PATH,
+        namespace=args.robot_name, 
+        basename="RHCViz", 
+        rate = 10,
+        cpu_cores = [14, 15],
+        use_only_collisions=False,
+        nodes_perc = args.nodes_perc       
+        )
     
     rhcviz.run()

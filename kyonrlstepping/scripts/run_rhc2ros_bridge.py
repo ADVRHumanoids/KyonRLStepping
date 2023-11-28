@@ -62,7 +62,8 @@ if __name__ == '__main__':
 
         start_time = time.perf_counter() 
 
-        success = bridge.update(index = 1)
+        success = bridge.update(index = 0) # index is the controller 
+        # position in the cluster
 
         elapsed_time = time.perf_counter() - start_time
 

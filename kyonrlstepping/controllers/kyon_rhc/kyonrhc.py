@@ -379,8 +379,6 @@ class KyonRHC(RHController):
     def _publish_rhc_sol_data(self):
 
         self.rhc2shared_bridge.update(x_opt=self._ti.solution['x_opt'])
-        
-        print(f"########{self._ti.solution['x_opt'][0:3,0]}")
 
     def _publish_rob_state_data(self):
 

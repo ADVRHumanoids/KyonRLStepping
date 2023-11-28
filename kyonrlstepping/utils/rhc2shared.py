@@ -59,8 +59,10 @@ class RHC2SharedInternal:
                         namespace = self.namespace, 
                         index = self.index)
         
+        self.n_jnts = n_jnts
+
         self.floating_base_q_dim = 7 # orientation quat.
-        self.n_rows = 7 + n_jnts
+        self.n_rows = 7 + self.n_jnts
         self.n_cols = n_rhc_nodes
 
         self.dtype = np.float32
@@ -88,6 +90,9 @@ class RHC2SharedInternal:
         for i in range(len(self.server_factories)):
                         
             self.server_factories[i].run() # starts servers
+
+            self.server_factories[i].write(self.rhc_q[:, :], 0, 0) # initialized to 
+            #  null valid data (identity quaternion)
 
     def update(self, 
             x_opt: np.ndarray):

@@ -101,7 +101,8 @@ class Shared2ROSInternal:
         self.rhc_q = np.zeros((self.n_rows, self.n_cols),
                     dtype=toNumpyDType(self.client_factories[0].getScalarType()),
                     order=self.order)
-        
+        self.rhc_q[6, :] = 1 # initializing to valid identity quaternion
+
         rospy.init_node('RHC2ROSBridge')
 
         self.handshaker.set_n_nodes(self.n_cols) # signal to RHViz client
