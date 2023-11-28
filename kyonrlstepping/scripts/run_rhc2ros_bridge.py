@@ -5,6 +5,8 @@ from perf_sleep.pyperfsleep import PerfSleep
 import argparse
 import os
 
+import rospy
+
 import time 
 
 # Function to set CPU affinity
@@ -20,7 +22,7 @@ if __name__ == '__main__':
     # Parse command line arguments for CPU affinity
     parser = argparse.ArgumentParser(description="Set CPU affinity for the script.")
     parser.add_argument('--cores', nargs='+', type=int, help='List of CPU cores to set affinity to')
-    parser.add_argument('--dt', type=float, default=0.001, help='Update interval in seconds, default is 0.001')
+    parser.add_argument('--dt', type=float, default=0.01, help='Update interval in seconds, default is 0.01')
     parser.add_argument('robot_name', type=str, help='Name of the robot')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode, default is False')
     parser.add_argument('--verbose', type=bool, default=True, help='Enable verbose mode, default is True')
@@ -56,7 +58,7 @@ if __name__ == '__main__':
 
     time_to_sleep_ns = 0
 
-    while True:
+    while not rospy.is_shutdown():
 
         start_time = time.perf_counter() 
 
@@ -65,6 +67,8 @@ if __name__ == '__main__':
         elapsed_time = time.perf_counter() - start_time
 
         time_to_sleep_ns = int((update_dt - elapsed_time) * 1e+9) # [ns]
+
+        print(f"####{bridge.rhc_q[0:3,0]}")
 
         if time_to_sleep_ns < 0:
 

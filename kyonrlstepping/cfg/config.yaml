@@ -1,7 +1,0 @@
-# set default task and default training config based on task
-defaults:
-  - task: KyonRlStepping
-  - train: ${task}PPO
-  - hydra/job_logging: disabled
-
-
