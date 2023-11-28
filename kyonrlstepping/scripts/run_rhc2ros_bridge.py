@@ -69,8 +69,6 @@ if __name__ == '__main__':
 
         time_to_sleep_ns = int((update_dt - elapsed_time) * 1e+9) # [ns]
 
-        print(f"####{bridge.rhc_q[0:3,0]}")
-
         if time_to_sleep_ns < 0:
 
             warning = f"[RHC2RosBridge]" + \

@@ -84,7 +84,9 @@ class KyonRHC(RHController):
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + \
               f"[{self.journal.status}]" + ": initializing RHC problem")
 
-        self.urdf = self.urdf.replace('continuous', 'revolute')
+        self.urdf = self.urdf.replace('continuous', 'revolute') # continous joint is parametrized
+        # in So2, so will add 
+
         self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf)
 
         self._assign_server_side_jnt_names(self._get_robot_jnt_names())
@@ -231,17 +233,6 @@ class KyonRHC(RHController):
         self.n_contacts = len(self._model.cmap.keys())
         
         # self.horizon_anal = analyzer.ProblemAnalyzer(self._prb)
-
-        print("")
-        print("###############")
-        print("homing map")
-        print(self._homer.get_homing_map())
-        print("init CoM")
-        print(CoM_tmp)
-        print("base init")
-        print(base_init)
-        print("###############")
-        print("")
 
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.journal.status}]" + "Initialized RHC problem")
 
@@ -397,7 +388,7 @@ class KyonRHC(RHController):
     
     def _publish_rhc_sol_data(self):
 
-        self.rhc2shared_bridge.update(x_opt=self._ti.solution['x_opt'])
+        self.rhc2shared_bridge.update(q_opt=self._ti.solution['q'])
 
     def _publish_rob_state_data(self):
 

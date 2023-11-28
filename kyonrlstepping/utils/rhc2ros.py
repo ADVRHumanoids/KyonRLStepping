@@ -8,15 +8,18 @@ import torch
 
 from rhcviz.utils.handshake import RHCVizHandshake
 from rhcviz.utils.namings import NamingConventions
+from rhcviz.utils.string_list_encoding import StringArray
 
 from control_cluster_bridge.utilities.defs import Journal
-from control_cluster_bridge.utilities.shared_mem import SharedMemClient
+from control_cluster_bridge.utilities.shared_mem import SharedMemClient, SharedStringArray
 from control_cluster_bridge.utilities.defs import cluster_size_name
+from control_cluster_bridge.utilities.defs import jnt_names_rhc_name
 
 from kyonrlstepping.utils.rhc2shared import RHC2SharedNamings
 
 import rospy
 from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import String
 
 class Shared2ROSInternal:
 
@@ -58,14 +61,19 @@ class Shared2ROSInternal:
         self.rhcviz_basename = rhcviz_basename
 
         self.handshaker = RHCVizHandshake(self.ros_names.handshake_topicname(basename=self.rhcviz_basename, 
-                                            namespace=namespace), 
+                                            namespace=self.namespace), 
                             is_server=True)
         
         self.rhc_q_pub = rospy.Publisher(self.ros_names.rhc_q_topicname(basename=self.rhcviz_basename, 
-                                        namespace=namespace), 
+                                        namespace=self.namespace), 
                             Float64MultiArray, 
                             queue_size=10)
 
+        self.robot_jntnames_pub = rospy.Publisher(self.ros_names.robot_jntnames(basename=self.rhcviz_basename, 
+                                        namespace=self.namespace), 
+                            String, 
+                            queue_size=10)
+        
         # other data
         self.floating_base_q_dim = 7 # orientation quat.
         
@@ -80,6 +88,8 @@ class Shared2ROSInternal:
             self.order = 'F' # 'F'
         
         self.client_factories = []
+        self.jnt_names_from_cluster_shared = None
+        self.cluster_jnt_names = []
 
         self._init_rhc_q_bridge() # init. shared mem. clients
 
@@ -93,6 +103,24 @@ class Shared2ROSInternal:
 
             self.client_factories[i].attach() 
 
+        # for sending joint names to RHCViz
+        self.jnt_names_from_cluster_shared = SharedStringArray(length=-1, 
+                                    name=jnt_names_rhc_name(), 
+                                    namespace=self.namespace,
+                                    is_server=False, 
+                                    wait_amount=0.1, 
+                                    verbose=self.verbose)
+        self.jnt_names_from_cluster_shared.start()
+
+        self.cluster_jnt_names = self.jnt_names_from_cluster_shared.read()
+        
+        rospy.init_node('RHC2ROSBridge')
+
+        # publishing joint names on topic 
+        string_array = StringArray()
+        self.jnt_names_encoded = string_array.encode(self.cluster_jnt_names) # encoding 
+        # jnt names in a ; separated string
+
         # we assume all clients to be of the same controller, for
         # the same robot
         self.n_rows = self.client_factories[0].getNRows()
@@ -102,8 +130,6 @@ class Shared2ROSInternal:
                     dtype=toNumpyDType(self.client_factories[0].getScalarType()),
                     order=self.order)
         self.rhc_q[6, :] = 1 # initializing to valid identity quaternion
-
-        rospy.init_node('RHC2ROSBridge')
 
         self.handshaker.set_n_nodes(self.n_cols) # signal to RHViz client
         # the number of nodes of the RHC problem
@@ -142,6 +168,9 @@ class Shared2ROSInternal:
             self.client_factories[i].close() # closes servers
 
     def _publish(self):
+        
+        # continously publish also joint names
+        self.robot_jntnames_pub.publish(String(data=self.jnt_names_encoded))
 
         # Publish rhc_q
         self.rhc_q_pub.publish(Float64MultiArray(data=self.rhc_q.flatten()))

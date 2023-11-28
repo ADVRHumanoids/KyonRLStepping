@@ -95,10 +95,13 @@ class RHC2SharedInternal:
             #  null valid data (identity quaternion)
 
     def update(self, 
-            x_opt: np.ndarray):
+            q_opt: np.ndarray):
         
+        # print(f"AAAAAAAAAAA{q_opt.shape[0]}{q_opt.shape[1]}")
+        # print(f"{q_opt}")
+
         # update rhc_q matrix from Horizon solution dictionary
-        self.rhc_q[:, :] = x_opt[0:self.rhc_q.shape[0], 0:self.rhc_q.shape[1]]
+        self.rhc_q[:, :] = q_opt[0:self.rhc_q.shape[0], 0:self.rhc_q.shape[1]]
 
         # writing q to shared memory
         self.server_factories[0].write(self.rhc_q[:, :], 0, 0)
