@@ -25,8 +25,10 @@ class KyonRlSteppingTask(CustomTask):
                 default_jnt_damping = 10.0,
                 default_wheel_stiffness = 0.0,
                 default_wheel_damping = 10.0,
-                jnt_stiffness_at_startup = 50,
-                jnt_damping_at_startup = 5,
+                startup_jnt_stiffness = 50,
+                startup_jnt_damping = 5,
+                startup_wheel_stiffness = 0.0,
+                startup_wheel_damping = 10.0,
                 robot_names = ["kyon0"],
                 robot_pkg_names = ["kyon"],
                 contact_prims = None,
@@ -77,9 +79,11 @@ class KyonRlSteppingTask(CustomTask):
         
         self.cluster_dt = cluster_dt
         self.use_diff_velocities = use_diff_velocities
-
-        self.jnt_stiffness_at_startup = jnt_stiffness_at_startup
-        self.jnt_damping_at_startup = jnt_damping_at_startup
+        
+        self.startup_jnt_stiffness = startup_jnt_stiffness
+        self.startup_jnt_damping = startup_jnt_damping
+        self.startup_wheel_stiffness = startup_wheel_stiffness
+        self.startup_wheel_damping = startup_wheel_damping
         
     def _xrdf_cmds(self):
 

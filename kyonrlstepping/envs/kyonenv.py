@@ -82,10 +82,6 @@ class KyonEnv(RobotVecEnv):
 
                 self.cluster_clients[self.robot_names[i]].solve() # we solve all the underlying TOs in the cluster
                 # (the solve will do nothing unless the cluster is ready)
-
-                # print(f"[{self.__class__.__name__}]" + f"[{self.journal.info}]: " + \
-                #     "cluster client n." + str(i) + " solve time -> " + \
-                #     str(self.cluster_clients[self.robot_names[i]].solution_time))
                 
             if self.cluster_clients[self.robot_names[i]].cluster_ready() and \
                 self.cluster_clients[self.robot_names[i]].controllers_active:
@@ -94,53 +90,11 @@ class KyonEnv(RobotVecEnv):
                     
                     # transition from controllers stopped to active -->
                     # we set the joint impedance controllers to the desired runtime state 
-                
-                    gains_pos = torch.full((self.num_envs, \
-                                            self.task.jnt_imp_controllers[self.robot_names[i]].n_dofs), 
-                                self.task.jnt_stiffness_at_startup, 
-                                device = self.task.torch_device, 
-                                dtype=self.task.torch_dtype)
-                    gains_vel = torch.full((self.num_envs, \
-                                            self.task.jnt_imp_controllers[self.robot_names[i]].n_dofs), 
-                                self.task.jnt_damping_at_startup, 
-                                device = self.task.torch_device, 
-                                dtype=self.task.torch_dtype)
-                    success = self.task.jnt_imp_controllers[self.robot_names[i]].set_gains(
-                                                pos_gains = gains_pos,
-                                                vel_gains = gains_vel)
-                    
-                    if not all(success):
-                        
-                        warning = f"[{self.__class__.__name__}]" + f"[{self.journal.warning}]: " + \
-                        f"impedance controller could not set gains."
 
-                        print(warning)
-
-                    # wheels are velocity-controlled
-                    wheels_indxs = self.task.jnt_imp_controllers[self.robot_names[i]].get_jnt_idxs_matching(
-                                            name_pattern="wheel")
-                    wheels_pos_gains = torch.full((self.num_envs, len(wheels_indxs)), 
-                                                self.task.default_wheel_stiffness, 
-                                                device = self.task.torch_device, 
-                                                dtype=self.task.torch_dtype)
-                    
-                    wheels_vel_gains = torch.full((self.num_envs, len(wheels_indxs)), 
-                                                self.task.default_wheel_damping, 
-                                                device = self.task.torch_device, 
-                                                dtype=self.task.torch_dtype)
-                    
-                    success_wheels = self.task.jnt_imp_controllers[self.robot_names[i]].set_gains(
-                                        pos_gains = wheels_pos_gains,
-                                        vel_gains = wheels_vel_gains,
-                                        jnt_indxs=wheels_indxs)
-
-                    if not all(success_wheels):
-                        
-                        warning = f"[{self.__class__.__name__}]" + f"[{self.journal.warning}]: " + \
-                        f"impedance controller could not set wheel gains."
-
-                        print(warning)
-                        
+                    self.task.update_jnt_imp_control(jnt_stiffness = self.task.startup_jnt_stiffness, 
+                                    jnt_damping = self.task.startup_jnt_damping, 
+                                    wheel_stiffness = self.task.startup_wheel_stiffness, 
+                                    wheel_damping =self.task.startup_wheel_damping)
 
                 self.task.pre_physics_step(robot_name = self.robot_names[i], 
                                 actions = self.cluster_clients[self.robot_names[i]].controllers_cmds)

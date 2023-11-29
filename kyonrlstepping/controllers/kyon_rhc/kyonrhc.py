@@ -23,6 +23,7 @@ class KyonRHC(RHController):
             robot_name: str = "kyon0",
             t_horizon:float = 3.0,
             n_intervals: int = 30,
+            max_solver_iter = 1, # defaults to rt-iteration
             add_data_lenght: int = 2,
             enable_replay = False, 
             verbose = False, 
@@ -33,6 +34,8 @@ class KyonRHC(RHController):
         self.step_counter = 0
         self.sol_counter = 0
 
+        self.max_solver_iter = max_solver_iter
+    
         self.publish_sol = publish_sol
 
         self.robot_name = robot_name
@@ -118,9 +121,10 @@ class KyonRHC(RHController):
                                 base_init=base_init)
         
         self._ti = TaskInterface(prb=self._prb, 
-                                model=self._model, 
-                                debug = self._debug, 
-                                verbose = self._verbose)
+                            model=self._model, 
+                            max_solver_iter=self.max_solver_iter,
+                            debug = self._debug, 
+                            verbose = self._verbose)
         
         self._ti.setTaskFromYaml(self.config_path)
 

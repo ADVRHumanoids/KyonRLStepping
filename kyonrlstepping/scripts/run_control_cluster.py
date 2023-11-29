@@ -25,6 +25,7 @@ def generate_controllers(robot_name: str):
                                 cluster_size=control_cluster_srvr.cluster_size,
                                 robot_name=robot_name,
                                 config_path = kyonrhc_config_path, 
+                                max_solver_iter = max_solver_iter,
                                 verbose = verbose, 
                                 debug = debug,
                                 array_dtype = dtype,
@@ -36,6 +37,8 @@ verbose = True
 debug = True
 
 debug_solution = True
+
+max_solver_iter = 1
 
 perf_timer = PerfSleep()
 
