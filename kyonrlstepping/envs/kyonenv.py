@@ -91,7 +91,8 @@ class KyonEnv(RobotVecEnv):
                     # transition from controllers stopped to active -->
                     # we set the joint impedance controllers to the desired runtime state 
 
-                    self.task.update_jnt_imp_control(jnt_stiffness = self.task.startup_jnt_stiffness, 
+                    self.task.update_jnt_imp_control(robot_name = self.robot_names[i], 
+                                    jnt_stiffness = self.task.startup_jnt_stiffness, 
                                     jnt_damping = self.task.startup_jnt_damping, 
                                     wheel_stiffness = self.task.startup_wheel_stiffness, 
                                     wheel_damping =self.task.startup_wheel_damping)
