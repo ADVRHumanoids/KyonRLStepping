@@ -145,7 +145,7 @@ class RHC2SharedInternal:
         self.server_factory_rhc_q.write(self.rhc_q[:, :], 0, 0)
 
         # writing robot q to shared memory
-
+        
         self.server_factory_robot_q.write(self.robot_q[:, :], 0, 0)
     
     def close(self):
