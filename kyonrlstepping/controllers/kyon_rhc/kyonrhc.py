@@ -309,6 +309,54 @@ class KyonRHC(RHController):
         
         self._prb.setInitialState(x0=xig[:, 0])
     
+    def _assemble_meas_robot_state(self, 
+                        to_numpy: bool = False):
+
+        if to_numpy:
+            
+            return torch.cat((self.robot_state.root_state.get_p(), 
+                    self.robot_state.root_state.get_q(), 
+                    self.robot_state.jnt_state.get_q(), 
+                    self.robot_state.root_state.get_v(), 
+                    self.robot_state.root_state.get_omega(), 
+                    self.robot_state.jnt_state.get_v()), 
+                    dim=1
+                    ).numpy().T
+        
+        if not to_numpy:
+
+            return torch.cat((self.robot_state.root_state.get_p(), 
+                    self.robot_state.root_state.get_q(), 
+                    self.robot_state.jnt_state.get_q(), 
+                    self.robot_state.root_state.get_v(), 
+                    self.robot_state.root_state.get_omega(), 
+                    self.robot_state.jnt_state.get_v()), 
+                    dim=1
+                    ).T
+
+        return 
+    
+    def _assemble_meas_robot_configuration(self, 
+                        to_numpy: bool = False):
+
+        if to_numpy:
+            
+            return torch.cat((self.robot_state.root_state.get_p(), 
+                    self.robot_state.root_state.get_q(), 
+                    self.robot_state.jnt_state.get_q()), 
+                    dim=1
+                    ).numpy().T
+        
+        if not to_numpy:
+
+            return torch.cat((self.robot_state.root_state.get_p(), 
+                    self.robot_state.root_state.get_q(), 
+                    self.robot_state.jnt_state.get_q()), 
+                    dim=1
+                    ).T
+
+        return 
+    
     def _update_closed_loop(self):
 
         # set initial state and initial guess
@@ -319,14 +367,8 @@ class KyonRHC(RHController):
         for i in range(abs(shift_num)):
             xig[:, -1 - i] = x_opt[:, -1]
 
-        robot_state = torch.cat((self.robot_state.root_state.get_p(), 
-                        self.robot_state.root_state.get_q(), 
-                        self.robot_state.jnt_state.get_q(), 
-                        self.robot_state.root_state.get_v(), 
-                        self.robot_state.root_state.get_omega(), 
-                        self.robot_state.jnt_state.get_v()), 
-                        dim=1
-                        )
+        robot_state = self._assemble_meas_robot_state(to_numpy=True)
+
         # robot_state = np.concatenate((xig[0:7, 0].reshape(1, len(xig[0:7, 0])), 
         #                     self.robot_state.jnt_state.q, 
         #                     xig[23:29, 0].reshape(1, len(xig[23:29, 0])), 
@@ -340,55 +382,13 @@ class KyonRHC(RHController):
         self._prb.getState().setInitialGuess(xig)
 
         self._prb.setInitialState(x0=
-                        robot_state.numpy().T
+                        robot_state
                         )
-
-    def _update_semiclosed_loop(self):
-
-        # set initial state and initial guess
-        shift_num = -1
-
-        x_opt =  self._ti.solution['x_opt']
-        xig = np.roll(x_opt, shift_num, axis=1)
-        for i in range(abs(shift_num)):
-            xig[:, -1 - i] = x_opt[:, -1]
-
-        # robot_state = torch.cat((self.robot_state.root_state.get_p(), 
-        #                 self.robot_state.root_state.get_q(), 
-        #                 self.robot_state.jnt_state.get_q(), 
-        #                 self.robot_state.root_state.get_v(), 
-        #                 self.robot_state.root_state.get_omega(), 
-        #                 self.robot_state.jnt_state.get_v()), 
-        #                 dim=1
-        #                 )
-        
-        # using only jnt state from simulator
-        robot_state = np.concatenate((xig[0:7, 0].reshape(1, len(xig[0:7, 0])), 
-                            self.robot_state.jnt_state.q, 
-                            xig[23:29, 0].reshape(1, len(xig[23:29, 0])), 
-                            self.robot_state.jnt_state.v), axis=1).T # only joint states from measurements
-
-        # print("state debug n." + str(self.controller_index) + "\n" + 
-        #     "solver: " + str(xig[:, 0]) + "\n" + 
-        #     "meas.: " + str(robot_state.flatten()) + "\n", 
-        #     "q cmd: " + str(self.robot_cmds.jnt_state.q))
-        
-        self._prb.getState().setInitialGuess(xig)
-        
-        if self.sol_counter == 0:
-            
-            # we only use the real state at the first solution instant
-            self._prb.setInitialState(x0=
-                            robot_state
-                            )
-        else:
-
-            # after, we only use the internal RHC state
-            self._prb.setInitialState(x0=xig[:, 0])
     
     def _publish_rhc_sol_data(self):
 
-        self.rhc2shared_bridge.update(q_opt=self._ti.solution['q'])
+        self.rhc2shared_bridge.update(q_opt=self._ti.solution['q'], 
+                                q_robot=self._assemble_meas_robot_configuration(to_numpy=True))
 
     def _publish_rob_state_data(self):
 
