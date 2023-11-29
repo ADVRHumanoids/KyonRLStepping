@@ -14,6 +14,7 @@ from control_cluster_bridge.utilities.defs import Journal
 from control_cluster_bridge.utilities.shared_mem import SharedMemClient, SharedStringArray
 from control_cluster_bridge.utilities.defs import cluster_size_name
 from control_cluster_bridge.utilities.defs import jnt_names_rhc_name
+from control_cluster_bridge.utilities.defs import env_selector_name
 
 from kyonrlstepping.utils.rhc2shared import RHC2SharedNamings
 
@@ -43,10 +44,17 @@ class Shared2ROSInternal:
         self.cluster_size_clnt = SharedMemClient(name=cluster_size_name(), 
                                     namespace=self.namespace,
                                     dtype=torch.int64, 
-                                    wait_amount=0.05, 
+                                    wait_amount=0.3, 
                                     verbose=self.verbose)
         self.cluster_size_clnt.attach()
         self.cluster_size = self.cluster_size_clnt.tensor_view[0, 0].item()
+
+        self.env_index = SharedMemClient(name=env_selector_name(), 
+                                        namespace=self.namespace, 
+                                        dtype=torch.int64, 
+                                        wait_amount=0.3, 
+                                        verbose=self.verbose)
+        self.env_index.attach()
 
         # shared mem. namings
         self.names = []
@@ -175,21 +183,22 @@ class Shared2ROSInternal:
 
         self._initialized = True
 
-    def update(self, 
-            index: int = 0):
+    def update(self):
         
         success = False
+
+        cluster_idx = self.env_index.tensor_view[0, 0].item()
 
         if self._initialized:
             
             # first read from shared memory so 
 
             # rhc q
-            success = self.client_factories_rhc_q[index].read(self.rhc_q[:, :], 0, 0)
+            success = self.client_factories_rhc_q[cluster_idx].read(self.rhc_q[:, :], 0, 0)
 
             # robot state
 
-            success = self.client_factories_robot_q[index].read(self.robot_q[:, :], 0, 0)
+            success = self.client_factories_robot_q[cluster_idx].read(self.robot_q[:, :], 0, 0)
 
             # publish it on ROS topic
 

@@ -31,11 +31,11 @@ costs:
     - &w_base_pos 10.
     - &w_base_ori 10.
     - &w_ball_z 1.
-    - &w_postural 0.03
-    - &wheel_radius 0.124
+    - &w_postural 0.001
     - &w_jnt_v_reg 0.1
     - &w_jnt_a_reg 0.01
     - &w_jnt_f_reg 0.001
+    - &wheel_radius 0.124
 
 CoM_pose: # actually is not CoM, it's just a Cartesian on the base_link
   type: Cartesian
