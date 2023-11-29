@@ -120,12 +120,12 @@ class KyonEnv(RobotVecEnv):
                     wheels_indxs = self.task.jnt_imp_controllers[self.robot_names[i]].get_jnt_idxs_matching(
                                             name_pattern="wheel")
                     wheels_pos_gains = torch.full((self.num_envs, len(wheels_indxs)), 
-                                                0.0, 
+                                                self.task.default_wheel_stiffness, 
                                                 device = self.task.torch_device, 
                                                 dtype=self.task.torch_dtype)
                     
                     wheels_vel_gains = torch.full((self.num_envs, len(wheels_indxs)), 
-                                                10.0, 
+                                                self.task.default_wheel_damping, 
                                                 device = self.task.torch_device, 
                                                 dtype=self.task.torch_dtype)
                     

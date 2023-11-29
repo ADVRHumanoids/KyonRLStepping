@@ -7,7 +7,7 @@ import torch
 #from stable_baselines3 import PPO
 from kyonrlstepping.envs.kyonenv import KyonEnv 
 
-env = KyonEnv(headless=False, 
+env = KyonEnv(headless=True, 
         enable_livestream=False, 
         enable_viewport=False) # create environment
 
@@ -72,26 +72,28 @@ for i in range(0, len(contact_prims["kyon0"])):
     sensor_radii["kyon0"][contact_prims["kyon0"][i]] = 0.124
                             
 task = KyonRlSteppingTask(cluster_dt = control_clust_dt, 
-                        integration_dt = integration_dt,
-                        num_envs = num_envs, 
-                        cloning_offset = np.array([[0.0, 0.0, 1.3]] * num_envs), 
-                        env_spacing=6,
-                        spawning_radius=1.0, 
-                        use_flat_ground=True, 
-                        pos_iter_increase_factor = 1, # 1 means to default
-                        vel_iter_increase_factor = 1,
-                        default_jnt_stiffness=200.0, 
-                        default_jnt_damping=50.0, 
-                        jnt_stiffness_at_startup = 100,
-                        jnt_damping_at_startup = 10,
-                        robot_names = robot_names,
-                        robot_pkg_names = robot_pkg_names,
-                        contact_prims = contact_prims,
-                        contact_offsets = contact_offsets,
-                        sensor_radii = sensor_radii,
-                        device = device, 
-                        use_diff_velocities = True,
-                        dtype=dtype_torch) # create task
+                    integration_dt = integration_dt,
+                    num_envs = num_envs, 
+                    cloning_offset = np.array([[0.0, 0.0, 1.3]] * num_envs), 
+                    env_spacing=6,
+                    spawning_radius=1.0, 
+                    use_flat_ground=True, 
+                    pos_iter_increase_factor = 1, # 1 means to default
+                    vel_iter_increase_factor = 1,
+                    default_jnt_stiffness=200.0, 
+                    default_jnt_damping=50.0, 
+                    default_wheel_stiffness = 0.0,
+                    default_wheel_damping=200.0,
+                    jnt_stiffness_at_startup = 300,
+                    jnt_damping_at_startup = 80,
+                    robot_names = robot_names,
+                    robot_pkg_names = robot_pkg_names,
+                    contact_prims = contact_prims,
+                    contact_offsets = contact_offsets,
+                    sensor_radii = sensor_radii,
+                    device = device, 
+                    use_diff_velocities = True,
+                    dtype=dtype_torch) # create task
 
 env.set_task(task, 
         backend="torch", 
