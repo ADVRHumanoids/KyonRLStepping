@@ -19,37 +19,30 @@ constraints:
   - z_ball_2
   - z_ball_3
   - z_ball_4
-  # - final_base_xy
   # - base_orientation
 
 costs:
   - CoM_pose
   - joint_regularization
-  - joint_posture
+  # - joint_posture
   - base_orientation
 
 .define:
-    - &w_com 1.
+    - &w_base_pos 10.
     - &w_base_ori 10.
-    - &w_base_xy 10.
     - &w_ball_z 1.
-    - &w_postural 0.1
+    - &w_postural 0.03
     - &wheel_radius 0.124
+    - &w_jnt_v_reg 0.1
+    - &w_jnt_a_reg 0.01
+    - &w_jnt_f_reg 0.001
 
-final_base_xy:
-  type: Cartesian
-  distal_link: base_link
-  indices: [0, 1]
-  nodes: ${range(N-5, N)}
-#  nodes: all
-#  weight: *w_base_xy
-
-CoM_pose:
+CoM_pose: # actually is not CoM, it's just a Cartesian on the base_link
   type: Cartesian
   distal_link: base_link
   indices: [0, 1, 2]
-  nodes: all
-  weight: *w_com
+  nodes: ${range(N-8, N)}
+  weight: *w_base_pos
 
 base_orientation:
   type: Cartesian
@@ -170,11 +163,11 @@ joint_posture:
 # todo: wrong, as the order COUNTS. If I add the contacts after the joint regularization, they wont get considered.
 joint_regularization:
   type: Regularization
-  nodes: all
+  nodes: all # maybe not on first nodes??
   weight:
-#    velocity: 1e-1
-    acceleration: 1e-2 # 0.01
-    force: 1e-3 # todo <----- how to do? if there are more forces...
+    velocity: *w_jnt_v_reg
+    acceleration: *w_jnt_a_reg # 0.01
+    force: *w_jnt_f_reg
 
 z_ball_1:
   type: Cartesian

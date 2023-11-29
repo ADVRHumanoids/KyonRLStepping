@@ -271,13 +271,13 @@ class KyonRHC(RHController):
         
         # wrapping joint q commands between 2pi and -2pi
         # (to be done for the simulator)
-        return torch.tensor(self._ti.solution['q'][7:, 0], 
+        return torch.tensor(self._ti.solution['q'][7:, 1], 
                         dtype=self.array_dtype).reshape(1,  
                                         self.robot_cmds.jnt_cmd.q.shape[1]).fmod(2 * torch.pi)
     
     def _get_cmd_jnt_v_from_sol(self):
 
-        return torch.tensor(self._ti.solution['v'][6:, 0], 
+        return torch.tensor(self._ti.solution['v'][6:, 1], 
                         dtype=self.array_dtype).reshape(1, 
                                         self.robot_cmds.jnt_cmd.v.shape[1])
 
@@ -294,20 +294,6 @@ class KyonRHC(RHController):
         return torch.tensor([self._ti.solution["opt_cost"], 
                             self._ti.solution["n_iter2sol"]], 
                         dtype=self.array_dtype)
-    
-    def _update_open_loop(self):
-
-        # set initial state and initial guess
-        shift_num = -1
-
-        x_opt =  self._ti.solution['x_opt']
-        xig = np.roll(x_opt, shift_num, axis=1)
-        for i in range(abs(shift_num)):
-            xig[:, -1 - i] = x_opt[:, -1]
-
-        self._prb.getState().setInitialGuess(xig)
-        
-        self._prb.setInitialState(x0=xig[:, 0])
     
     def _assemble_meas_robot_state(self, 
                         to_numpy: bool = False):
@@ -357,6 +343,20 @@ class KyonRHC(RHController):
 
         return 
     
+    def _update_open_loop(self):
+
+        # set initial state and initial guess
+        shift_num = -1
+
+        x_opt =  self._ti.solution['x_opt']
+        xig = np.roll(x_opt, shift_num, axis=1)
+        for i in range(abs(shift_num)):
+            xig[:, -1 - i] = x_opt[:, -1]
+
+        self._prb.getState().setInitialGuess(xig)
+        
+        self._prb.setInitialState(x0=xig[:, 0])
+    
     def _update_closed_loop(self):
 
         # set initial state and initial guess
@@ -368,16 +368,6 @@ class KyonRHC(RHController):
             xig[:, -1 - i] = x_opt[:, -1]
 
         robot_state = self._assemble_meas_robot_state(to_numpy=True)
-
-        # robot_state = np.concatenate((xig[0:7, 0].reshape(1, len(xig[0:7, 0])), 
-        #                     self.robot_state.jnt_state.q, 
-        #                     xig[23:29, 0].reshape(1, len(xig[23:29, 0])), 
-        #                     self.robot_state.jnt_state.v), axis=1).T # only joint states from measurements
-
-        # print("state debug n." + str(self.controller_index) + "\n" + 
-        #     "solver: " + str(xig[:, 0]) + "\n" + 
-        #     "meas.: " + str(robot_state.flatten()) + "\n", 
-        #     "q cmd: " + str(self.robot_cmds.jnt_state.q))
         
         self._prb.getState().setInitialGuess(xig)
 
@@ -396,10 +386,10 @@ class KyonRHC(RHController):
         
     def _solve(self):
         
-        self._update_open_loop() # updates the TO ig and 
+        # self._update_open_loop() # updates the TO ig and 
         # initial conditions using data from the solution
 
-        # self._update_closed_loop() # updates the TO ig and 
+        self._update_closed_loop() # updates the TO ig and 
         # # initial conditions using robot measurements
         
         # self._update_semiclosed_loop()
