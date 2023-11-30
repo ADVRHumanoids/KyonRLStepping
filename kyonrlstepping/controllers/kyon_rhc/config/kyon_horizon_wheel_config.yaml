@@ -19,6 +19,7 @@ constraints:
   - z_ball_2
   - z_ball_3
   - z_ball_4
+  # - base_orientation
 
 costs:
   - CoM_pose
@@ -27,12 +28,12 @@ costs:
   - base_orientation
 
 .define:
-    - &w_base_pos 1.
-    - &w_base_ori 1.
+    - &w_base_pos 10.
+    - &w_base_ori 10.
     - &w_ball_z 1.
     - &w_postural 0.001
-    - &w_jnt_v_reg 0.001
-    - &w_jnt_a_reg 0.001
+    - &w_jnt_v_reg 0.1
+    - &w_jnt_a_reg 0.01
     - &w_jnt_f_reg 0.001
     - &wheel_radius 0.124
 
