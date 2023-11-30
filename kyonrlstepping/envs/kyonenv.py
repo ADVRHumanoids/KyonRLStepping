@@ -182,7 +182,7 @@ class KyonEnv(RobotVecEnv):
 
             self.task.jnt_imp_controllers[robot_name].set_refs(
                             pos_ref = self.task.homers[robot_name].get_homing())
-            self.task.jnt_imp_controllers[robot_name].apply_refs()
+            self.task.jnt_imp_controllers[robot_name].apply_cmds()
 
         # self.cluster_client.controllers_cmds.jnt_cmd.v = 
         # self.cluster_client.controllers_cmds.jnt_cmd.eff = 

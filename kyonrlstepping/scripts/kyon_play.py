@@ -7,7 +7,7 @@ import torch
 #from stable_baselines3 import PPO
 from kyonrlstepping.envs.kyonenv import KyonEnv 
 
-env = KyonEnv(headless=True, 
+env = KyonEnv(headless=False, 
         enable_livestream=False, 
         enable_viewport=False) # create environment
 
@@ -93,6 +93,7 @@ task = KyonRlSteppingTask(cluster_dt = control_clust_dt,
                     contact_prims = contact_prims,
                     contact_offsets = contact_offsets,
                     sensor_radii = sensor_radii,
+                    override_art_controller=False,
                     device = device, 
                     use_diff_velocities = True,
                     dtype=dtype_torch) # create task

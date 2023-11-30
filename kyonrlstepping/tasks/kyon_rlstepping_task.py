@@ -35,6 +35,7 @@ class KyonRlSteppingTask(CustomTask):
                 contact_offsets = None,
                 sensor_radii = None,
                 use_diff_velocities = True,
+                override_art_controller = False,
                 dtype = torch.float64) -> None:
 
         if cloning_offset is None:
@@ -72,6 +73,7 @@ class KyonRlSteppingTask(CustomTask):
                     default_jnt_damping = default_jnt_damping,
                     default_wheel_stiffness = default_wheel_stiffness,
                     default_wheel_damping = default_wheel_damping,
+                    override_art_controller = override_art_controller,
                     dtype = dtype, 
                     self_collide = [False] * len(robot_names), 
                     fix_base = [False] * len(robot_names),
@@ -119,7 +121,7 @@ class KyonRlSteppingTask(CustomTask):
                                         vel_ref = actions.jnt_cmd.v, 
                                         eff_ref = actions.jnt_cmd.eff)
                     
-            self.jnt_imp_controllers[robot_name].apply_refs()
+            self.jnt_imp_controllers[robot_name].apply_cmds()
             
             # print("cmd debug" + "\n" + 
             #         "q_cmd: " + str(actions.jnt_cmd.q) + "\n" + 
