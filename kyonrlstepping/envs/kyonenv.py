@@ -51,8 +51,6 @@ class KyonEnv(RobotVecEnv):
                         debug = debug, 
                         robot_name=self.robot_names[i])
         
-        self.init_jnt_cmd_to_safe_vals()
-
         self._is_cluster_ready = False
         
         self.controllers_were_active = False
@@ -75,6 +73,8 @@ class KyonEnv(RobotVecEnv):
 
             if self.cluster_clients[self.robot_names[i]].is_cluster_instant(index):
                 
+                # RHC solutions are updated at a different rate wrt the integration dt
+
                 # assign last robot state observation to the cluster client
                 self.update_cluster_state(self.robot_names[i], index)
 
@@ -86,6 +86,7 @@ class KyonEnv(RobotVecEnv):
             if self.cluster_clients[self.robot_names[i]].cluster_ready() and \
                 self.cluster_clients[self.robot_names[i]].controllers_active:
                 
+                # this runs at a rata = simulation dt, with latest available RHC solution
                 if not self.controllers_were_active:
                     
                     # transition from controllers stopped to active -->
@@ -103,6 +104,9 @@ class KyonEnv(RobotVecEnv):
                 self.controllers_were_active = self.cluster_clients[self.robot_names[i]].controllers_active
 
             else:
+                
+                # either cluster is not ready yet (initializing) or the RHC controllers
+                # are not active yet
 
                 self.task.pre_physics_step(robot_name = self.robot_names[i],
                                 actions = None)
@@ -129,11 +133,7 @@ class KyonEnv(RobotVecEnv):
         
         self._world.step(render=self._render)
 
-        observations = self.task.get_observations()
-
-        self.init_jnt_cmd_to_safe_vals()
-
-        return observations
+        return None
     
     def update_cluster_state(self, 
                         robot_name: str, 
@@ -173,19 +173,6 @@ class KyonEnv(RobotVecEnv):
                         f"Contact state from link {contact_link} cannot be retrieved in IsaacSim if using use_gpu_pipeline is set to True!"
 
                     print(warning)
-
-    def init_jnt_cmd_to_safe_vals(self):
-        
-        for i in range(len(self.robot_names)):
-            
-            robot_name = self.robot_names[i]
-
-            self.task.jnt_imp_controllers[robot_name].set_refs(
-                            pos_ref = self.task.homers[robot_name].get_homing())
-            self.task.jnt_imp_controllers[robot_name].apply_cmds()
-
-        # self.cluster_client.controllers_cmds.jnt_cmd.v = 
-        # self.cluster_client.controllers_cmds.jnt_cmd.eff = 
 
     def close(self):
 

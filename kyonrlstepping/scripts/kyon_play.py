@@ -38,8 +38,8 @@ else:
 
 device = sim_params["device"]
 
-control_clust_dt = sim_params["integration_dt"] * 2
 integration_dt = sim_params["integration_dt"]
+control_clust_dt = integration_dt * 2
 
 dtype = "float32" # Isaac requires data to be float32, so this should not be touched
 if dtype == "float64":
@@ -83,11 +83,11 @@ task = KyonRlSteppingTask(cluster_dt = control_clust_dt,
                     default_jnt_stiffness=200.0, 
                     default_jnt_damping=50.0, 
                     default_wheel_stiffness = 0.0,
-                    default_wheel_damping=30.0,
-                    startup_jnt_stiffness = 100,
-                    startup_jnt_damping = 10,
+                    default_wheel_damping=10.0,
+                    startup_jnt_stiffness = 50,
+                    startup_jnt_damping = 5,
                     startup_wheel_stiffness = 0.0,
-                    startup_wheel_damping=100.0,
+                    startup_wheel_damping=10.0,
                     robot_names = robot_names,
                     robot_pkg_names = robot_pkg_names,
                     contact_prims = contact_prims,
@@ -108,7 +108,6 @@ env.set_task(task,
 
 # Run inference on the trained policy
 #model = PPO.load("ppo_cartpole")
-# env._world.reset()
 obs = env.reset()
 # env._world.pause()
 

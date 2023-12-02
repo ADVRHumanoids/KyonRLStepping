@@ -21,8 +21,8 @@ class KyonRHC(RHController):
             config_path: str,
             cluster_size: int, # needed by shared mem manager
             robot_name: str = "kyon0",
-            t_horizon:float = 3.0,
-            n_intervals: int = 30,
+            n_intervals:float = 25,
+            dt: float = 0.02,
             max_solver_iter = 1, # defaults to rt-iteration
             add_data_lenght: int = 2,
             enable_replay = False, 
@@ -41,8 +41,10 @@ class KyonRHC(RHController):
         self.robot_name = robot_name
         
         self._enable_replay = enable_replay
-        self._t_horizon = t_horizon
+        
         self._n_intervals = n_intervals
+        self._dt = dt
+        self._t_horizon = self._n_intervals * self._dt
 
         self.config_path = config_path
 
@@ -85,7 +87,8 @@ class KyonRHC(RHController):
     def _init_problem(self):
         
         print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + \
-              f"[{self.journal.status}]" + ": initializing RHC problem")
+                f"[{self.journal.status}]" + ": initializing RHC problem " + \
+                f"with dt: {self._dt} s, t_horizon: {self._t_horizon} s, n_intervals: {self._n_intervals}")
 
         self.urdf = self.urdf.replace('continuous', 'revolute') # continous joint is parametrized
         # in So2, so will add 
@@ -94,7 +97,6 @@ class KyonRHC(RHController):
 
         self._assign_server_side_jnt_names(self._get_robot_jnt_names())
 
-        self._dt = self._t_horizon / self._n_intervals
         self._prb = Problem(self._n_intervals, 
                         receding=True, 
                         casadi_type=cs.SX)
@@ -390,10 +392,10 @@ class KyonRHC(RHController):
         
     def _solve(self):
         
-        # self._update_open_loop() # updates the TO ig and 
+        self._update_open_loop() # updates the TO ig and 
         # initial conditions using data from the solution
 
-        self._update_closed_loop() # updates the TO ig and 
+        # self._update_closed_loop() # updates the TO ig and 
         # # initial conditions using robot measurements
         
         # self._update_semiclosed_loop()

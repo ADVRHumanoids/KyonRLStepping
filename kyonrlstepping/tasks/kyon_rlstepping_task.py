@@ -113,26 +113,33 @@ class KyonRlSteppingTask(CustomTask):
     def pre_physics_step(self, 
             robot_name: str, 
             actions: RobotClusterCmd = None) -> None:
+
+        # always updated imp. controller internal state
+        self.jnt_imp_controllers[robot_name].update_state(pos = self.jnts_q[robot_name], 
+                                                    vel = self.jnts_v[robot_name],
+                                                    eff = None)
         
         if actions is not None:
             
+            # if new actions are received, also update references
             self.jnt_imp_controllers[robot_name].set_refs(
                                         pos_ref = actions.jnt_cmd.q, 
                                         vel_ref = actions.jnt_cmd.v, 
                                         eff_ref = actions.jnt_cmd.eff)
-                    
-            self.jnt_imp_controllers[robot_name].apply_cmds()
             
             # print("cmd debug" + "\n" + 
             #         "q_cmd: " + str(actions.jnt_cmd.q) + "\n" + 
             #         "v_cmd: " + str(actions.jnt_cmd.v) + "\n" + 
             #         "eff_cmd: " + str(actions.jnt_cmd.eff))
+        
+        # jnt imp. controller actions are always applied
+        self.jnt_imp_controllers[robot_name].apply_cmds()
 
     def get_observations(self):
         
         if self.use_diff_velocities:
-
-            self._get_robots_state(self.integration_dt) # updates robot states
+            
+            self._get_robots_state(dt = self.integration_dt) # updates robot states
             # but velocities are obtained via num. differentiation
         
         else:
