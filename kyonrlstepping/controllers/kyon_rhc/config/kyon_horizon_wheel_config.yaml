@@ -24,16 +24,16 @@ constraints:
 costs:
   - CoM_pose
   - joint_regularization
-  # - joint_posture
+  - joint_posture
   - base_orientation
 
 .define:
     - &w_base_pos 10.
     - &w_base_ori 10.
     - &w_ball_z 1.
-    - &w_postural 0.001
-    - &w_jnt_v_reg 0.1
-    - &w_jnt_a_reg 0.01
+    - &w_postural 0.01
+    - &w_jnt_v_reg 0.001
+    - &w_jnt_a_reg 0.001
     - &w_jnt_f_reg 0.001
     - &wheel_radius 0.124
 
