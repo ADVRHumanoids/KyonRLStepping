@@ -24,31 +24,31 @@ constraints:
 costs:
   - CoM_pose
   - joint_regularization
-  - joint_posture
+  # - joint_posture
   - base_orientation
 
 .define:
     - &w_base_pos 10.
     - &w_base_ori 10.
-    - &w_ball_z 1.
-    - &w_postural 0.01
-    - &w_jnt_v_reg 0.001
-    - &w_jnt_a_reg 0.001
-    - &w_jnt_f_reg 0.001
+    - &w_ball_z 10.
+    # - &w_postural 0.01
+    # - &w_jnt_v_reg 0.001
+    - &w_jnt_a_reg 0.01
+    - &w_jnt_f_reg 0.01
     - &wheel_radius 0.124
 
 CoM_pose: # actually is not CoM, it's just a Cartesian on the base_link
   type: Cartesian
   distal_link: base_link
   indices: [0, 1, 2]
-  nodes: ${range(N-8, N)}
+  nodes: ${N}
   weight: *w_base_pos
 
 base_orientation:
   type: Cartesian
   distal_link: base_link
   indices: [3, 4, 5]
-  nodes: ${range(N-8, N)}
+  nodes: ${N}
   weight: *w_base_ori
 
 # ===============================
@@ -151,21 +151,21 @@ ball_4_contact:
   type: Contact
   subtask: [interaction_wheel_4, rolling_contact_4]
 
-joint_posture:
-  type: Postural
-  weight: *w_postural
-  indices: [0, 1, 2,
-            4, 5, 6,
-            8, 9, 10,
-            12, 13, 14]
-  nodes: all
+# joint_posture:
+#   type: Postural
+#   weight: *w_postural
+#   indices: [0, 1, 2,
+#             4, 5, 6,
+#             8, 9, 10,
+#             12, 13, 14]
+#   nodes: ${range(N-8, N)}
 
 # todo: wrong, as the order COUNTS. If I add the contacts after the joint regularization, they wont get considered.
 joint_regularization:
   type: Regularization
   nodes: all # maybe not on first nodes??
   weight:
-    velocity: *w_jnt_v_reg
+    # velocity: *w_jnt_v_reg
     acceleration: *w_jnt_a_reg # 0.01
     force: *w_jnt_f_reg
 

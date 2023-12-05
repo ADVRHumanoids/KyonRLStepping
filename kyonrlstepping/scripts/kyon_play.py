@@ -7,7 +7,7 @@ import torch
 #from stable_baselines3 import PPO
 from kyonrlstepping.envs.kyonenv import KyonEnv 
 
-env = KyonEnv(headless=False, 
+env = KyonEnv(headless=True, 
         enable_livestream=False, 
         enable_viewport=False) # create environment
 
