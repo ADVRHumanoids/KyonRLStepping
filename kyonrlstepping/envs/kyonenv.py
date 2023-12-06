@@ -9,6 +9,7 @@ class KyonEnv(RobotVecEnv):
 
     def set_task(self, 
                 task, 
+                cluster_dt: float, 
                 backend="torch", 
                 sim_params=None, 
                 init_sim=True, 
@@ -24,6 +25,7 @@ class KyonEnv(RobotVecEnv):
         self.robot_names = self.task.robot_names
         self.robot_pkg_names = self.task.robot_pkg_names
         self.cluster_clients = {}
+        self.cluster_dt = cluster_dt
 
         # now the task and the simulation is guaranteed to be initialized
         # -> we have the data to initialize the cluster client
@@ -41,7 +43,7 @@ class KyonEnv(RobotVecEnv):
 
             self.cluster_clients[self.robot_names[i]] = KyonRHClusterClient(cluster_size=task.num_envs, 
                         device=task.torch_device, 
-                        cluster_dt=task.cluster_dt, 
+                        cluster_dt=self.cluster_dt, 
                         control_dt=task.integration_dt, 
                         jnt_names = task.robot_dof_names[self.robot_names[i]], 
                         n_contact_sensors = n_contact_sensors,
@@ -60,7 +62,7 @@ class KyonEnv(RobotVecEnv):
         actions = None):
         
         for i in range(len(self.robot_names)):
-
+            
             if self.cluster_clients[self.robot_names[i]].is_first_control_step():
                 
                 # first time the cluster is ready (i.e. the controllers are ready and connected)

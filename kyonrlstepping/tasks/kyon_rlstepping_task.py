@@ -1,6 +1,7 @@
 from omni_robo_gym.tasks.custom_task import CustomTask
 
 from control_cluster_bridge.utilities.control_cluster_defs import RobotClusterCmd
+from control_cluster_bridge.utilities.control_cluster_defs import JntImpCntrlData
 
 import numpy as np
 import torch
@@ -9,34 +10,34 @@ from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_isaac
 
 class KyonRlSteppingTask(CustomTask):
     def __init__(self, 
-                cluster_dt: float, 
-                integration_dt: float,
-                num_envs = 1,
-                device = "cuda", 
-                cloning_offset: np.array = None,
-                replicate_physics: bool = True,
-                pos_iter_increase_factor: int = 1,
-                vel_iter_increase_factor: int = 1,
-                offset=None, 
-                env_spacing = 5.0, 
-                spawning_radius = 1.0, 
-                use_flat_ground = True,
-                default_jnt_stiffness = 100.0,
-                default_jnt_damping = 10.0,
-                default_wheel_stiffness = 0.0,
-                default_wheel_damping = 10.0,
-                startup_jnt_stiffness = 50,
-                startup_jnt_damping = 5,
-                startup_wheel_stiffness = 0.0,
-                startup_wheel_damping = 10.0,
-                robot_names = ["kyon0"],
-                robot_pkg_names = ["kyon"],
-                contact_prims = None,
-                contact_offsets = None,
-                sensor_radii = None,
-                use_diff_velocities = True,
-                override_art_controller = False,
-                dtype = torch.float64) -> None:
+            integration_dt: float,
+            num_envs = 1,
+            device = "cuda", 
+            cloning_offset: np.array = None,
+            replicate_physics: bool = True,
+            pos_iter_increase_factor: int = 1,
+            vel_iter_increase_factor: int = 1,
+            offset=None, 
+            env_spacing = 5.0, 
+            spawning_radius = 1.0, 
+            use_flat_ground = True,
+            default_jnt_stiffness = 100.0,
+            default_jnt_damping = 10.0,
+            default_wheel_stiffness = 0.0,
+            default_wheel_damping = 10.0,
+            startup_jnt_stiffness = 50,
+            startup_jnt_damping = 5,
+            startup_wheel_stiffness = 0.0,
+            startup_wheel_damping = 10.0,
+            robot_names = ["kyon0"],
+            robot_pkg_names = ["kyon"],
+            contact_prims = None,
+            contact_offsets = None,
+            sensor_radii = None,
+            use_diff_velocities = True,
+            override_art_controller = False,
+            debug_jnt_imp_control = False,
+            dtype = torch.float64) -> None:
 
         if cloning_offset is None:
         
@@ -79,14 +80,91 @@ class KyonRlSteppingTask(CustomTask):
                     fix_base = [False] * len(robot_names),
                     merge_fixed = [True] * len(robot_names))
         
-        self.cluster_dt = cluster_dt
         self.use_diff_velocities = use_diff_velocities
         
+        self.debug_jnt_imp_control = debug_jnt_imp_control
+
         self.startup_jnt_stiffness = startup_jnt_stiffness
         self.startup_jnt_damping = startup_jnt_damping
         self.startup_wheel_stiffness = startup_wheel_stiffness
         self.startup_wheel_damping = startup_wheel_damping
-        
+
+        self.jnt_imp_cntrl_shared_data = {}
+    
+    def _custom_post_init(self):
+
+        # will be called at the end of the post-initialization steps
+
+        for i in range(0, len(self.robot_names)):
+            
+            robot_name = self.robot_names[i]
+
+            from SharsorIPCpp.PySharsorIPC import VLevel
+
+            self.jnt_imp_cntrl_shared_data[robot_name] = JntImpCntrlData(is_server = True, 
+                                                        n_envs = self.num_envs, 
+                                                        n_jnts = self.robot_n_dofs[robot_name],
+                                                        jnt_names = self.jnt_imp_controllers[robot_name].jnts_names,
+                                                        namespace = robot_name, 
+                                                        verbose = True, 
+                                                        vlevel = VLevel.V3)
+
+            self.jnt_imp_cntrl_shared_data[robot_name].run()
+            
+    def _update_jnt_imp_cntrl_shared_data(self):
+
+        if self.debug_jnt_imp_control:
+
+            for i in range(0, len(self.robot_names)):
+            
+                robot_name = self.robot_names[i]
+
+                success = True
+
+                # updated all the jnt impedance data
+                success = self.jnt_imp_cntrl_shared_data[robot_name].pos_err_view.write(
+                    self.jnt_imp_controllers[robot_name].pos_err()
+                    ) and success
+                success = self.jnt_imp_cntrl_shared_data[robot_name].vel_err_view.write(
+                    self.jnt_imp_controllers[robot_name].vel_err()
+                    ) and success
+                success = self.jnt_imp_cntrl_shared_data[robot_name].pos_gains_view.write(
+                    self.jnt_imp_controllers[robot_name].pos_gains()
+                    ) and success
+                success = self.jnt_imp_cntrl_shared_data[robot_name].vel_gains_view.write(
+                    self.jnt_imp_controllers[robot_name].vel_gains()
+                    ) and success
+                success = self.jnt_imp_cntrl_shared_data[robot_name].eff_ff_view.write(
+                    self.jnt_imp_controllers[robot_name].eff_ref()
+                    ) and success
+                success = self.jnt_imp_cntrl_shared_data[robot_name].pos_view.write(
+                    self.jnt_imp_controllers[robot_name].pos()
+                    ) and success
+                success = self.jnt_imp_cntrl_shared_data[robot_name].pos_ref_view.write(
+                    self.jnt_imp_controllers[robot_name].pos_ref()
+                    ) and success
+                success = self.jnt_imp_cntrl_shared_data[robot_name].vel_view.write(
+                    self.jnt_imp_controllers[robot_name].vel()
+                    ) and success
+                success = self.jnt_imp_cntrl_shared_data[robot_name].vel_ref_view.write(
+                    self.jnt_imp_controllers[robot_name].vel_ref()
+                    ) and success
+                success = self.jnt_imp_cntrl_shared_data[robot_name].eff_view.write(
+                    self.jnt_imp_controllers[robot_name].eff()
+                    ) and success
+                success = self.jnt_imp_cntrl_shared_data[robot_name].imp_eff_view.write(
+                    self.jnt_imp_controllers[robot_name].imp_eff()
+                    ) and success
+
+                if not success:
+                    
+                    message = f"[{self.__class__.__name__}]" + \
+                        f"[{self.journal.status}]" + \
+                        ": Could not update all jnt. imp. controller info on shared memory," + \
+                        " probably because the data was already owned at the time of writing. Data might be lost"
+
+                    print(message)
+
     def _xrdf_cmds(self):
 
         n_robots = len(self.robot_names)
@@ -115,10 +193,18 @@ class KyonRlSteppingTask(CustomTask):
             actions: RobotClusterCmd = None) -> None:
 
         # always updated imp. controller internal state
-        self.jnt_imp_controllers[robot_name].update_state(pos = self.jnts_q[robot_name], 
+        success = self.jnt_imp_controllers[robot_name].update_state(pos = self.jnts_q[robot_name], 
                                                     vel = self.jnts_v[robot_name],
                                                     eff = None)
         
+        if not all(success):
+            
+            print(success)
+
+            exception = "Could not update the whole joint impedance state!!"
+            
+            raise Exception(exception)
+
         if actions is not None:
             
             # if new actions are received, also update references
@@ -134,6 +220,8 @@ class KyonRlSteppingTask(CustomTask):
         
         # jnt imp. controller actions are always applied
         self.jnt_imp_controllers[robot_name].apply_cmds()
+
+        self._update_jnt_imp_cntrl_shared_data() # only if flag is enabled
 
     def get_observations(self):
         
@@ -166,3 +254,12 @@ class KyonRlSteppingTask(CustomTask):
         # self.resets = resets
 
         return True
+
+    def terminate(self):
+
+        for i in range(0, len(self.robot_names)):
+            
+            robot_name = self.robot_names[i]
+
+            # closing shared memory
+            self.jnt_imp_cntrl_shared_data[robot_name].terminate()

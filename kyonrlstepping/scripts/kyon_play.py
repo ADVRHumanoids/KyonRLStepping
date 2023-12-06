@@ -7,22 +7,12 @@ import torch
 #from stable_baselines3 import PPO
 from kyonrlstepping.envs.kyonenv import KyonEnv 
 
-env = KyonEnv(headless=True, 
-        enable_livestream=False, 
-        enable_viewport=False) # create environment
-
-# now we can import the task (not before, since Omni plugins are loaded 
-# upon environment initialization)
-from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
-
-from omni_robo_gym.utils.shared_sim_info import SharedSimInfo
-
 print_sim_info = False
 
-num_envs = 3 # 9, 3, 5
+num_envs = 1 # 9, 3, 5
 sim_params = {}
 sim_params["use_gpu_pipeline"] = False
-sim_params["integration_dt"] = 1.0/100.0
+sim_params["integration_dt"] = 1.0/1000.0
 sim_params["rendering_dt"] = sim_params["integration_dt"]
 sim_params["substeps"] = 1
 sim_params["gravity"] = np.array([0.0, 0.0, -9.81])
@@ -39,7 +29,7 @@ else:
 device = sim_params["device"]
 
 integration_dt = sim_params["integration_dt"]
-control_clust_dt = integration_dt * 2
+control_clust_dt = 0.04 # [s]
 
 dtype = "float32" # Isaac requires data to be float32, so this should not be touched
 if dtype == "float64":
@@ -70,35 +60,46 @@ sensor_radii["kyon0"] = {}
 for i in range(0, len(contact_prims["kyon0"])):
     
     sensor_radii["kyon0"][contact_prims["kyon0"][i]] = 0.124
+
+env = KyonEnv(headless=True, 
+        enable_livestream=False, 
+        enable_viewport=False) # create environment
+
+# now we can import the task (not before, since Omni plugins are loaded 
+# upon environment initialization)
+from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
+
+from omni_robo_gym.utils.shared_sim_info import SharedSimInfo
                             
-task = KyonRlSteppingTask(cluster_dt = control_clust_dt, 
-                    integration_dt = integration_dt,
-                    num_envs = num_envs, 
-                    cloning_offset = np.array([[0.0, 0.0, 1.3]] * num_envs), 
-                    env_spacing=6,
-                    spawning_radius=1.0, 
-                    use_flat_ground=True, 
-                    pos_iter_increase_factor = 1, # 1 means to default
-                    vel_iter_increase_factor = 1,
-                    default_jnt_stiffness=200.0, 
-                    default_jnt_damping=50.0, 
-                    default_wheel_stiffness = 0.0,
-                    default_wheel_damping=10.0,
-                    startup_jnt_stiffness = 50,
-                    startup_jnt_damping = 5,
-                    startup_wheel_stiffness = 0.0,
-                    startup_wheel_damping=10.0,
-                    robot_names = robot_names,
-                    robot_pkg_names = robot_pkg_names,
-                    contact_prims = contact_prims,
-                    contact_offsets = contact_offsets,
-                    sensor_radii = sensor_radii,
-                    override_art_controller=False,
-                    device = device, 
-                    use_diff_velocities = True,
-                    dtype=dtype_torch) # create task
+task = KyonRlSteppingTask(integration_dt = integration_dt,
+                num_envs = num_envs, 
+                cloning_offset = np.array([[0.0, 0.0, 1.3]] * num_envs), 
+                env_spacing=6,
+                spawning_radius=1.0, 
+                use_flat_ground=True, 
+                pos_iter_increase_factor = 1, # 1 means to default
+                vel_iter_increase_factor = 1,
+                default_jnt_stiffness=200.0, 
+                default_jnt_damping=50.0, 
+                default_wheel_stiffness = 0.0,
+                default_wheel_damping=10.0,
+                startup_jnt_stiffness = 0,
+                startup_jnt_damping = 0,
+                startup_wheel_stiffness = 0.0,
+                startup_wheel_damping=10.0,
+                robot_names = robot_names,
+                robot_pkg_names = robot_pkg_names,
+                contact_prims = contact_prims,
+                contact_offsets = contact_offsets,
+                sensor_radii = sensor_radii,
+                override_art_controller=True,
+                device = device, 
+                use_diff_velocities = True,
+                debug_jnt_imp_control = True, # writes jnt imp. controller info on shared mem
+                dtype=dtype_torch) # create task
 
 env.set_task(task, 
+        cluster_dt = control_clust_dt,
         backend="torch", 
         sim_params = sim_params, 
         np_array_dtype = dtype_np, 
@@ -184,9 +185,10 @@ while env._simulation_app.is_running():
     # print("Number of contacts:")
     # print(contact_report['number_of_contacts'])
 
-
 print("[main][info]: closing environment and simulation")
 
 shared_sim_info.terminate()
+
+task.terminate()
 
 env.close()

@@ -24,17 +24,17 @@ constraints:
 costs:
   - CoM_pose
   - joint_regularization
-  # - joint_posture
+  - joint_posture
   - base_orientation
 
 .define:
-    - &w_base_pos 10.
-    - &w_base_ori 10.
-    - &w_ball_z 10.
-    # - &w_postural 0.01
-    # - &w_jnt_v_reg 0.001
-    - &w_jnt_a_reg 0.01
-    - &w_jnt_f_reg 0.01
+    - &w_base_pos 1
+    - &w_base_ori 1
+    - &w_ball_z 1
+    # - &w_postural 0.0001
+    - &w_jnt_v_reg 0.001
+    - &w_jnt_a_reg 0.001
+    - &w_jnt_f_reg 0.00001
     - &wheel_radius 0.124
 
 CoM_pose: # actually is not CoM, it's just a Cartesian on the base_link
@@ -166,7 +166,7 @@ joint_regularization:
   nodes: all # maybe not on first nodes??
   weight:
     # velocity: *w_jnt_v_reg
-    acceleration: *w_jnt_a_reg # 0.01
+    acceleration: *w_jnt_a_reg 
     force: *w_jnt_f_reg
 
 z_ball_1:
