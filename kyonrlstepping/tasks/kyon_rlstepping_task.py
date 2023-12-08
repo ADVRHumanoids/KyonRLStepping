@@ -123,37 +123,37 @@ class KyonRlSteppingTask(CustomTask):
 
                 # updated all the jnt impedance data
                 success = self.jnt_imp_cntrl_shared_data[robot_name].pos_err_view.write(
-                    self.jnt_imp_controllers[robot_name].pos_err()
+                    self.jnt_imp_controllers[robot_name].pos_err(), 0, 0
                     ) and success
                 success = self.jnt_imp_cntrl_shared_data[robot_name].vel_err_view.write(
-                    self.jnt_imp_controllers[robot_name].vel_err()
+                    self.jnt_imp_controllers[robot_name].vel_err(), 0, 0
                     ) and success
                 success = self.jnt_imp_cntrl_shared_data[robot_name].pos_gains_view.write(
-                    self.jnt_imp_controllers[robot_name].pos_gains()
+                    self.jnt_imp_controllers[robot_name].pos_gains(), 0, 0
                     ) and success
                 success = self.jnt_imp_cntrl_shared_data[robot_name].vel_gains_view.write(
-                    self.jnt_imp_controllers[robot_name].vel_gains()
+                    self.jnt_imp_controllers[robot_name].vel_gains(), 0, 0
                     ) and success
                 success = self.jnt_imp_cntrl_shared_data[robot_name].eff_ff_view.write(
-                    self.jnt_imp_controllers[robot_name].eff_ref()
+                    self.jnt_imp_controllers[robot_name].eff_ref(), 0, 0
                     ) and success
                 success = self.jnt_imp_cntrl_shared_data[robot_name].pos_view.write(
-                    self.jnt_imp_controllers[robot_name].pos()
+                    self.jnt_imp_controllers[robot_name].pos(), 0, 0
                     ) and success
                 success = self.jnt_imp_cntrl_shared_data[robot_name].pos_ref_view.write(
-                    self.jnt_imp_controllers[robot_name].pos_ref()
+                    self.jnt_imp_controllers[robot_name].pos_ref(), 0, 0
                     ) and success
                 success = self.jnt_imp_cntrl_shared_data[robot_name].vel_view.write(
-                    self.jnt_imp_controllers[robot_name].vel()
+                    self.jnt_imp_controllers[robot_name].vel(), 0, 0
                     ) and success
                 success = self.jnt_imp_cntrl_shared_data[robot_name].vel_ref_view.write(
-                    self.jnt_imp_controllers[robot_name].vel_ref()
+                    self.jnt_imp_controllers[robot_name].vel_ref(), 0, 0
                     ) and success
                 success = self.jnt_imp_cntrl_shared_data[robot_name].eff_view.write(
-                    self.jnt_imp_controllers[robot_name].eff()
+                    self.jnt_imp_controllers[robot_name].eff(), 0, 0
                     ) and success
                 success = self.jnt_imp_cntrl_shared_data[robot_name].imp_eff_view.write(
-                    self.jnt_imp_controllers[robot_name].imp_eff()
+                    self.jnt_imp_controllers[robot_name].imp_eff(), 0, 0
                     ) and success
 
                 if not success:
