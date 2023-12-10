@@ -174,7 +174,7 @@ class Shared2ROSInternal:
         
         self.robot_q = np.zeros((self.n_rows, 1),
                     dtype=toNumpyDType(self.client_factories_robot_q[0].getScalarType()),
-                    order='C' # to circumvent Numpy bug when slicing 2D matrices as 1D forcing Fortran ordering
+                    order=self.order
                     )
         self.robot_q[6, :] = 1 # initializing to valid identity quaternion
 
@@ -244,7 +244,7 @@ class Shared2ROSInternal:
                                             basename = "",
                                             namespace = self.names[i].get_rhc_q_name(), 
                                             verbose = self.verbose, 
-                                            vlevel = VLevel.V3, 
+                                            vlevel = VLevel.V2, 
                                             dtype = dtype.Float,
                                             layout = self.layout)
                                         )
@@ -262,7 +262,7 @@ class Shared2ROSInternal:
                                             basename = "",
                                             namespace = self.names[i].get_robot_q_name(), 
                                             verbose = self.verbose, 
-                                            vlevel = VLevel.V3, 
+                                            vlevel = VLevel.V2, 
                                             dtype = dtype.Float,
                                             layout = ColMajor # ColMajor to circumvent Numpy bug when slicing 2D matrices as 1D
                                             )

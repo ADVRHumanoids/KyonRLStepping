@@ -107,7 +107,7 @@ class KyonRlSteppingTask(CustomTask):
                                                         jnt_names = self.jnt_imp_controllers[robot_name].jnts_names,
                                                         namespace = robot_name, 
                                                         verbose = True, 
-                                                        vlevel = VLevel.V3)
+                                                        vlevel = VLevel.V2)
 
             self.jnt_imp_cntrl_shared_data[robot_name].run()
             

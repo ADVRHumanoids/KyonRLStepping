@@ -162,7 +162,7 @@ class RHC2SharedInternal:
                                         basename = "",
                                         namespace = self.names.get_rhc_q_name(), 
                                         verbose = self.verbose, 
-                                        vlevel = VLevel.V3, 
+                                        vlevel = VLevel.V2, 
                                         force_reconnection = False, 
                                         dtype = dtype.Float,
                                         layout = self.layout)
@@ -172,7 +172,7 @@ class RHC2SharedInternal:
                                         basename = "",
                                         namespace = self.names.get_robot_q_name(), 
                                         verbose = self.verbose, 
-                                        vlevel = VLevel.V3, 
+                                        vlevel = VLevel.V2, 
                                         force_reconnection = False, 
                                         dtype = dtype.Float,
                                         layout = ColMajor # ColMajor to circumvent Numpy bug when slicing 2D matrices as 1D
