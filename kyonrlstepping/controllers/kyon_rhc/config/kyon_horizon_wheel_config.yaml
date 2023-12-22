@@ -28,13 +28,13 @@ costs:
   - base_orientation
 
 .define:
-    - &w_base_pos 1
+    - &w_base_pos 100
     - &w_base_ori 1
     - &w_ball_z 1
     # - &w_postural 0.0001
-    - &w_jnt_v_reg 0.001
+    - &w_jnt_v_reg 0.01
     - &w_jnt_a_reg 0.001
-    - &w_jnt_f_reg 0.00001
+    - &w_jnt_f_reg 0.0001
     - &wheel_radius 0.124
 
 CoM_pose: # actually is not CoM, it's just a Cartesian on the base_link
@@ -165,7 +165,7 @@ joint_regularization:
   type: Regularization
   nodes: all # maybe not on first nodes??
   weight:
-    # velocity: *w_jnt_v_reg
+    velocity: *w_jnt_v_reg
     acceleration: *w_jnt_a_reg 
     force: *w_jnt_f_reg
 

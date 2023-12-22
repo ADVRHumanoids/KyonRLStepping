@@ -61,7 +61,7 @@ for i in range(0, len(contact_prims["kyon0"])):
     
     sensor_radii["kyon0"][contact_prims["kyon0"][i]] = 0.124
 
-env = KyonEnv(headless=True, 
+env = KyonEnv(headless=False, 
         enable_livestream=False, 
         enable_viewport=False) # create environment
 
@@ -83,7 +83,7 @@ task = KyonRlSteppingTask(integration_dt = integration_dt,
                 default_jnt_damping=50.0, 
                 default_wheel_stiffness = 0.0,
                 default_wheel_damping=10.0,
-                startup_jnt_stiffness = 0,
+                startup_jnt_stiffness = 00,
                 startup_jnt_damping = 0,
                 startup_wheel_stiffness = 0.0,
                 startup_wheel_damping=10.0,
@@ -92,7 +92,7 @@ task = KyonRlSteppingTask(integration_dt = integration_dt,
                 contact_prims = contact_prims,
                 contact_offsets = contact_offsets,
                 sensor_radii = sensor_radii,
-                override_art_controller=True,
+                override_art_controller=False,
                 device = device, 
                 use_diff_velocities = True,
                 debug_jnt_imp_control = True, # writes jnt imp. controller info on shared mem
