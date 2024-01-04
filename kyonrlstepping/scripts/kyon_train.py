@@ -16,7 +16,7 @@ from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_client import KyonRHClu
 num_envs = 3
 sim_params = {}
 sim_params["use_gpu_pipeline"] = True
-sim_params["integration_dt"] = 1.0/100.0
+sim_params["physics_dt"] = 1.0/100.0
 sim_params["rendering_dt"] = 1.0/50.0
 sim_params["substeps"] = 1
 sim_params["gravity"] = np.array([0.0, 0.0, -9.81])
@@ -48,11 +48,11 @@ obs = env.reset()
 
 n_jnts = env._task._robot_n_dofs
 
-control_clust_dt = sim_params["integration_dt"] * 2
+control_clust_dt = sim_params["physics_dt"] * 2
 cluster_client = KyonRHClusterClient(cluster_size=num_envs, 
                                     device=device, 
                                     cluster_dt=control_clust_dt, 
-                                    control_dt=sim_params["integration_dt"])
+                                    control_dt=sim_params["physics_dt"])
 
 import time
 rt_time_reset = 100
@@ -87,7 +87,7 @@ while env._simulation_app.is_running():
     
     now = time.perf_counter()
     real_time = now - start_time
-    sim_time += sim_params["integration_dt"]
+    sim_time += sim_params["physics_dt"]
     rt_factor = sim_time / real_time
     
     i+=1 # updating simulation iteration number

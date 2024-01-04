@@ -392,10 +392,10 @@ class KyonRHC(RHController):
         
     def _solve(self):
         
-        # self._update_open_loop() # updates the TO ig and 
+        self._update_open_loop() # updates the TO ig and 
         # initial conditions using data from the solution
 
-        self._update_closed_loop() # updates the TO ig and 
+        # self._update_closed_loop() # updates the TO ig and 
         # # initial conditions using robot measurements
         
         # self._update_semiclosed_loop()

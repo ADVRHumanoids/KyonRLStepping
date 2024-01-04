@@ -25,8 +25,8 @@ else:
     sim_params["device"] = "cpu"
 device = sim_params["device"]
 
-sim_params["integration_dt"] = 1.0/100.0
-sim_params["rendering_dt"] = sim_params["integration_dt"]
+sim_params["physics_dt"] = 1.0/100.0 # physics_dt?
+sim_params["rendering_dt"] = sim_params["physics_dt"]
 sim_params["substeps"] = 1
 
 sim_params["gravity"] = np.array([0.0, 0.0, -9.81])
@@ -45,7 +45,7 @@ sim_params["enable_stabilization"] = True
 # sim_params["solver_velocity_iteration_count"] = 1
 # sim_params["sleep_threshold"] = 0.0 # Mass-normalized kinetic energy threshold below which an actor may go to sleep.
 # Allowed range [0, max_float).
-sim_params["stabilization_threshold"] = 0.0
+# sim_params["stabilization_threshold"] = 0.0
 # Per-body settings ( can override in actor_options )
 # sim_params["enable_gyroscopic_forces"] = False
 # sim_params["density"] = 1000 # density to be used for bodies that do not specify mass or density
@@ -64,7 +64,7 @@ sim_params["stabilization_threshold"] = 0.0
 # sim_params["gpu_temp_buffer_capacity"] = 16 * 1024 * 1024
 # sim_params["gpu_max_num_partitions"] = 8
 
-integration_dt = sim_params["integration_dt"]
+integration_dt = sim_params["physics_dt"]
 control_clust_dt = 0.04 # [s]
 
 dtype = "float32" # Isaac requires data to be float32, so this should not be touched
@@ -117,8 +117,8 @@ task = KyonRlSteppingTask(integration_dt = integration_dt,
                 default_jnt_damping=50.0, 
                 default_wheel_stiffness = 0.0,
                 default_wheel_damping=10.0,
-                startup_jnt_stiffness = 00,
-                startup_jnt_damping = 0,
+                startup_jnt_stiffness = 50,
+                startup_jnt_damping = 5,
                 startup_wheel_stiffness = 0.0,
                 startup_wheel_damping=10.0,
                 robot_names = robot_names,
@@ -181,7 +181,7 @@ while env._simulation_app.is_running():
     now = time.perf_counter()
 
     real_time = now - start_time
-    sim_time += sim_params["integration_dt"]
+    sim_time += sim_params["physics_dt"]
     rt_factor = sim_time / real_time
     
     shared_sim_info.update(sim_rt_factor=rt_factor, 
@@ -205,11 +205,11 @@ while env._simulation_app.is_running():
     # print(contact_report)
 
     # print(task.omni_contact_sensors["kyon0"].contact_geom_prim_views[0].get_net_contact_forces(clone = False, 
-                                                                                            # dt = sim_params["integration_dt"]))
+                                                                                            # dt = sim_params["physics_dt"]))
     
     # print("Detailed:")
     # print(task.omni_contact_sensors["kyon0"].contact_geom_prim_views[0].get_contact_force_data(clone = False,
-    #                                                                                         dt = sim_params["integration_dt"]))
+    #                                                                                         dt = sim_params["physics_dt"]))
     # # print("Normal:")
     # # print(contact_report['contacts'])
     # # print(contact_report['normal'].device)
