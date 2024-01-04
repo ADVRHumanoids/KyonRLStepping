@@ -7,26 +7,62 @@ import torch
 #from stable_baselines3 import PPO
 from kyonrlstepping.envs.kyonenv import KyonEnv 
 
+from omni_robo_gym.utils.shared_sim_info import SharedSimInfo
+
 print_sim_info = False
 
-num_envs = 1 # 9, 3, 5
+num_envs = 8 # 9, 3, 5
+
+# simulation parameters
 sim_params = {}
-sim_params["use_gpu_pipeline"] = False
-sim_params["integration_dt"] = 1.0/200.0
-sim_params["rendering_dt"] = sim_params["integration_dt"]
-sim_params["substeps"] = 1
-sim_params["gravity"] = np.array([0.0, 0.0, -9.81])
-sim_params["enable_scene_query_support"] = False
-sim_params["use_fabric"] = True # Enable/disable reading of physics buffers directly. Default is True.
-sim_params["replicate_physics"] = True
-sim_params["enable_stabilization"] = True
-sim_params["disable_contact_processing"] = True
+# device settings
+sim_params["use_gpu_pipeline"] = False # disabling gpu pipeline is necessary to be able
+# to retrieve some quantities from the simulator which, otherwise, would have random values
+sim_params["use_gpu"] = True # does this actually do something?
 if sim_params["use_gpu_pipeline"]:
     sim_params["device"] = "cuda"
 else:
     sim_params["device"] = "cpu"
-
 device = sim_params["device"]
+
+sim_params["integration_dt"] = 1.0/100.0
+sim_params["rendering_dt"] = sim_params["integration_dt"]
+sim_params["substeps"] = 1
+
+sim_params["gravity"] = np.array([0.0, 0.0, -9.81])
+sim_params["enable_scene_query_support"] = False
+sim_params["use_fabric"] = True # Enable/disable reading of physics buffers directly. Default is True.
+sim_params["replicate_physics"] = True
+# sim_params["worker_thread_count"] = 4
+# sim_params["solver_type"] =  0 # 0: PGS, 1:TGS
+sim_params["enable_stabilization"] = True
+# sim_params["bounce_threshold_velocity"] = 0.2
+# sim_params["friction_offset_threshold"] = 0.04
+# sim_params["friction_correlation_distance"] = 0.025
+# sim_params["enable_sleeping"] = True
+# Per-actor settings ( can override in actor_options )
+# sim_params["solver_position_iteration_count"] = 4
+# sim_params["solver_velocity_iteration_count"] = 1
+# sim_params["sleep_threshold"] = 0.0 # Mass-normalized kinetic energy threshold below which an actor may go to sleep.
+# Allowed range [0, max_float).
+sim_params["stabilization_threshold"] = 0.0
+# Per-body settings ( can override in actor_options )
+# sim_params["enable_gyroscopic_forces"] = False
+# sim_params["density"] = 1000 # density to be used for bodies that do not specify mass or density
+# sim_params["max_depenetration_velocity"] = 100.0
+# sim_params["solver_velocity_iteration_count"] = 1
+
+# GPU buffers settings
+# sim_params["gpu_max_rigid_contact_count"] = 512 * 1024
+# sim_params["gpu_max_rigid_patch_count"] = 80 * 1024
+# sim_params["gpu_found_lost_pairs_capacity"] = 1024
+# sim_params["gpu_found_lost_aggregate_pairs_capacity"] = 1024
+# sim_params["gpu_total_aggregate_pairs_capacity"] = 1024
+# sim_params["gpu_max_soft_body_contacts"] = 1024 * 1024
+# sim_params["gpu_max_particle_contacts"] = 1024 * 1024
+# sim_params["gpu_heap_capacity"] = 64 * 1024 * 1024
+# sim_params["gpu_temp_buffer_capacity"] = 16 * 1024 * 1024
+# sim_params["gpu_max_num_partitions"] = 8
 
 integration_dt = sim_params["integration_dt"]
 control_clust_dt = 0.04 # [s]
@@ -61,15 +97,13 @@ for i in range(0, len(contact_prims["kyon0"])):
     
     sensor_radii["kyon0"][contact_prims["kyon0"][i]] = 0.124
 
-env = KyonEnv(headless=False, 
+env = KyonEnv(headless=True, 
         enable_livestream=False, 
         enable_viewport=False) # create environment
 
 # now we can import the task (not before, since Omni plugins are loaded 
 # upon environment initialization)
 from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
-
-from omni_robo_gym.utils.shared_sim_info import SharedSimInfo
                             
 task = KyonRlSteppingTask(integration_dt = integration_dt,
                 num_envs = num_envs, 
@@ -109,6 +143,7 @@ env.set_task(task,
 
 # Run inference on the trained policy
 #model = PPO.load("ppo_cartpole")
+obs = env._world.reset()
 obs = env.reset()
 # env._world.pause()
 
