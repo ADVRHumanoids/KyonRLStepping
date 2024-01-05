@@ -28,7 +28,7 @@ costs:
   - base_orientation
 
 .define:
-    - &w_base_pos 100
+    - &w_base_pos 10
     - &w_base_ori 1
     - &w_ball_z 1
     # - &w_postural 0.0001
