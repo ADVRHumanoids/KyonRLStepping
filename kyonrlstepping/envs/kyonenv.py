@@ -54,41 +54,154 @@ class KyonEnv(RobotVecEnv):
                         robot_name=self.robot_names[i])
         
         self._is_cluster_ready = False
+        self._trigger_solution = True
         
         self.controllers_were_active = False
 
+    # def step(self, 
+    #     index: int, 
+    #     actions = None):
+        
+    #     # Stepping order explained:
+    #     # 1) we trigger the solution of the cluster, which will employ the previous state (i.e.
+    #     #    the controller applies an action which is delayed of a cluster_dt wrt to the state it
+    #     #    used -> this is realistic, since between state retrieval and action computation there 
+    #     #    will always be at least a cluster_dt delay
+    #     # 2) we then proceed to step physics -> controllers in the cluster, in the meantime, 
+    #     #    are solving in parallel between them and wrt to simulation stepping. Aside from being
+    #     #    much more realistic, this also avoids serial evaluation of the controllers and the
+    #     #    sim. stepping, which can cause significant rt-factor degradation.
+    #     # 3) as soon as the simulation was stepped, we check the cluster solution status and
+    #     #    wait for the solution if necessary. This means that the bottlneck of the step()
+    #     #    will be the slowest between simulation stepping and cluster solution.
+    #     # 4) we set the latest available cluster cmd to the low-level impedance controller
+    #     #    (the reference will actually change every cluster_dt/integration_dt steps)
+        
+    #     for i in range(len(self.robot_names)):
+            
+    #         # for each robot instance across cloned environments
+
+    #         if self.cluster_clients[self.robot_names[i]].is_first_control_step():
+                
+    #             # first time the cluster is ready (i.e. the controllers are ready and connected)
+
+    #             # we get the current absolute positions and use them as 
+    #             # references
+    #             self.task.init_root_abs_offsets(self.robot_names[i]) 
+
+    #             # we update the default root state now, so that we
+    #             # can use it at the next call to reset
+    #             self.task.synch_default_root_states()
+                
+    #         if self.cluster_clients[self.robot_names[i]].cluster_ready() and \
+    #             self.cluster_clients[self.robot_names[i]].controllers_active:
+                
+    #             # this runs at a dt = simulation dt i.e. the highest possible,
+    #             # using the latest available RHC solution
+
+    #             if not self.controllers_were_active:
+                    
+    #                 # transition from controllers stopped to active -->
+    #                 # we set the joint impedance controllers to the desired runtime state 
+
+    #                 self.task.update_jnt_imp_control(robot_name = self.robot_names[i], 
+    #                                 jnt_stiffness = self.task.startup_jnt_stiffness, 
+    #                                 jnt_damping = self.task.startup_jnt_damping, 
+    #                                 wheel_stiffness = self.task.startup_wheel_stiffness, 
+    #                                 wheel_damping =self.task.startup_wheel_damping)
+
+    #             self.task.pre_physics_step(robot_name = self.robot_names[i], 
+    #                             actions = self.cluster_clients[self.robot_names[i]].controllers_cmds)
+                
+    #             self.controllers_were_active = self.cluster_clients[self.robot_names[i]].controllers_active
+
+    #         else:
+                
+    #             # either cluster is not ready yet (initializing) or the RHC controllers
+    #             # are not active yet
+
+    #             self.task.pre_physics_step(robot_name = self.robot_names[i],
+    #                             actions = None)
+                
+    #         if self.cluster_clients[self.robot_names[i]].is_cluster_instant(index):
+                
+    #             # RHC solutions are updated at a different dt wrt the integration dt (usually
+    #             # at a dt which is a multiple of that)
+
+    #             # assign last robot state observation to the cluster client
+    #             self.update_cluster_state(self.robot_names[i], index)
+
+    #             # the control cluster may run at a different rate wrt the simulation
+
+    #             self.cluster_clients[self.robot_names[i]].solve() # we solve all the underlying TOs in the cluster
+    #             # (the solve will do nothing unless the cluster is ready)
+                
+                
+    #     self._world.step(render=self._render)
+        
+    #     self.sim_frame_count += 1
+
+    #     observations = self.task.get_observations()
+
+    #     rewards = self.task.calculate_metrics()
+
+    #     dones = self.task.is_done()
+
+    #     info = {}
+
+    #     return observations, rewards, dones, info
+    
     def step(self, 
         index: int, 
         actions = None):
         
+        # Stepping order explained:
+        # 1) we trigger the solution of the cluster, which will employ the previous state (i.e.
+        #    the controller applies an action which is delayed of a cluster_dt wrt to the state it
+        #    used -> this is realistic, since between state retrieval and action computation there 
+        #    will always be at least a cluster_dt delay
+        # 2) we then proceed to set the latest available cluster cmd to 
+        #    the low-level impedance controller
+        #    (the reference will actually change every cluster_dt/integration_dt steps)-> controllers in the cluster, in the meantime, 
+        #    are solving in parallel between them and wrt to simulation stepping. Aside from being
+        #    much more realistic, this also avoids serial evaluation of the controllers and the
+        #    sim. stepping, which can cause significant rt-factor degradation.
+        # 3) we step the simulation
+        # 4) as soon as the simulation was stepped, we check the cluster solution status and
+        #    wait for the solution if necessary. This means that the bottlneck of the step()
+        #    will be the slowest between simulation stepping and cluster solution.
+        # 5) we update the cluster state with the one reached after the sim stepping
+        
         for i in range(len(self.robot_names)):
             
+            # first time the cluster is ready (i.e. the controllers are ready and connected)
             if self.cluster_clients[self.robot_names[i]].is_first_control_step():
-                
-                # first time the cluster is ready (i.e. the controllers are ready and connected)
-
-                self.task.init_root_abs_offsets(self.robot_names[i]) # we get the current absolute positions and use them as 
+            
+                # we get the current absolute positions and use them as 
                 # references
+                self.task.init_root_abs_offsets(self.robot_names[i]) 
 
-                self.task.synch_default_root_states() # we update the default root state now, so that we
+                # we update the default root state now, so that we
                 # can use it at the next call to reset
+                self.task.synch_default_root_states()
 
-            if self.cluster_clients[self.robot_names[i]].is_cluster_instant(index):
-                
-                # RHC solutions are updated at a different rate wrt the integration dt
-
-                # assign last robot state observation to the cluster client
+                # we initialize vals of the state for the cluster
                 self.update_cluster_state(self.robot_names[i], index)
 
-                # the control cluster may run at a different rate wrt the simulation
+            # 1) this runs at a dt = control_cluster dt (sol. triggering) + 
+            if self.cluster_clients[self.robot_names[i]].is_cluster_instant(index) and \
+                self._trigger_solution:
 
-                self.cluster_clients[self.robot_names[i]].solve() # we solve all the underlying TOs in the cluster
-                # (the solve will do nothing unless the cluster is ready)
-                
+                # every control_cluster_dt, trigger the solution of the cluster
+                # with the latest available state. trigger_solution() will also 
+                # perform runtime checks to ensure the cluster is ready and active
+                self.cluster_clients[self.robot_names[i]].trigger_solution() # this is non-blocking
+
+            # 2) this runs at a dt = simulation dt i.e. the highest possible rate,
+            #    using the latest available RHC solution (the new one is not available yet)
             if self.cluster_clients[self.robot_names[i]].cluster_ready() and \
                 self.cluster_clients[self.robot_names[i]].controllers_active:
                 
-                # this runs at a rata = simulation dt, with latest available RHC solution
                 if not self.controllers_were_active:
                     
                     # transition from controllers stopped to active -->
@@ -112,11 +225,38 @@ class KyonEnv(RobotVecEnv):
 
                 self.task.pre_physics_step(robot_name = self.robot_names[i],
                                 actions = None)
-                
+            
+        # 3) simulation stepping # integration_dt
         self._world.step(render=self._render)
-        
+
+        # this runs at a dt = control_cluster dt
+
+        if self.cluster_clients[self.robot_names[i]].is_cluster_instant(index):
+
+            if not self._trigger_solution:
+                        
+                for i in range(len(self.robot_names)):
+                    
+                    # we reach the next control instant -> we get the solution
+                    # we also reset the flag, so next call to step() will trigger again the
+                    # cluster
+                
+                    # 3) wait for solution (will also read latest computed cmds)
+                    self.cluster_clients[self.robot_names[i]].wait_for_solution() # this is blocking
+                    
+                    self._trigger_solution = True # this allows for the next trigger 
+
+                    # 4) update cluster state
+                    self.update_cluster_state(self.robot_names[i], index)
+
+            else: # we are in the same step() call as the trigger
+
+                self._trigger_solution = False # -> next cluster instant we get the solution
+                # from the cluster                
+
         self.sim_frame_count += 1
 
+        # RL stuff
         observations = self.task.get_observations()
 
         rewards = self.task.calculate_metrics()
