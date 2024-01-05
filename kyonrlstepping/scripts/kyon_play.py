@@ -18,36 +18,36 @@ sim_params = {}
 # device settings
 sim_params["use_gpu_pipeline"] = False # disabling gpu pipeline is necessary to be able
 # to retrieve some quantities from the simulator which, otherwise, would have random values
-sim_params["use_gpu"] = True # does this actually do something?
+sim_params["use_gpu"] = True # does this actually do anything?
 if sim_params["use_gpu_pipeline"]:
     sim_params["device"] = "cuda"
 else:
     sim_params["device"] = "cpu"
 device = sim_params["device"]
 
-sim_params["physics_dt"] = 1.0/100.0 # physics_dt?
+# sim_params["dt"] = 1.0/100.0 # physics_dt?
+sim_params["physics_dt"] = 1.0/400.0 # physics_dt?
 sim_params["rendering_dt"] = sim_params["physics_dt"]
-sim_params["substeps"] = 1
-
+# sim_params["substeps"] = 1 # number of physics steps to be taken for for each rendering step
 sim_params["gravity"] = np.array([0.0, 0.0, -9.81])
 sim_params["enable_scene_query_support"] = False
 sim_params["use_fabric"] = True # Enable/disable reading of physics buffers directly. Default is True.
 sim_params["replicate_physics"] = True
 # sim_params["worker_thread_count"] = 4
-# sim_params["solver_type"] =  0 # 0: PGS, 1:TGS
+sim_params["solver_type"] =  1 # 0: PGS, 1:TGS, defaults to TGS. PGS faster but TGS
 sim_params["enable_stabilization"] = True
 # sim_params["bounce_threshold_velocity"] = 0.2
 # sim_params["friction_offset_threshold"] = 0.04
 # sim_params["friction_correlation_distance"] = 0.025
 # sim_params["enable_sleeping"] = True
 # Per-actor settings ( can override in actor_options )
-# sim_params["solver_position_iteration_count"] = 4
-# sim_params["solver_velocity_iteration_count"] = 1
-# sim_params["sleep_threshold"] = 0.0 # Mass-normalized kinetic energy threshold below which an actor may go to sleep.
+sim_params["solver_position_iteration_count"] = 4
+sim_params["solver_velocity_iteration_count"] = 1
+sim_params["sleep_threshold"] = 1e-5 # Mass-normalized kinetic energy threshold below which an actor may go to sleep.
 # Allowed range [0, max_float).
-# sim_params["stabilization_threshold"] = 0.0
+# sim_params["stabilization_threshold"] = 1e-5
 # Per-body settings ( can override in actor_options )
-# sim_params["enable_gyroscopic_forces"] = False
+# sim_params["enable_gyroscopic_forces"] = True
 # sim_params["density"] = 1000 # density to be used for bodies that do not specify mass or density
 # sim_params["max_depenetration_velocity"] = 100.0
 # sim_params["solver_velocity_iteration_count"] = 1
@@ -111,8 +111,9 @@ task = KyonRlSteppingTask(integration_dt = integration_dt,
                 env_spacing=6,
                 spawning_radius=1.0, 
                 use_flat_ground=True, 
-                pos_iter_increase_factor = 1, # 1 means to default
-                vel_iter_increase_factor = 1,
+                solver_position_iteration_count = sim_params["solver_position_iteration_count"],
+                solver_velocity_iteration_count = sim_params["solver_velocity_iteration_count"],
+                solver_stabilization_thresh = sim_params["sleep_threshold"],
                 default_jnt_stiffness=200.0, 
                 default_jnt_damping=50.0, 
                 default_wheel_stiffness = 0.0,
@@ -126,10 +127,10 @@ task = KyonRlSteppingTask(integration_dt = integration_dt,
                 contact_prims = contact_prims,
                 contact_offsets = contact_offsets,
                 sensor_radii = sensor_radii,
-                override_art_controller=False,
+                override_art_controller=True, # uses handmade EXPLICIT controller. This will usually be unstable for relatively high int. dts
                 device = device, 
-                use_diff_velocities = True,
-                debug_jnt_imp_control = True, # writes jnt imp. controller info on shared mem
+                use_diff_velocities = False,
+                debug_jnt_imp_control = False, # writes jnt imp. controller info on shared mem
                 dtype=dtype_torch) # create task
 
 env.set_task(task, 
@@ -160,7 +161,7 @@ rt_factor_counter = 0
 
 shared_sim_info = SharedSimInfo() # sim. info to be broadcasted
 shared_sim_info.start(gpu_pipeline_active=sim_params["use_gpu_pipeline"], 
-                    integration_dt=integration_dt,
+                    integration_dt=sim_params["physics_dt"],
                     rendering_dt=sim_params["rendering_dt"], 
                     cluster_dt=control_clust_dt)
 

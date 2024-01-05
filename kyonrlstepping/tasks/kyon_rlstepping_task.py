@@ -15,8 +15,9 @@ class KyonRlSteppingTask(CustomTask):
             device = "cuda", 
             cloning_offset: np.array = None,
             replicate_physics: bool = True,
-            pos_iter_increase_factor: int = 1,
-            vel_iter_increase_factor: int = 1,
+            solver_position_iteration_count: int = 4,
+            solver_velocity_iteration_count: int = 1,
+            solver_stabilization_thresh: float = 1e-5,
             offset=None, 
             env_spacing = 5.0, 
             spawning_radius = 1.0, 
@@ -65,8 +66,9 @@ class KyonRlSteppingTask(CustomTask):
                     cloning_offset = cloning_offset,
                     spawning_radius = spawning_radius,
                     replicate_physics = replicate_physics,
-                    pos_iter_increase_factor = pos_iter_increase_factor,
-                    vel_iter_increase_factor = vel_iter_increase_factor,
+                    solver_position_iteration_count = solver_position_iteration_count,
+                    solver_velocity_iteration_count = solver_velocity_iteration_count,
+                    solver_stabilization_thresh = solver_stabilization_thresh,
                     offset = offset, 
                     env_spacing = env_spacing, 
                     use_flat_ground = use_flat_ground,
@@ -121,7 +123,8 @@ class KyonRlSteppingTask(CustomTask):
 
                 success = True
 
-                # updated all the jnt impedance data
+                # updating all the jnt impedance data - > this introduces some overhead. 
+                # disable this with debug_jnt_imp_control when debugging is not necessary
                 success = self.jnt_imp_cntrl_shared_data[robot_name].pos_err_view.write(
                     self.jnt_imp_controllers[robot_name].pos_err(), 0, 0
                     ) and success

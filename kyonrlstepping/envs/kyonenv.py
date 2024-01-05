@@ -169,8 +169,9 @@ class KyonEnv(RobotVecEnv):
 
             else:
                 
-                if ((step_index + 1) % 100) == 0:
-
+                if ((step_index + 1) % 10000) == 0:
+                    
+                    # sporadic warning
                     warning = f"[{self.__class__.__name__}]" + f"[{self.journal.warning}]: " + \
                         f"Contact state from link {contact_link} cannot be retrieved in IsaacSim if using use_gpu_pipeline is set to True!"
 
@@ -182,6 +183,8 @@ class KyonEnv(RobotVecEnv):
 
             self.cluster_clients[self.robot_names[i]].close()
         
+        self.task.terminate() # performs closing steps for task
+
         super().close() # this has to be called last 
         # so that isaac's simulation is close properly
 
