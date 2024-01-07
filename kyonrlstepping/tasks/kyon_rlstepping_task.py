@@ -104,12 +104,12 @@ class KyonRlSteppingTask(CustomTask):
             from SharsorIPCpp.PySharsorIPC import VLevel
 
             self.jnt_imp_cntrl_shared_data[robot_name] = JntImpCntrlData(is_server = True, 
-                                                        n_envs = self.num_envs, 
-                                                        n_jnts = self.robot_n_dofs[robot_name],
-                                                        jnt_names = self.jnt_imp_controllers[robot_name].jnts_names,
-                                                        namespace = robot_name, 
-                                                        verbose = True, 
-                                                        vlevel = VLevel.V2)
+                                            n_envs = self.num_envs, 
+                                            n_jnts = self.robot_n_dofs[robot_name],
+                                            jnt_names = self.jnt_imp_controllers[robot_name].jnts_names,
+                                            namespace = robot_name, 
+                                            verbose = True, 
+                                            vlevel = VLevel.V2)
 
             self.jnt_imp_cntrl_shared_data[robot_name].run()
             

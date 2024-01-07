@@ -43,9 +43,9 @@ sim_params["enable_stabilization"] = True
 # Per-actor settings ( can override in actor_options )
 sim_params["solver_position_iteration_count"] = 4
 sim_params["solver_velocity_iteration_count"] = 1
-sim_params["sleep_threshold"] = 1e-5 # Mass-normalized kinetic energy threshold below which an actor may go to sleep.
+sim_params["sleep_threshold"] = 0.0 # Mass-normalized kinetic energy threshold below which an actor may go to sleep.
 # Allowed range [0, max_float).
-# sim_params["stabilization_threshold"] = 1e-5
+sim_params["stabilization_threshold"] = 1e-5
 # Per-body settings ( can override in actor_options )
 # sim_params["enable_gyroscopic_forces"] = True
 # sim_params["density"] = 1000 # density to be used for bodies that do not specify mass or density
@@ -111,7 +111,7 @@ task = KyonRlSteppingTask(integration_dt = integration_dt,
         env_spacing=6,
         spawning_radius=1.0, 
         use_flat_ground=True, 
-        solver_position_iteration_count = sim_params["solver_position_iteration_count"],
+        solver_position_iteration_count = sim_params["solver_position_iteration_count"], # applies this to all articulations
         solver_velocity_iteration_count = sim_params["solver_velocity_iteration_count"],
         solver_stabilization_thresh = sim_params["sleep_threshold"],
         default_jnt_stiffness=200.0, 
@@ -130,7 +130,7 @@ task = KyonRlSteppingTask(integration_dt = integration_dt,
         override_art_controller=True, # uses handmade EXPLICIT controller. This will usually be unstable for relatively high int. dts
         device = device, 
         use_diff_velocities = False, # whether to differentiate velocities numerically
-        debug_jnt_imp_control = True, # writes jnt imp. controller info on shared mem
+        debug_jnt_imp_control = False, # writes jnt imp. controller info on shared mem (overhead)
         dtype=dtype_torch) # create task
 
 env.set_task(task, 
