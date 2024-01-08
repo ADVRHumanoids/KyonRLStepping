@@ -177,7 +177,7 @@ while env._simulation_app.is_running():
 
     start_time_step = time.perf_counter()
 
-    obs, rewards, dones, info = env.step(index=i) 
+    obs, rewards, dones, info = env.step() 
     
     now = time.perf_counter()
 

@@ -59,7 +59,6 @@ class KyonEnv(RobotVecEnv):
         self.controllers_were_active = False
     
     def step(self, 
-        index: int, 
         actions = None):
         
         # Stepping order explained:
@@ -93,10 +92,10 @@ class KyonEnv(RobotVecEnv):
                 self.task.synch_default_root_states()
 
                 # we initialize vals of the state for the cluster
-                self.update_cluster_state(self.robot_names[i], index)
+                self.update_cluster_state(self.robot_names[i], self.step_counter)
 
             # 1) this runs at a dt = control_cluster dt (sol. triggering) + 
-            if self.cluster_clients[self.robot_names[i]].is_cluster_instant(index) and \
+            if self.cluster_clients[self.robot_names[i]].is_cluster_instant(self.step_counter) and \
                 self._trigger_solution:
 
                 # every control_cluster_dt, trigger the solution of the cluster
@@ -138,7 +137,7 @@ class KyonEnv(RobotVecEnv):
 
         # this runs at a dt = control_cluster dt
 
-        if self.cluster_clients[self.robot_names[i]].is_cluster_instant(index):
+        if self.cluster_clients[self.robot_names[i]].is_cluster_instant(self.step_counter):
 
             if not self._trigger_solution:
                         
@@ -154,14 +153,14 @@ class KyonEnv(RobotVecEnv):
                     self._trigger_solution = True # this allows for the next trigger 
 
                     # 4) update cluster state
-                    self.update_cluster_state(self.robot_names[i], index)
-
+                    self.update_cluster_state(self.robot_names[i], self.step_counter)
+                    
             else: # we are in the same step() call as the trigger
 
                 self._trigger_solution = False # -> next cluster instant we get the solution
                 # from the cluster                
 
-        self.sim_frame_count += 1
+        self.step_counter += 1
 
         # RL stuff
         observations = self.task.get_observations()
