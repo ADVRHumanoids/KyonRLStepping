@@ -58,6 +58,7 @@ class KyonRHC(RHController):
         super().__init__(controller_index = controller_index, 
                         cluster_size = cluster_size,
                         srdf_path = srdf_path,
+                        n_nodes = self._n_intervals + 1,
                         namespace = self.robot_name,
                         verbose = verbose, 
                         debug = debug,
