@@ -470,15 +470,10 @@ class KyonRHC(RHController):
             print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + \
               f"[{self.journal.exception}]" + ": rti() failed" + 
               f" with exception{type(e).__name__}")
-            
-            print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + \
-              f"[{self.journal.exception}]" + ": rti() failed!!")
-
-            self.sol_counter = self.sol_counter + 1
 
             if self.publish_sol:
                 
-                # we publish solution anyway
+                # we publish solution anyway ??
 
                 self._publish_rhc_sol_data() 
                 self._publish_rob_state_data()
