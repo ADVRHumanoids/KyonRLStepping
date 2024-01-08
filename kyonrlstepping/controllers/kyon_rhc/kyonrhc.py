@@ -29,7 +29,8 @@ class KyonRHC(RHController):
             verbose = False, 
             debug = False, 
             array_dtype = torch.float32, 
-            publish_sol = False):
+            publish_sol = False,
+            debug_sol = True):
 
         self.step_counter = 0
         self.sol_counter = 0
@@ -60,7 +61,8 @@ class KyonRHC(RHController):
                         namespace = self.robot_name,
                         verbose = verbose, 
                         debug = debug,
-                        array_dtype = array_dtype)
+                        array_dtype = array_dtype,
+                        debug_sol = debug_sol)
 
         self.add_data_lenght = add_data_lenght # length of the array holding additional info from the solver
 
