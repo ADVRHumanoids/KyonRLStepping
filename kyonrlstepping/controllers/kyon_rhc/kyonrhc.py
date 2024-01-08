@@ -480,7 +480,7 @@ class KyonRHC(RHController):
 
             return False
 
-    def reset(self):
+    def _reset(self):
         
         # resets controller ig and initial
         # states/inputs
