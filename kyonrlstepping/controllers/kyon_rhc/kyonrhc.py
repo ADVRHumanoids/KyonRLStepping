@@ -351,35 +351,61 @@ class KyonRHC(RHController):
     
     def _update_open_loop(self):
 
-        # set initial state and initial guess
-        shift_num = -1
+        shift_num = -1 # shift data by one node
 
-        x_opt =  self._ti.solution['x_opt']
-        xig = np.roll(x_opt, shift_num, axis=1)
+        # building ig for state
+        xig = np.roll(self._ti.solution['x_opt'], 
+                shift_num, axis=1) # rolling state sol.
         for i in range(abs(shift_num)):
-            xig[:, -1 - i] = x_opt[:, -1]
+            # state on last node is copied to the elements
+            # which are "lost" during the shift operation
+            xig[:, -1 - i] = self._ti.solution['x_opt'][:, -1]
 
+        # building ig for inputs
+        uig = np.roll(self._ti.solution['u_opt'], 
+                shift_num, axis=1) # rolling state sol.
+        for i in range(abs(shift_num)):
+            # state on last node is copied to the elements
+            # which are "lost" during the shift operation
+            uig[:, -1 - i] = self._ti.solution['u_opt'][:, -1]
+
+        # assigning ig
         self._prb.getState().setInitialGuess(xig)
-        
-        self._prb.setInitialState(x0=xig[:, 0])
+        self._prb.getInput().setInitialGuess(uig)
+
+        # open loop update:
+        # state on first node is second state 
+        # shifted
+        self._prb.setInitialState(x0=xig[:, 1])
     
     def _update_closed_loop(self):
 
-        # set initial state and initial guess
-        shift_num = -1
+        shift_num = -1 # shift data by one node
 
-        x_opt =  self._ti.solution['x_opt']
-        xig = np.roll(x_opt, shift_num, axis=1)
+        # building ig for state
+        xig = np.roll(self._ti.solution['x_opt'], 
+                shift_num, axis=1) # rolling state sol.
         for i in range(abs(shift_num)):
-            xig[:, -1 - i] = x_opt[:, -1]
+            # state on last node is copied to the elements
+            # which are "lost" during the shift operation
+            xig[:, -1 - i] = self._ti.solution['x_opt'][:, -1]
 
-        robot_state = self._assemble_meas_robot_state(to_numpy=True)
-        
+        # building ig for inputs
+        uig = np.roll(self._ti.solution['u_opt'], 
+                shift_num, axis=1) # rolling state sol.
+        for i in range(abs(shift_num)):
+            # state on last node is copied to the elements
+            # which are "lost" during the shift operation
+            uig[:, -1 - i] = self._ti.solution['u_opt'][:, -1]
+
+        # assigning ig
         self._prb.getState().setInitialGuess(xig)
+        self._prb.getInput().setInitialGuess(uig)
 
+        # sets state on node 0 from measurements
+        robot_state = self._assemble_meas_robot_state(to_numpy=True)
         self._prb.setInitialState(x0=
-                        robot_state
-                        )
+                        robot_state)
     
     def _publish_rhc_sol_data(self):
 
@@ -460,7 +486,9 @@ class KyonRHC(RHController):
             return False
 
     def reset(self):
+        
+        # resets controller ig and initial
+        # states/inputs
+        self._ti.reset()
 
-        a = 1
-
-        # resets controller to bootstrap 
+        
