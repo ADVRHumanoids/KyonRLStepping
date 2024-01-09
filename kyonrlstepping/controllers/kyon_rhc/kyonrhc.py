@@ -30,7 +30,8 @@ class KyonRHC(RHController):
             debug = False, 
             array_dtype = torch.float32, 
             publish_sol = False,
-            debug_sol = True):
+            debug_sol = True # whether to publish rhc rebug data
+            ):
 
         self.step_counter = 0
         self.sol_counter = 0
@@ -68,6 +69,9 @@ class KyonRHC(RHController):
         self.add_data_lenght = add_data_lenght # length of the array holding additional info from the solver
 
         self._quat_remap = [1, 2, 3, 0] # mapping from robot quat. to Horizon's quaternion convention
+
+        self.rhc_costs={}
+        self.rhc_constr={}
 
         if self.publish_sol:
             
@@ -458,13 +462,19 @@ class KyonRHC(RHController):
         try:
 
             result = self._ti.rti() # solves the problem
-            
+
             self.sol_counter = self.sol_counter + 1
 
             if self.publish_sol:
 
                 self._publish_rhc_sol_data() 
                 self._publish_rob_state_data()
+
+            if self._debug_sol:
+                
+                # we update cost and constr. dictionaries
+                self.rhc_costs.update(self._ti.solver_rti.getCostsValues())
+                self.rhc_constr.update(self._ti.solver_rti.getConstraintsValues())
 
             return True
         
@@ -489,4 +499,87 @@ class KyonRHC(RHController):
         # states/inputs
         self._ti.reset()
 
+    def _get_cost_data(self):
         
+        cost_dict = self._ti.solver_rti.getCostsValues()
+        
+        cost_names = list(cost_dict.keys())
+
+        cost_dims = [1] * len(cost_names) # costs are always scalar
+
+        return cost_names, cost_dims
+    
+    def _get_constr_data(self):
+        
+        constr_dict = self._ti.solver_rti.getConstraintsValues()
+
+        constr_names = list(constr_dict.keys())
+
+        constr_dims = [-1] * len(constr_names)
+
+        i = 0
+        for constr in constr_dict:
+
+            constr_val = constr_dict[constr]
+        
+            constr_shape = constr_val.shape
+            
+            constr_dims[i] = constr_shape[0]
+
+            i+=1
+
+        return constr_names, constr_dims
+    
+    def _get_q_from_sol(self):
+
+        return self._ti.solution['q']
+
+    def _get_v_from_sol(self):
+
+        # to be overridden by child class
+        
+        return self._ti.solution['v']
+    
+    def _get_a_from_sol(self):
+
+        # to be overridden by child class
+        
+        return self._ti.solution['a']
+    
+    def _get_a_dot_from_sol(self):
+
+        # to be overridden by child class
+        
+        return None
+    
+    def _get_f_from_sol(self):
+
+        # to be overridden by child class
+        
+        return self._ti.solution['a']
+    
+    def _get_f_dot_from_sol(self):
+
+        # to be overridden by child class
+        
+        return None
+    
+    def _get_eff_from_sol(self):
+
+        # to be overridden by child class
+        
+        return None
+    
+    def _get_cost_from_sol(self,
+                    cost_name: str):
+
+        # to be overridden by child class
+        
+        return self.rhc_costs[cost_name]
+    
+    def _get_constr_from_sol(self,
+                    constr_name: str):
+
+        # to be overridden by child class
+        
+        return self.rhc_constr[constr_name]
