@@ -11,7 +11,7 @@ from omni_robo_gym.utils.shared_sim_info import SharedSimInfo
 
 print_sim_info = False
 
-num_envs = 8 # 9, 3, 5
+num_envs = 1 # 9, 3, 5
 
 # simulation parameters
 sim_params = {}

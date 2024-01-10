@@ -30,6 +30,11 @@ execute_command() {
     xdotool key Ctrl+L
 }
 
+prepare_command() {
+    xdotool type --delay 1 "$1"
+    sleep $SLEEP_FOR
+}
+
 source_mamba_env() {
 
     execute_command "mamba activate ${MAMBAENVNAME}"
@@ -72,6 +77,7 @@ terminator -m -T ${WS_NAME} --working-directory=${WORKING_DIR}
 
 # tab 0
 source_mamba_env
+prepare_command "reset && python kyon_play"
 
 split_v
 
