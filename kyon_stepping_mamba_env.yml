@@ -1,4 +1,4 @@
-name: kyonrlstepping_isaac2023.1.1
+name: "KyonRLSteppingIsaac2023.1.0
 channels: 
   - defaults
   - pytorch
