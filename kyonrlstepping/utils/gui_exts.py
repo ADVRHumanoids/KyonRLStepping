@@ -4,15 +4,6 @@ from PyQt5.QtWidgets import QWidget
 from control_cluster_bridge.utilities.debugger_gui.gui_exts import SharedDataWindowV2
 from control_cluster_bridge.utilities.debugger_gui.plot_utils import RtPlotWindow
 
-from control_cluster_bridge.utilities.rhc_defs import RhcTaskRefs
-from control_cluster_bridge.utilities.shared_mem import SharedMemClient
-
-import torch
-
-from control_cluster_bridge.utilities.defs import jnt_names_client_name
-from control_cluster_bridge.utilities.defs import additional_data_name
-from control_cluster_bridge.utilities.defs import n_contacts_name
-
 from control_cluster_bridge.utilities.control_cluster_defs import JntImpCntrlData
 
 from SharsorIPCpp.PySharsorIPC import VLevel
