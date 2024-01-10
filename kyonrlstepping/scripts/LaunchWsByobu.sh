@@ -16,11 +16,12 @@ directories=(
     "$HOME/RL_ws/hhcm/src/CoClusterBridge"
     "$HOME/RL_ws/hhcm/src/OmniRoboGym"
     "$HOME/RL_ws/hhcm/src/horizon"
+    "$HOME/RL_ws/hhcm/src/RHCViz"
     "$HOME/RL_ws/hhcm/build/horizon"
-    # "$HOME/RL_ws/hhcm/src/phase_manager"
-    # "$HOME/RL_ws/hhcm/build/phase_manager"
-    # "$HOME/RL_ws/hhcm/src/SharsorIPCpp"
-    # "$HOME/RL_ws/hhcm/build/SharsorIPCpp"
+    "$HOME/RL_ws/hhcm/src/phase_manager"
+    "$HOME/RL_ws/hhcm/build/phase_manager"
+    "$HOME/RL_ws/hhcm/src/SharsorIPCpp"
+    "$HOME/RL_ws/hhcm/build/SharsorIPCpp"
     # Add more directories as needed
 )
 
@@ -102,26 +103,32 @@ byobu kill-session -t ${WS_NAME}
 
 byobu new-session -d -s ${WS_NAME} -c ${WORKING_DIR} -n ${WS_NAME} # -d "detached" session
 
+
 # tab 0
+execute_command "cd ${WORKING_DIR}"
 source_mamba_env
 execute_command "source ~/.local/share/ov/pkg/isaac_sim-2023.1.0-hotfix.1/setup_conda_env.sh"
 prepare_command "reset && python KyonPlay.py"
 
 split_v
+execute_command "cd ${WORKING_DIR}"
 source_mamba_env
 prepare_command "reset && python RunControlCluster.py"
 
 split_h
+execute_command "cd ${WORKING_DIR}"
 source_mamba_env
-prepare_command "reset && python RunDebuggerGUI.py"
+prepare_command "reset && python RunDebugGUI.py"
 
 split_h
+execute_command "cd ${WORKING_DIR}"
 source_mamba_env
 prepare_command "reset && python RunKeyboardCmds.py"
 
 go_to_pane 0 
 
 split_h
+execute_command "cd ${WORKING_DIR}"
 execute_command "source /opt/ros/noetic/setup.bash"
 execute_command "source ~/RL_ws/hhcm/setup.bash"
 source_mamba_env
@@ -134,15 +141,17 @@ execute_command "source /opt/ros/noetic/setup.bash"
 prepare_command "roscore"
 
 split_h
+execute_command "cd ${WORKING_DIR}"
 execute_command "source /opt/ros/noetic/setup.bash"
 execute_command "source ~/RL_ws/hhcm/setup.bash"
-prepare_command "reset && python3 run_rhc2viz.py --nodes_perc 10 --robot_type kyon --robot_name kyon0"
+prepare_command "reset && python3 RunRhc2Viz.py --nodes_perc 10 --robot_type kyon --robot_name kyon0"
 
 # tab2
 new_tab
 execute_command "htop"
 
 split_h
+execute_command "cd ${WORKING_DIR}"
 execute_command "nvtop"
 press_enter
 
