@@ -17,6 +17,8 @@ directories=(
     "$HOME/RL_ws/hhcm/src/OmniRoboGym"
     "$HOME/RL_ws/hhcm/src/horizon"
     "$HOME/RL_ws/hhcm/build/horizon"
+    "$HOME/RL_ws/hhcm/src/phase_manager"
+    "$HOME/RL_ws/hhcm/build/phase_manager"
     "$HOME/RL_ws/hhcm/src/SharsorIPCpp"
     "$HOME/RL_ws/hhcm/build/SharsorIPCpp"
     # Add more directories as needed
@@ -55,7 +57,7 @@ split_v() {
 
 new_tab() {
 
-    xdotool key Ctrl+Shift+T
+    byobu new-window
 
 }
 
@@ -77,19 +79,24 @@ terminator -m -T ${WS_NAME} --working-directory=${WORKING_DIR}
 
 # tab 0
 source_mamba_env
-prepare_command "reset && python kyon_play"
+execute_command "source ~/.local/share/ov/pkg/isaac_sim-2023.1.0-hotfix.1/setup_conda_env.sh"
+
+prepare_command "reset && python KyonPlay.py"
 
 split_v
 
 source_mamba_env
+prepare_command "reset && python RunControlCluster.py"
 
 split_h
 
 source_mamba_env
+prepare_command "reset && python RunDebuggerGUI.py"
 
 split_h
 
 source_mamba_env
+prepare_command "reset && python RunKeyboardCmds.py"
 
 xdotool key Alt+Left
 
@@ -98,6 +105,8 @@ split_h
 execute_command "source /opt/ros/noetic/setup.bash"
 execute_command "source ~/RL_ws/hhcm/setup.bash"
 source_mamba_env
+
+prepare_command "reset && python RunRhc2RosBridge.py kyon0"
 
 # tab 1
 
@@ -109,6 +118,8 @@ split_h
 
 execute_command "source /opt/ros/noetic/setup.bash"
 execute_command "source ~/RL_ws/hhcm/setup.bash"
+
+prepare_command "reset && python3 run_rhc2viz.py --nodes_perc 10 --robot_type kyon --robot_name kyon0"
 
 # tab 2
 

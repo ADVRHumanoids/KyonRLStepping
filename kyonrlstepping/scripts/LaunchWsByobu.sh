@@ -5,17 +5,59 @@ export XMODIFIERS=@im=ibus
 export GTK_IM_MODULE=ibus
 export QT_IM_MODULE=ibus
 
-SLEEP_FOR=0.5
+SLEEP_FOR=0.1
 WS_NAME="RlWorkspace"
 WORKING_DIR="$HOME/RL_ws/hhcm/src/KyonRLStepping/kyonrlstepping/scripts"
 MAMBAENVNAME="KyonRLSteppingIsaac2023.1.0"
 
+# Array of directories
+directories=(
+    "$HOME/RL_ws/hhcm/src/KyonRLStepping"
+    "$HOME/RL_ws/hhcm/src/CoClusterBridge"
+    "$HOME/RL_ws/hhcm/src/OmniRoboGym"
+    "$HOME/RL_ws/hhcm/src/horizon"
+    "$HOME/RL_ws/hhcm/build/horizon"
+    # "$HOME/RL_ws/hhcm/src/phase_manager"
+    # "$HOME/RL_ws/hhcm/build/phase_manager"
+    # "$HOME/RL_ws/hhcm/src/SharsorIPCpp"
+    # "$HOME/RL_ws/hhcm/build/SharsorIPCpp"
+    # Add more directories as needed
+)
+
+press_enter() {
+
+    byobu send-keys Enter
+    sleep $SLEEP_FOR
+}
+
 # Function to execute common commands in Terminator terminal
 execute_command() {
-    xdotool type --delay 1 "$1"
-    xdotool key Return
+    byobu send-keys "$1"
+    press_enter
     sleep $SLEEP_FOR
-    xdotool key Ctrl+L
+}
+
+prepare_command() {
+    byobu send-keys "$1"
+    sleep $SLEEP_FOR
+}
+
+go_to_pane() {
+
+    byobu select-pane -t $1
+
+}
+
+go_to_window() {
+
+    byobu select-window -t $1
+
+}
+
+attach_to_session() {
+
+    byobu attach-session -t ${WS_NAME} 
+
 }
 
 source_mamba_env() {
@@ -26,70 +68,92 @@ source_mamba_env() {
 
 split_h() {
 
-    xdotool key Ctrl+F2
+    byobu split-window -p 50 -v
 
 }
 
 split_v() {
 
-    xdotool key Ctrl+Shift+e
+    byobu split-window -p 50 -h
 
 }
 
 new_tab() {
 
-    xdotool key Ctrl+Shift+T
+    byobu new-window
 
+}
+
+# Function to navigate to a directory and split Terminator horizontally
+cd_and_split() {
+
+    execute_command "cd $1"
+    
+    # Check if it's the last directory before splitting
+    if [ "$1" != "${directories[-1]}" ]; then
+    
+        split_h
+
+    fi
 }
 
 # launch terminator window
 byobu kill-session -t ${WS_NAME}
-byobu new-session -s ${WS_NAME} 
-execute_command "cd ${WORKING_DIR}"
-split_h
+
+byobu new-session -d -s ${WS_NAME} -c ${WORKING_DIR} -n ${WS_NAME} # -d "detached" session
 
 # tab 0
-# source_mamba_env
+source_mamba_env
+execute_command "source ~/.local/share/ov/pkg/isaac_sim-2023.1.0-hotfix.1/setup_conda_env.sh"
+prepare_command "reset && python KyonPlay.py"
 
-# split_v
+split_v
+source_mamba_env
+prepare_command "reset && python RunControlCluster.py"
 
-# source_mamba_env
+split_h
+source_mamba_env
+prepare_command "reset && python RunDebuggerGUI.py"
 
-# split_h
+split_h
+source_mamba_env
+prepare_command "reset && python RunKeyboardCmds.py"
 
-# source_mamba_env
+go_to_pane 0 
 
-# split_h
+split_h
+execute_command "source /opt/ros/noetic/setup.bash"
+execute_command "source ~/RL_ws/hhcm/setup.bash"
+source_mamba_env
+prepare_command "reset && python RunRhc2RosBridge.py kyon0"
 
-# source_mamba_env
+# tab 1
+new_tab
 
-# xdotool key Alt+Left
+execute_command "source /opt/ros/noetic/setup.bash"
+prepare_command "roscore"
 
-# split_h
+split_h
+execute_command "source /opt/ros/noetic/setup.bash"
+execute_command "source ~/RL_ws/hhcm/setup.bash"
+prepare_command "reset && python3 run_rhc2viz.py --nodes_perc 10 --robot_type kyon --robot_name kyon0"
 
-# execute_command "source /opt/ros/noetic/setup.bash"
-# execute_command "source ~/RL_ws/hhcm/setup.bash"
-# source_mamba_env
+# tab2
+new_tab
+execute_command "htop"
 
-# # tab 1
+split_h
+execute_command "nvtop"
+press_enter
 
-# new_tab
-# execute_command "source /opt/ros/noetic/setup.bash"
-# execute_command "roscore"
+# tab 3
 
-# split_h
+new_tab
 
-# execute_command "source /opt/ros/noetic/setup.bash"
-# execute_command "source ~/RL_ws/hhcm/setup.bash"
+# Loop through directories and navigate to each one
+for dir in "${directories[@]}"; do
+    cd_and_split "$dir"
+done
 
-# # tab 2
-
-# new_tab
-
-# execute_command "htop"
-
-# split_h
-
-# execute_command "nvtop"
-# xdotool key Return
-
+# we attach to the detached session
+attach_to_session
