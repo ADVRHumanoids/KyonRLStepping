@@ -573,8 +573,6 @@ class KyonRHC(RHController):
     def _get_cost_from_sol(self,
                     cost_name: str):
 
-        # to be overridden by child class
-        
         return self.rhc_costs[cost_name]
     
     def _get_constr_from_sol(self,
