@@ -2,6 +2,8 @@ from omni_robo_gym.gym.omni_vect_env.vec_envs import RobotVecEnv
 from omni_robo_gym.utils.math_utils import quat_to_omega
 from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_client import KyonRHClusterClient
 
+from typing import List
+
 import torch 
 import numpy as np
 
@@ -85,7 +87,7 @@ class KyonEnv(RobotVecEnv):
             
                 # we get the current absolute positions and use them as 
                 # references
-                self.task.init_root_abs_offsets(self.robot_names[i]) 
+                self.task.update_root_offsets(self.robot_names[i]) 
 
                 # we update the default root state now, so that we
                 # can use it at the next call to reset
@@ -173,12 +175,16 @@ class KyonEnv(RobotVecEnv):
 
         return observations, rewards, dones, info
         
-    def reset(self):
+    def reset(self,
+            env_ids: List[int]=None,
+            robot_names: List[str]=None):
 
-        self._world.reset()
+        # self._world.reset()
 
-        self.task.reset(self.task.integration_dt)
+        self.task.reset(env_ids = env_ids,
+            robot_names = robot_names)
         
+        # perform a simulation step
         self._world.step(render=self._render)
 
         return None

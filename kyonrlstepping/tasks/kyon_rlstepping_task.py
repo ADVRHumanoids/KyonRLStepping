@@ -3,6 +3,8 @@ from omni_robo_gym.tasks.custom_task import CustomTask
 from control_cluster_bridge.utilities.control_cluster_defs import RobotClusterCmd
 from control_cluster_bridge.utilities.control_cluster_defs import JntImpCntrlData
 
+from typing import List
+
 import numpy as np
 import torch
 
@@ -179,6 +181,7 @@ class KyonRlSteppingTask(CustomTask):
         return cmds
       
     def post_reset(self):
+
         # self._cart_dof_idx = self._cartpoles.get_dof_index("cartJoint")
         # self._pole_dof_idx = self._cartpoles.get_dof_index("poleJoint")
         # # randomize all envs
@@ -187,9 +190,12 @@ class KyonRlSteppingTask(CustomTask):
 
         a = 1
     
-    def reset(self, env_ids=None):
+    def reset(self, 
+            env_ids: List[int]=None,
+            robot_names: List[str]=None):
 
-        super().reset()
+        super().reset(env_ids=env_ids, 
+                    robot_names=robot_names)
 
     def pre_physics_step(self, 
             robot_name: str, 
