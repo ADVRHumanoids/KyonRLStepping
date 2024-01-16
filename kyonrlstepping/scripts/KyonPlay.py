@@ -144,9 +144,8 @@ env.set_task(task,
 
 # Run inference on the trained policy
 #model = PPO.load("ppo_cartpole")
-obs = env._world.reset()
-obs = env.reset()
-# env._world.pause()
+# env.get_world().reset()
+obs = env.reset(reset_world=True)
 
 import time
 rt_time_reset = 100
@@ -191,7 +190,7 @@ while env._simulation_app.is_running():
     
     i+=1 # updating simulation iteration number
     rt_factor_counter = rt_factor_counter + 1
-
+        
     if print_sim_info:
         
         print(f"[{script_name}]" + "[info]: current RT factor-> " + str(rt_factor))

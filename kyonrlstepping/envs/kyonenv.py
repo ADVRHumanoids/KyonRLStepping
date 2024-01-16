@@ -177,9 +177,12 @@ class KyonEnv(RobotVecEnv):
         
     def reset(self,
             env_ids: List[int]=None,
-            robot_names: List[str]=None):
+            robot_names: List[str]=None,
+            reset_world: bool = False):
 
-        # self._world.reset()
+        if reset_world:
+
+            self._world.reset()
 
         self.task.reset(env_ids = env_ids,
             robot_names = robot_names)
