@@ -16,8 +16,7 @@ if __name__ == "__main__":
                             window_buffer_factor=window_buffer_factor, 
                             verbose=True, 
                             namespace=namespace,
-                            add_sim_data = True, 
-                            add_cluster_data = True)
+                            add_sim_data = True)
     
     gui_extensions = []
     gui_extensions.append(JntImpMonitor(update_data_dt = data_update_dt,

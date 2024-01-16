@@ -7,9 +7,7 @@ import torch
 #from stable_baselines3 import PPO
 from kyonrlstepping.envs.kyonenv import KyonEnv 
 
-from omni_robo_gym.utils.shared_sim_info import SharedSimInfo
-
-print_sim_info = False
+from control_cluster_bridge.utilities.shared_info import SharedSimInfo
 
 num_envs = 8 
 
@@ -97,9 +95,14 @@ for i in range(0, len(contact_prims["kyon0"])):
     
     sensor_radii["kyon0"][contact_prims["kyon0"][i]] = 0.124
 
-env = KyonEnv(headless=True, 
-        enable_livestream=False, 
-        enable_viewport=False) # create environment
+headless = True
+enable_livestream = False
+enable_viewport = False
+env_debug = False
+env = KyonEnv(headless=headless, 
+        enable_livestream=enable_livestream, 
+        enable_viewport=enable_viewport,
+        debug = env_debug) # create environment
 
 # now we can import the task (not before, since Omni plugins are loaded 
 # upon environment initialization)
@@ -138,13 +141,12 @@ env.set_task(task,
         backend="torch", 
         sim_params = sim_params, 
         np_array_dtype = dtype_np, 
-        verbose=True, 
-        debug=True) # add the task to the environment 
+        cluster_client_verbose=True, 
+        cluster_client_debug=True) # add the task to the environment 
 # (includes spawning robots and launching the cluster client for the controllers)
 
 # Run inference on the trained policy
 #model = PPO.load("ppo_cartpole")
-# env.get_world().reset()
 obs = env.reset(reset_world=True)
 
 import time
@@ -158,11 +160,18 @@ start_time_loop = 0
 rt_factor_reset_n = 100 
 rt_factor_counter = 0
 
-shared_sim_info = SharedSimInfo() # sim. info to be broadcasted
-shared_sim_info.start(gpu_pipeline_active=sim_params["use_gpu_pipeline"], 
-                    integration_dt=sim_params["physics_dt"],
-                    rendering_dt=sim_params["rendering_dt"], 
-                    cluster_dt=control_clust_dt)
+# sim info to be broadcasted 
+# adding some data to dict for debugging
+sim_params["n_envs"] = num_envs 
+sim_params["control_clust_dt"] = control_clust_dt
+sim_params["headless"] = headless
+sim_params["enable_livestream"] = enable_livestream
+sim_params["enable_viewport"] = enable_viewport
+sim_params["env_debug"] = env_debug
+
+shared_sim_info = SharedSimInfo(is_server=True, 
+                            sim_params_dict=sim_params) 
+shared_sim_info.run()
 
 while env._simulation_app.is_running():
     
@@ -184,21 +193,16 @@ while env._simulation_app.is_running():
     sim_time += sim_params["physics_dt"]
     rt_factor = sim_time / real_time
     
-    shared_sim_info.update(sim_rt_factor=rt_factor, 
-                        cumulative_rt_factor=rt_factor * num_envs, 
-                        time_for_sim_stepping=now - start_time_step)
+    shared_sim_info.write(dyn_info_name=["sim_rt_factor", 
+                                        "total_rt_factor", 
+                                        "env_stepping_dt"],
+                        val=[rt_factor, 
+                            rt_factor * num_envs,
+                            now - start_time_step])
     
     i+=1 # updating simulation iteration number
     rt_factor_counter = rt_factor_counter + 1
         
-    if print_sim_info:
-        
-        print(f"[{script_name}]" + "[info]: current RT factor-> " + str(rt_factor))
-        print(f"[{script_name}]" + "[info]: current training RT factor-> " + str(rt_factor * num_envs))
-        print(f"[{script_name}]" + "[info]: real_time-> " + str(real_time))
-        print(f"[{script_name}]" + "[info]: sim_time-> " + str(sim_time))
-        print(f"[{script_name}]" + "[info]: time to step full env.-> " + str(now - start_time_step))
-
     # contact_report = task.omni_contact_sensors["kyon0"].contact_sensors[0][0].get_current_frame() 
 
     # print("#########")

@@ -16,8 +16,8 @@ class KyonEnv(RobotVecEnv):
                 sim_params=None, 
                 init_sim=True, 
                 np_array_dtype = np.float32, 
-                verbose = False, 
-                debug = False) -> None:
+                cluster_client_verbose = False, 
+                cluster_client_debug = False) -> None:
 
         super().set_task(task, 
                 backend=backend, 
@@ -51,8 +51,8 @@ class KyonEnv(RobotVecEnv):
                         n_contact_sensors = n_contact_sensors,
                         contact_linknames = contact_names, 
                         np_array_dtype = np_array_dtype, 
-                        verbose = False, 
-                        debug = debug, 
+                        verbose = cluster_client_verbose, 
+                        debug = cluster_client_debug, 
                         robot_name=self.robot_names[i])
         
         self._is_cluster_ready = False
@@ -96,6 +96,8 @@ class KyonEnv(RobotVecEnv):
                 # we initialize vals of the state for the cluster
                 self.update_cluster_state(self.robot_names[i], self.step_counter)
 
+                # print("KyonEnv aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
             # 1) this runs at a dt = control_cluster dt (sol. triggering) + 
             if self.cluster_clients[self.robot_names[i]].is_cluster_instant(self.step_counter) and \
                 self._trigger_solution:
@@ -104,6 +106,8 @@ class KyonEnv(RobotVecEnv):
                 # with the latest available state. trigger_solution() will also 
                 # perform runtime checks to ensure the cluster is ready and active
                 self.cluster_clients[self.robot_names[i]].trigger_solution() # this is non-blocking
+
+                # print("KyonEnv iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
 
             # 2) this runs at a dt = simulation dt i.e. the highest possible rate,
             #    using the latest available RHC solution (the new one is not available yet)
@@ -126,11 +130,14 @@ class KyonEnv(RobotVecEnv):
                 
                 self.controllers_were_active = self.cluster_clients[self.robot_names[i]].controllers_active
 
+                # print("KyonEnv UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU")
+
             else:
                 
                 # either cluster is not ready yet (initializing) or the RHC controllers
                 # are not active yet
 
+                # print("KyonEnv AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 self.task.pre_physics_step(robot_name = self.robot_names[i],
                                 actions = None)
             
@@ -242,5 +249,3 @@ class KyonEnv(RobotVecEnv):
 
         super().close() # this has to be called last 
         # so that isaac's simulation is close properly
-
-        
