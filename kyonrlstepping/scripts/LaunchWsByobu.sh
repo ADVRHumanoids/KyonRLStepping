@@ -17,12 +17,12 @@ directories=(
     "$HOME/RL_ws/hhcm/src/CoClusterBridge"
     "$HOME/RL_ws/hhcm/src/OmniRoboGym"
     "$HOME/RL_ws/hhcm/src/horizon"
-    "$HOME/RL_ws/hhcm/src/RHCViz"
+    # "$HOME/RL_ws/hhcm/src/RHCViz"
     "$HOME/RL_ws/hhcm/build/horizon"
-    "$HOME/RL_ws/hhcm/src/phase_manager"
-    "$HOME/RL_ws/hhcm/build/phase_manager"
-    "$HOME/RL_ws/hhcm/src/SharsorIPCpp"
-    "$HOME/RL_ws/hhcm/build/SharsorIPCpp"
+    # "$HOME/RL_ws/hhcm/src/phase_manager"
+    # "$HOME/RL_ws/hhcm/build/phase_manager"
+    # "$HOME/RL_ws/hhcm/src/SharsorIPCpp"
+    # "$HOME/RL_ws/hhcm/build/SharsorIPCpp"
     # Add more directories as needed
 )
 
