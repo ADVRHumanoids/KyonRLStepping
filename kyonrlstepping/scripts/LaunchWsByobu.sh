@@ -9,6 +9,7 @@ SLEEP_FOR=0.1
 WS_NAME="RlWorkspace"
 WORKING_DIR="$HOME/RL_ws/hhcm/src/KyonRLStepping/kyonrlstepping/scripts"
 MAMBAENVNAME="KyonRLSteppingIsaac2023.1.0"
+N_FILES=4096
 
 # Array of directories
 directories=(
@@ -67,6 +68,14 @@ source_mamba_env() {
 
 }
 
+increase_file_limits_locally() {
+
+    # for shared memory
+
+    execute_command "ulimit -n ${N_FILES}"
+
+}
+
 split_h() {
 
     byobu split-window -p 50 -v
@@ -103,26 +112,29 @@ byobu kill-session -t ${WS_NAME}
 
 byobu new-session -d -s ${WS_NAME} -c ${WORKING_DIR} -n ${WS_NAME} # -d "detached" session
 
-
 # tab 0
 execute_command "cd ${WORKING_DIR}"
 source_mamba_env
 execute_command "source ~/.local/share/ov/pkg/isaac_sim-2023.1.0-hotfix.1/setup_conda_env.sh"
+increase_file_limits_locally 
 prepare_command "reset && python KyonPlay.py"
 
 split_v
 execute_command "cd ${WORKING_DIR}"
 source_mamba_env
+increase_file_limits_locally
 prepare_command "reset && python RunControlCluster.py"
 
 split_h
 execute_command "cd ${WORKING_DIR}"
 source_mamba_env
+increase_file_limits_locally
 prepare_command "reset && python RunDebugGUI.py"
 
 split_h
 execute_command "cd ${WORKING_DIR}"
 source_mamba_env
+increase_file_limits_locally
 prepare_command "reset && python RunKeyboardCmds.py"
 
 go_to_pane 0 
@@ -132,6 +144,7 @@ execute_command "cd ${WORKING_DIR}"
 execute_command "source /opt/ros/noetic/setup.bash"
 execute_command "source ~/RL_ws/hhcm/setup.bash"
 source_mamba_env
+increase_file_limits_locally
 prepare_command "reset && python RunRhc2RosBridge.py kyon0"
 
 # tab 1
