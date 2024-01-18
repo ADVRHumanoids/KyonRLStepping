@@ -9,7 +9,7 @@ from kyonrlstepping.envs.kyonenv import KyonEnv
 
 from control_cluster_bridge.utilities.shared_info import SharedSimInfo
 
-num_envs = 8 
+num_envs = 1
 
 # simulation parameters
 sim_params = {}
@@ -98,8 +98,10 @@ for i in range(0, len(contact_prims["kyon0"])):
 headless = True
 enable_livestream = False
 enable_viewport = False
-env_debug = False
-env = KyonEnv(headless=headless, 
+env_debug = True
+    
+env = KyonEnv(headless=headless,
+        sim_device = 0,
         enable_livestream=enable_livestream, 
         enable_viewport=enable_viewport,
         debug = env_debug) # create environment
@@ -133,8 +135,9 @@ task = KyonRlSteppingTask(integration_dt = integration_dt,
         override_art_controller=True, # uses handmade EXPLICIT controller. This will usually be unstable for relatively high int. dts
         device = device, 
         use_diff_velocities = False, # whether to differentiate velocities numerically
-        debug_jnt_imp_control = False, # writes jnt imp. controller info on shared mem (overhead)
-        dtype=dtype_torch) # create task
+        dtype=dtype_torch,
+        debug_mode_jnt_imp = True) # writes jnt imp. controller info on shared mem (overhead)
+        # and profiles it
 
 env.set_task(task, 
         cluster_dt = control_clust_dt,
@@ -170,7 +173,7 @@ sim_time = 0.0
 i = 0
 start_time = time.perf_counter()
 start_time_loop = 0
-rt_factor_reset_n = 10000
+rt_factor_reset_n = 1000
 rt_factor_counter = 0
 reset_rt_factor = True
 while env._simulation_app.is_running():
@@ -187,43 +190,29 @@ while env._simulation_app.is_running():
     start_time_step = time.perf_counter()
 
     obs, rewards, dones, info = env.step() 
-    
-    now = time.perf_counter()
-
-    real_time = now - start_time
-    sim_time += sim_params["physics_dt"]
-    rt_factor = sim_time / real_time
-    
+        
     shared_sim_info.write(dyn_info_name=["sim_rt_factor", 
                                         "total_rt_factor", 
-                                        "env_stepping_dt"],
+                                        "env_stepping_dt",
+                                        "world_stepping_dt",
+                                        "time_to_get_agent_data",
+                                        "cluster_state_update_dt",
+                                        "cluster_sol_time"
+                                        ],
                         val=[rt_factor, 
                             rt_factor * num_envs,
-                            now - start_time_step])
+                            time.perf_counter() - start_time_step,
+                            env.debug_data["time_to_step_world"],
+                            env.debug_data["time_to_get_agent_data"],
+                            env.debug_data["cluster_state_update_dt"],
+                            env.debug_data["cluster_sol_time"][f"{robot_names[0]}"]])
     
     i+=1 # updating simulation iteration number
     rt_factor_counter = rt_factor_counter + 1
         
-    # contact_report = task.omni_contact_sensors["kyon0"].contact_sensors[0][0].get_current_frame() 
-
-    # print("#########")
-    # print(contact_report)
-
-    # print(task.omni_contact_sensors["kyon0"].contact_geom_prim_views[0].get_net_contact_forces(clone = False, 
-                                                                                            # dt = sim_params["physics_dt"]))
-    
-    # print("Detailed:")
-    # print(task.omni_contact_sensors["kyon0"].contact_geom_prim_views[0].get_contact_force_data(clone = False,
-    #                                                                                         dt = sim_params["physics_dt"]))
-    # # print("Normal:")
-    # # print(contact_report['contacts'])
-    # # print(contact_report['normal'].device)
-    # print("In contact:")
-    # print(contact_report['in_contact'])
-    # print("Force:")
-    # print(contact_report['force'])
-    # print("Number of contacts:")
-    # print(contact_report['number_of_contacts'])
+    real_time = time.perf_counter() - start_time
+    sim_time += sim_params["physics_dt"]
+    rt_factor = sim_time / real_time
 
 print("[main][info]: closing environment and simulation")
 

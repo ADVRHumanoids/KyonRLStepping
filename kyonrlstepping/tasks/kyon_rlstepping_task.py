@@ -39,8 +39,8 @@ class KyonRlSteppingTask(CustomTask):
             sensor_radii = None,
             use_diff_velocities = True,
             override_art_controller = False,
-            debug_jnt_imp_control = False,
-            dtype = torch.float64) -> None:
+            dtype = torch.float64,
+            debug_mode_jnt_imp = False) -> None:
 
         if cloning_offset is None:
         
@@ -82,11 +82,12 @@ class KyonRlSteppingTask(CustomTask):
                     dtype = dtype, 
                     self_collide = [False] * len(robot_names), 
                     fix_base = [False] * len(robot_names),
-                    merge_fixed = [True] * len(robot_names))
+                    merge_fixed = [True] * len(robot_names),
+                    debug_mode_jnt_imp = debug_mode_jnt_imp)
         
         self.use_diff_velocities = use_diff_velocities
         
-        self.debug_jnt_imp_control = debug_jnt_imp_control
+        self.debug_mode_jnt_imp = debug_mode_jnt_imp
 
         self.startup_jnt_stiffness = startup_jnt_stiffness
         self.startup_jnt_damping = startup_jnt_damping
@@ -117,7 +118,7 @@ class KyonRlSteppingTask(CustomTask):
             
     def _update_jnt_imp_cntrl_shared_data(self):
 
-        if self.debug_jnt_imp_control:
+        if self.debug_mode_jnt_imp:
 
             for i in range(0, len(self.robot_names)):
             
@@ -126,7 +127,7 @@ class KyonRlSteppingTask(CustomTask):
                 success = True
 
                 # updating all the jnt impedance data - > this introduces some overhead. 
-                # disable this with debug_jnt_imp_control when debugging is not necessary
+                # disable this with debug_mode_jnt_imp when debugging is not necessary
                 success = self.jnt_imp_cntrl_shared_data[robot_name].pos_err_view.write(
                     self.jnt_imp_controllers[robot_name].pos_err(), 0, 0
                     ) and success
@@ -221,13 +222,8 @@ class KyonRlSteppingTask(CustomTask):
                                         pos_ref = actions.jnt_cmd.q, 
                                         vel_ref = actions.jnt_cmd.v, 
                                         eff_ref = actions.jnt_cmd.eff)
-            
-            # print("cmd debug" + "\n" + 
-            #         "q_cmd: " + str(actions.jnt_cmd.q) + "\n" + 
-            #         "v_cmd: " + str(actions.jnt_cmd.v) + "\n" + 
-            #         "eff_cmd: " + str(actions.jnt_cmd.eff))
         
-        # jnt imp. controller actions are always applied
+        # # jnt imp. controller actions are always applied
         self.jnt_imp_controllers[robot_name].apply_cmds()
 
         self._update_jnt_imp_cntrl_shared_data() # only if flag is enabled

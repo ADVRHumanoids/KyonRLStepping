@@ -7,7 +7,33 @@ from typing import List
 import torch 
 import numpy as np
 
+import time
+
 class KyonEnv(RobotVecEnv):
+
+    def __init__(self,
+                headless: bool = True, 
+                sim_device: int = 0, 
+                enable_livestream: bool = False, 
+                enable_viewport: bool = False,
+                debug = False):
+
+        super().__init__(headless = headless, 
+                sim_device = sim_device, 
+                enable_livestream = enable_livestream, 
+                enable_viewport = enable_viewport,
+                debug = debug)
+
+        # debug data
+        self.debug_data = {}
+        self.debug_data["time_to_step_world"] = np.nan
+        self.debug_data["time_to_get_agent_data"] = np.nan
+        self.debug_data["cluster_state_update_dt"] = np.nan
+        self.debug_data["cluster_sol_time"] = {}
+
+        self.start_time = None
+        if self.debug:
+            self.start_time = time.perf_counter()
 
     def set_task(self, 
                 task, 
@@ -54,7 +80,9 @@ class KyonEnv(RobotVecEnv):
                         verbose = cluster_client_verbose, 
                         debug = cluster_client_debug, 
                         robot_name=self.robot_names[i])
-        
+
+            self.debug_data["cluster_sol_time"][f"{self.robot_names[i]}"]= np.nan
+
         self._is_cluster_ready = False
         self._trigger_solution = True
         
@@ -96,8 +124,6 @@ class KyonEnv(RobotVecEnv):
                 # we initialize vals of the state for the cluster
                 self.update_cluster_state(self.robot_names[i], self.step_counter)
 
-                # print("KyonEnv aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-
             # 1) this runs at a dt = control_cluster dt (sol. triggering) + 
             if self.cluster_clients[self.robot_names[i]].is_cluster_instant(self.step_counter) and \
                 self._trigger_solution:
@@ -106,8 +132,6 @@ class KyonEnv(RobotVecEnv):
                 # with the latest available state. trigger_solution() will also 
                 # perform runtime checks to ensure the cluster is ready and active
                 self.cluster_clients[self.robot_names[i]].trigger_solution() # this is non-blocking
-
-                # print("KyonEnv iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
 
             # 2) this runs at a dt = simulation dt i.e. the highest possible rate,
             #    using the latest available RHC solution (the new one is not available yet)
@@ -130,19 +154,24 @@ class KyonEnv(RobotVecEnv):
                 
                 self.controllers_were_active = self.cluster_clients[self.robot_names[i]].controllers_active
 
-                # print("KyonEnv UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU")
-
             else:
                 
                 # either cluster is not ready yet (initializing) or the RHC controllers
                 # are not active yet
 
-                # print("KyonEnv AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 self.task.pre_physics_step(robot_name = self.robot_names[i],
                                 actions = None)
-            
+        
         # 3) simulation stepping # integration_dt
+        if self.debug:
+            
+            self.start_time = time.perf_counter()
+
         self._world.step(render=self._render)
+
+        if self.debug:
+            
+            self.debug_data["time_to_step_world"] = time.perf_counter() - self.start_time
 
         # this runs at a dt = control_cluster dt
 
@@ -162,8 +191,21 @@ class KyonEnv(RobotVecEnv):
                     self._trigger_solution = True # this allows for the next trigger 
 
                     # 4) update cluster state
+
+                    if self.debug:
+
+                        self.start_time  = time.perf_counter()
+
                     self.update_cluster_state(self.robot_names[i], self.step_counter)
                     
+                    if self.debug:
+
+                        self.debug_data["cluster_state_update_dt"] = \
+                            time.perf_counter() - self.start_time
+                        
+                        self.debug_data["cluster_sol_time"][f"{self.robot_names[i]}"] = \
+                            self.cluster_clients[self.robot_names[i]].solution_time
+                        
             else: # we are in the same step() call as the trigger
 
                 self._trigger_solution = False # -> next cluster instant we get the solution
@@ -172,6 +214,10 @@ class KyonEnv(RobotVecEnv):
         self.step_counter += 1
 
         # RL stuff
+        if self.debug:
+            
+            self.start_time = time.perf_counter()
+            
         observations = self.task.get_observations()
 
         rewards = self.task.calculate_metrics()
@@ -179,6 +225,10 @@ class KyonEnv(RobotVecEnv):
         dones = self.task.is_done()
 
         info = {}
+
+        if self.debug:
+                        
+            self.debug_data["time_to_get_agent_data"] = time.perf_counter() - self.start_time
 
         return observations, rewards, dones, info
         
