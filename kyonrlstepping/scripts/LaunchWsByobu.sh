@@ -123,6 +123,7 @@ prepare_command "reset && python KyonPlay.py"
 split_v
 execute_command "cd ${WORKING_DIR}"
 source_mamba_env
+execute_command "source ~/RL_ws/hhcm/setup.bash"
 increase_file_limits_locally
 prepare_command "reset && python RunControlCluster.py"
 
