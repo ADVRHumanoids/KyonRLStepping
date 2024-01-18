@@ -149,17 +149,6 @@ env.set_task(task,
 #model = PPO.load("ppo_cartpole")
 obs = env.reset(reset_world=True)
 
-import time
-rt_time_reset = 100
-rt_factor = 1.0
-real_time = 0.0
-sim_time = 0.0
-i = 0
-start_time = time.perf_counter()
-start_time_loop = 0
-rt_factor_reset_n = 100 
-rt_factor_counter = 0
-
 # sim info to be broadcasted 
 # adding some data to dict for debugging
 sim_params["n_envs"] = num_envs 
@@ -173,9 +162,21 @@ shared_sim_info = SharedSimInfo(is_server=True,
                             sim_params_dict=sim_params) 
 shared_sim_info.run()
 
+import time
+rt_time_reset = 100
+rt_factor = 1.0
+real_time = 0.0
+sim_time = 0.0
+i = 0
+start_time = time.perf_counter()
+start_time_loop = 0
+rt_factor_reset_n = 10000
+rt_factor_counter = 0
+reset_rt_factor = True
 while env._simulation_app.is_running():
     
-    if ((i + 1) % rt_factor_reset_n) == 0:
+    if ((i + 1) % rt_factor_reset_n) == 0 \
+        and reset_rt_factor:
 
         rt_factor_counter = 0
 
