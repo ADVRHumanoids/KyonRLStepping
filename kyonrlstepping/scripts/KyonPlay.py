@@ -9,7 +9,7 @@ from kyonrlstepping.envs.kyonenv import KyonEnv
 
 from control_cluster_bridge.utilities.shared_info import SharedSimInfo
 
-num_envs = 1
+num_envs = 10
 
 # simulation parameters
 sim_params = {}
@@ -32,15 +32,15 @@ sim_params["enable_scene_query_support"] = False
 sim_params["use_fabric"] = True # Enable/disable reading of physics buffers directly. Default is True.
 sim_params["replicate_physics"] = True
 # sim_params["worker_thread_count"] = 4
-sim_params["solver_type"] =  1 # 0: PGS, 1:TGS, defaults to TGS. PGS faster but TGS
+sim_params["solver_type"] =  1 # 0: PGS, 1:TGS, defaults to TGS. PGS faster but TGS more stable
 sim_params["enable_stabilization"] = True
 # sim_params["bounce_threshold_velocity"] = 0.2
 # sim_params["friction_offset_threshold"] = 0.04
 # sim_params["friction_correlation_distance"] = 0.025
 # sim_params["enable_sleeping"] = True
 # Per-actor settings ( can override in actor_options )
-sim_params["solver_position_iteration_count"] = 4
-sim_params["solver_velocity_iteration_count"] = 1
+sim_params["solver_position_iteration_count"] = 2 # defaults to 4
+sim_params["solver_velocity_iteration_count"] = 1 # defaults to 1
 sim_params["sleep_threshold"] = 0.0 # Mass-normalized kinetic energy threshold below which an actor may go to sleep.
 # Allowed range [0, max_float).
 sim_params["stabilization_threshold"] = 1e-5
@@ -63,7 +63,7 @@ sim_params["stabilization_threshold"] = 1e-5
 # sim_params["gpu_max_num_partitions"] = 8
 
 integration_dt = sim_params["physics_dt"]
-control_clust_dt = 0.04 # [s]
+control_clust_dt = 0.02 # [s]
 
 dtype = "float32" # Isaac requires data to be float32, so this should not be touched
 if dtype == "float64":

@@ -25,7 +25,7 @@ def generate_controllers(robot_name: str):
                 cluster_size=control_cluster_srvr.cluster_size,
                 robot_name=robot_name,
                 config_path = kyonrhc_config_path,
-                dt=0.04,
+                dt=0.02,
                 n_intervals=30, 
                 max_solver_iter = max_solver_iter,
                 verbose = verbose, 

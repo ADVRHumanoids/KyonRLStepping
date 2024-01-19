@@ -460,7 +460,7 @@ class KyonRHC(RHController):
         try:
 
             result = self._ti.rti() # solves the problem
-
+            
             self.sol_counter = self.sol_counter + 1
 
             if self.publish_sol:
