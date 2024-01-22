@@ -25,7 +25,7 @@ def generate_controllers(robot_name: str):
                 cluster_size=control_cluster_srvr.cluster_size,
                 robot_name=robot_name,
                 config_path = kyonrhc_config_path,
-                dt=0.02,
+                dt=0.03,
                 n_intervals=30, 
                 max_solver_iter = max_solver_iter,
                 verbose = verbose, 
@@ -49,11 +49,14 @@ dtype = torch.float32 # this has to be the same wrt the cluster client, otherwis
 
 robot_name = "kyon0"
 control_cluster_srvr = KyonRHClusterSrvr(robot_name, 
-                                    use_isolated_cores=True, 
+                                    isolated_cores_only = True, 
+                                    use_only_physical_cores = True,
                                     verbose=verbose) # this blocks until connection with the client is established
 
-controllers = generate_controllers(robot_name)
+control_cluster_srvr.pre_init() # pre-initialization steps
 
+controllers = generate_controllers(robot_name)
+    
 for i in range(0, control_cluster_srvr.cluster_size):
     
     # we add the controllers

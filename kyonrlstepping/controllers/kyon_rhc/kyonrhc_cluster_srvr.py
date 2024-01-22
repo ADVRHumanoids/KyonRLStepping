@@ -2,12 +2,15 @@ from control_cluster_bridge.cluster_server.control_cluster_srvr import ControlCl
 
 from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_horizon
 
+from SharsorIPCpp.PySharsorIPC import Journal, LogType
+
 class KyonRHClusterSrvr(ControlClusterSrvr):
     
     def __init__(self, 
             robot_name: str, 
-            use_isolated_cores = False,
-            verbose = False):
+            isolated_cores_only: bool = False,
+            use_only_physical_cores: bool = False,
+            verbose: bool = False):
 
         self._temp_path = "/tmp/" + f"{self.__class__.__name__}"
         
@@ -16,7 +19,8 @@ class KyonRHClusterSrvr(ControlClusterSrvr):
         self.robot_pkg_name = "kyon"
 
         super().__init__(namespace = self.namespace, 
-                        use_isolated_cores = use_isolated_cores,
+                        isolated_cores_only = isolated_cores_only,
+                        use_only_physical_cores = use_only_physical_cores,
                         verbose = verbose)
         
         self._generate_srdf()
@@ -31,8 +35,12 @@ class KyonRHClusterSrvr(ControlClusterSrvr):
         
     def _generate_srdf(self):
         
-        print(f"[{self.__class__.__name__}]"  + f"[{self.journal.status}]" + ": generating SRDF for Control Cluster server")
-
+        Journal.log(self.__class__.__name__,
+                        "_generate_srdf",
+                        "generating SRDF for Control Cluster server",
+                        LogType.STAT,
+                        throw_when_excep = True)
+    
         # we generate the URDF where the Kyon description package is located
         import rospkg
         rospackage = rospkg.RosPack()
@@ -51,18 +59,28 @@ class KyonRHClusterSrvr(ControlClusterSrvr):
             xacro_cmd = ["xacro"] + [xacro_path] + cmds + ["-o"] + [self._srdf_path]
             xacro_gen = subprocess.check_call(xacro_cmd)
 
-            print(f"[{self.__class__.__name__}]"  + f"[{self.journal.status}]" + ": generated SRDF for Control Cluster server")
-
+            Journal.log(self.__class__.__name__,
+                        "_generate_srdf",
+                        "generated SRDF for Control Cluster server",
+                        LogType.STAT,
+                        throw_when_excep = True)
+            
         except:
-
-            raise Exception(f"[{self.__class__.__name__}]"  + 
-                            f"[{self.journal.status}]" + 
-                            ": failed to generate Kyon\'s SRDF!!!.")
+            
+            Journal.log(self.__class__.__name__,
+                        "_generate_srdf",
+                        "Failed to generate Kyon\'s SRDF!!!.",
+                        LogType.EXCEP,
+                        throw_when_excep = True)
     
     def _generate_urdf(self):
         
-        print(f"[{self.__class__.__name__}]"  + f"[{self.journal.status}]" + ": generating URDF for Control Cluster server")
-
+        Journal.log(self.__class__.__name__,
+                        "_generate_urdf",
+                        "Generating URDF for Control Cluster server",
+                        LogType.STAT,
+                        throw_when_excep = True)
+        
         # we generate the URDF where the Kyon description package is located
         import rospkg
         rospackage = rospkg.RosPack()
@@ -82,9 +100,16 @@ class KyonRHClusterSrvr(ControlClusterSrvr):
 
             xacro_gen = subprocess.check_call(xacro_cmd)
             
-            print(f"[{self.__class__.__name__}]"  + f"[{self.journal.status}]" + ": generated URDF for Control Cluster server")
-
+            Journal.log(self.__class__.__name__,
+                        "_generate_srdf",
+                        "Generated URDF for Control Cluster server",
+                        LogType.STAT,
+                        throw_when_excep = True)
+            
         except:
 
-            raise Exception(f"[{self.__class__.__name__}]"  + f"[{self.journal.status}]" + ": failed to generate Kyon\'s URDF!!!.")
-    
+            Journal.log(self.__class__.__name__,
+                        "_generate_urdf",
+                        "Failed to generate Kyon\'s URDF!!!.",
+                        LogType.EXCEP,
+                        throw_when_excep = True)    

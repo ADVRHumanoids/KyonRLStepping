@@ -8,9 +8,14 @@ from kyonrlstepping.controllers.kyon_rhc.gait_manager import GaitManager
 
 from kyonrlstepping.utils.rhc2shared import RHC2SharedInternal
 
+from SharsorIPCpp.PySharsorIPC import VLevel
+from SharsorIPCpp.PySharsorIPC import Journal, LogType
+
 import numpy as np
 
 import torch
+
+import time
 
 class KyonRHC(RHController):
 
@@ -28,6 +33,7 @@ class KyonRHC(RHController):
             enable_replay = False, 
             verbose = False, 
             debug = False, 
+            profile_all = False,
             array_dtype = torch.float32, 
             publish_sol = False,
             debug_sol = True # whether to publish rhc rebug data
@@ -35,9 +41,12 @@ class KyonRHC(RHController):
 
         self.step_counter = 0
         self.sol_counter = 0
-
-        self.max_solver_iter = max_solver_iter
     
+        self.max_solver_iter = max_solver_iter
+        
+        self._custom_timer_start = time.perf_counter()
+        self._profile_all = profile_all
+
         self.publish_sol = publish_sol
 
         self.robot_name = robot_name
@@ -93,10 +102,15 @@ class KyonRHC(RHController):
             
     def _init_problem(self):
         
-        print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + \
-                f"[{self.journal.status}]" + ": initializing RHC problem " + \
-                f"with dt: {self._dt} s, t_horizon: {self._t_horizon} s, n_intervals: {self._n_intervals}")
-
+        stat = f"Initializing RHC problem " + \
+            f"with dt: {self._dt} s, t_horizon: {self._t_horizon} s, n_intervals: {self._n_intervals}"
+        
+        Journal.log(self.__class__.__name__,
+                    "_init_problem",
+                    stat,
+                    LogType.STAT,
+                    throw_when_excep = True)
+        
         self.urdf = self.urdf.replace('continuous', 'revolute') # continous joint is parametrized
         # in So2, so will add 
 
@@ -247,8 +261,12 @@ class KyonRHC(RHController):
         
         # self.horizon_anal = analyzer.ProblemAnalyzer(self._prb)
 
-        print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" +  f"[{self.journal.status}]" + "Initialized RHC problem")
-
+        Journal.log(self.__class__.__name__,
+                    "_init_problem",
+                    "RHC problem initialized.",
+                    LogType.STAT,
+                    throw_when_excep = True)
+        
     def _init_rhc_task_cmds(self) -> KyonRhcTaskRef:
 
         return KyonRhcTaskRef(gait_manager=self._gm, 
@@ -425,16 +443,43 @@ class KyonRHC(RHController):
         
     def _solve(self):
         
+        # problem update
+
+        if self._profile_all:
+
+            self._custom_timer_start = time.perf_counter()
+
         # self._update_open_loop() # updates the TO ig and 
         # initial conditions using data from the solution itself
 
         self._update_closed_loop() # updates the TO ig and 
         # # initial conditions using robot measurements
         
+        if self._profile_all:
+
+            self._profiling_data_dict["problem_update_dt"] = time.perf_counter() - self._custom_timer_start
+
+        if self._profile_all:
+
+            self._custom_timer_start = time.perf_counter()
+
         self._pm.shift() # shifts phases of one dt
         
+        if self._profile_all:
+
+            self._profiling_data_dict["phases_shift_dt"] = time.perf_counter() - self._custom_timer_start
+
+
+        if self._profile_all:
+
+            self._custom_timer_start = time.perf_counter()
+
         self.rhc_task_refs.update() # updates rhc references
         # with the latests available
+
+        if self._profile_all:
+
+            self._profiling_data_dict["task_ref_update"] = time.perf_counter() - self._custom_timer_start
 
         # check what happend as soon as we try to step on the 1st controller
         # if self.controller_index == 0:
@@ -458,9 +503,17 @@ class KyonRHC(RHController):
             # self.horizon_anal.print()
 
         try:
+            
+            if self._profile_all:
+
+                self._custom_timer_start = time.perf_counter()
 
             result = self._ti.rti() # solves the problem
             
+            if self._profile_all:
+
+                self._profiling_data_dict["rti_solve_dt"] = time.perf_counter() - self._custom_timer_start
+
             self.sol_counter = self.sol_counter + 1
 
             if self.publish_sol:
@@ -478,10 +531,15 @@ class KyonRHC(RHController):
         
         except Exception as e:
             
-            print(f"[{self.__class__.__name__}" + str(self.controller_index) + "]" + \
-              f"[{self.journal.exception}]" + ": rti() failed" + 
-              f" with exception{type(e).__name__}")
-
+            exception = f"Rti() failed" + \
+              f" with exception{type(e).__name__}"
+            
+            Journal.log(self.__class__.__name__,
+                            "solve",
+                            exception,
+                            LogType.EXCEP,
+                            throw_when_excep = False)
+            
             if self.publish_sol:
                 
                 # we publish solution anyway ??
