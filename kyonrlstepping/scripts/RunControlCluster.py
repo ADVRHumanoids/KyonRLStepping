@@ -30,14 +30,16 @@ def generate_controllers(robot_name: str):
                 max_solver_iter = max_solver_iter,
                 verbose = verbose, 
                 debug = debug,
+                profile_all = profile_all,
                 array_dtype = dtype,
                 publish_sol=debug_solution))
 
     return cluster_controllers
 
 verbose = True
-debug = True
 
+debug = True
+profile_all = True
 debug_solution = True
 
 max_solver_iter = 1
