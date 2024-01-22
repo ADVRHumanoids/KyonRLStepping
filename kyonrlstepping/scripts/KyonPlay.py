@@ -9,7 +9,7 @@ from kyonrlstepping.envs.kyonenv import KyonEnv
 
 from control_cluster_bridge.utilities.shared_info import SharedSimInfo
 
-num_envs = 10
+num_envs = 1
 
 # simulation parameters
 sim_params = {}
@@ -63,7 +63,7 @@ sim_params["stabilization_threshold"] = 1e-5
 # sim_params["gpu_max_num_partitions"] = 8
 
 integration_dt = sim_params["physics_dt"]
-control_clust_dt = 0.02 # [s]
+control_clust_dt = 0.03 # [s]
 
 dtype = "float32" # Isaac requires data to be float32, so this should not be touched
 if dtype == "float64":
