@@ -1,5 +1,5 @@
 from control_cluster_bridge.utilities.debugger_gui.cluster_debugger import RtClusterDebugger
-from kyonrlstepping.utils.gui_exts import JntImpMonitor
+from control_cluster_bridge.utilities.debugger_gui.gui_exts import JntImpMonitor
 
 if __name__ == "__main__":  
 
@@ -18,6 +18,7 @@ if __name__ == "__main__":
                             namespace=namespace,
                             add_sim_data = True)
     
+    # adding some of the available extensions
     gui_extensions = []
     gui_extensions.append(JntImpMonitor(update_data_dt = data_update_dt,
             update_plot_dt = plot_update_dt,

@@ -4,12 +4,15 @@ from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_horizon
 
 from SharsorIPCpp.PySharsorIPC import Journal, LogType
 
+from typing import List
+
 class KyonRHClusterSrvr(ControlClusterSrvr):
     
     def __init__(self, 
             robot_name: str, 
             isolated_cores_only: bool = False,
             use_only_physical_cores: bool = False,
+            core_ids_override_list: List[int] = None,
             verbose: bool = False):
 
         self._temp_path = "/tmp/" + f"{self.__class__.__name__}"
@@ -21,6 +24,7 @@ class KyonRHClusterSrvr(ControlClusterSrvr):
         super().__init__(namespace = self.namespace, 
                         isolated_cores_only = isolated_cores_only,
                         use_only_physical_cores = use_only_physical_cores,
+                        core_ids_override_list = core_ids_override_list,
                         verbose = verbose)
         
         self._generate_srdf()
