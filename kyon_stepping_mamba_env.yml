@@ -56,3 +56,4 @@ dependencies:
     - urdf_parser_py
     - psutil
     - multiprocess
+    - matplotlib
