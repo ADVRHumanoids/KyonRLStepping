@@ -1,7 +1,7 @@
 from omni_robo_gym.tasks.custom_task import CustomTask
 
 from control_cluster_bridge.utilities.control_cluster_defs import RobotClusterCmd
-from control_cluster_bridge.utilities.control_cluster_defs import JntImpCntrlData
+from control_cluster_bridge.utilities.data import JntImpCntrlData
 
 from typing import List
 

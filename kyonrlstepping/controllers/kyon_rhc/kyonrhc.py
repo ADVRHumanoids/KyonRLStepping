@@ -333,10 +333,10 @@ class KyonRHC(RHController):
             
             return torch.cat((self.robot_state.root_state.get_p(), 
                     self.robot_state.root_state.get_q(), 
-                    self.robot_state.jnt_state.get_q(), 
+                    self.robot_state.jnts_state.get_q(), 
                     self.robot_state.root_state.get_v(), 
                     self.robot_state.root_state.get_omega(), 
-                    self.robot_state.jnt_state.get_v()), 
+                    self.robot_state.jnts_state.get_v()), 
                     dim=1
                     ).numpy().T
         
@@ -344,10 +344,10 @@ class KyonRHC(RHController):
 
             return torch.cat((self.robot_state.root_state.get_p(), 
                     self.robot_state.root_state.get_q(), 
-                    self.robot_state.jnt_state.get_q(), 
+                    self.robot_state.jnts_state.get_q(), 
                     self.robot_state.root_state.get_v(), 
                     self.robot_state.root_state.get_omega(), 
-                    self.robot_state.jnt_state.get_v()), 
+                    self.robot_state.jnts_state.get_v()), 
                     dim=1
                     ).T
 
@@ -360,7 +360,7 @@ class KyonRHC(RHController):
             
             return torch.cat((self.robot_state.root_state.get_p(), 
                     self.robot_state.root_state.get_q(), 
-                    self.robot_state.jnt_state.get_q()), 
+                    self.robot_state.jnts_state.get_q()), 
                     dim=1
                     ).numpy().T
         
@@ -368,7 +368,7 @@ class KyonRHC(RHController):
 
             return torch.cat((self.robot_state.root_state.get_p(), 
                     self.robot_state.root_state.get_q(), 
-                    self.robot_state.jnt_state.get_q()), 
+                    self.robot_state.jnts_state.get_q()), 
                     dim=1
                     ).T
 
