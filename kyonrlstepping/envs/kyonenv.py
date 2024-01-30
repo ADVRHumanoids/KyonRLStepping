@@ -150,7 +150,7 @@ class KyonEnv(RobotVecEnv):
                                     wheel_damping =self.task.startup_wheel_damping)
 
                 self.task.pre_physics_step(robot_name = self.robot_names[i], 
-                                actions = self.cluster_clients[self.robot_names[i]].controllers_cmds)
+                                actions = self.cluster_clients[self.robot_names[i]].rhc_cmds)
                 
                 self.controllers_were_active = self.cluster_clients[self.robot_names[i]].controllers_active
 

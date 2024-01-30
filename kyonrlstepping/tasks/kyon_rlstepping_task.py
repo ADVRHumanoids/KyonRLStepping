@@ -1,6 +1,6 @@
 from omni_robo_gym.tasks.custom_task import CustomTask
 
-from control_cluster_bridge.utilities.control_cluster_defs import RobotClusterCmd
+from control_cluster_bridge.utilities.data import RhcCmds
 from control_cluster_bridge.utilities.data import JntImpCntrlData
 
 from typing import List
@@ -200,7 +200,7 @@ class KyonRlSteppingTask(CustomTask):
 
     def pre_physics_step(self, 
             robot_name: str, 
-            actions: RobotClusterCmd = None) -> None:
+            actions: RhcCmds = None) -> None:
 
         # always updated imp. controller internal state
         success = self.jnt_imp_controllers[robot_name].update_state(pos = self.jnts_q[robot_name], 
@@ -219,9 +219,9 @@ class KyonRlSteppingTask(CustomTask):
             
             # if new actions are received, also update references
             self.jnt_imp_controllers[robot_name].set_refs(
-                                        pos_ref = actions.jnt_cmd.q, 
-                                        vel_ref = actions.jnt_cmd.v, 
-                                        eff_ref = actions.jnt_cmd.eff)
+                                        pos_ref = actions.jnts_state.get_q(gpu=True), 
+                                        vel_ref = actions.jnts_state.get_v(gpu=True), 
+                                        eff_ref = actions.jnts_state.get_eff(gpu=True))
         
         # # jnt imp. controller actions are always applied
         self.jnt_imp_controllers[robot_name].apply_cmds()
