@@ -331,23 +331,23 @@ class KyonRHC(RHController):
 
         if to_numpy:
             
-            return torch.cat((self.robot_state.root_state.get_p(), 
-                    self.robot_state.root_state.get_q(), 
-                    self.robot_state.jnts_state.get_q(), 
-                    self.robot_state.root_state.get_v(), 
-                    self.robot_state.root_state.get_omega(), 
-                    self.robot_state.jnts_state.get_v()), 
+            return torch.cat((self.robot_state.root_state.get_p(self.controller_index), 
+                    self.robot_state.root_state.get_q(self.controller_index), 
+                    self.robot_state.jnts_state.get_q(self.controller_index), 
+                    self.robot_state.root_state.get_v(self.controller_index), 
+                    self.robot_state.root_state.get_omega(self.controller_index), 
+                    self.robot_state.jnts_state.get_v(self.controller_index)), 
                     dim=1
                     ).numpy().T
         
         if not to_numpy:
 
-            return torch.cat((self.robot_state.root_state.get_p(), 
-                    self.robot_state.root_state.get_q(), 
-                    self.robot_state.jnts_state.get_q(), 
-                    self.robot_state.root_state.get_v(), 
-                    self.robot_state.root_state.get_omega(), 
-                    self.robot_state.jnts_state.get_v()), 
+            return torch.cat((self.robot_state.root_state.get_p(self.controller_index), 
+                    self.robot_state.root_state.get_q(self.controller_index), 
+                    self.robot_state.jnts_state.get_q(self.controller_index), 
+                    self.robot_state.root_state.get_v(self.controller_index), 
+                    self.robot_state.root_state.get_omega(self.controller_index), 
+                    self.robot_state.jnts_state.get_v(self.controller_index)), 
                     dim=1
                     ).T
 
@@ -358,17 +358,17 @@ class KyonRHC(RHController):
 
         if to_numpy:
             
-            return torch.cat((self.robot_state.root_state.get_p(), 
-                    self.robot_state.root_state.get_q(), 
-                    self.robot_state.jnts_state.get_q()), 
+            return torch.cat((self.robot_state.root_state.get_p(self.controller_index), 
+                    self.robot_state.root_state.get_q(self.controller_index), 
+                    self.robot_state.jnts_state.get_q(self.controller_index)), 
                     dim=1
                     ).numpy().T
         
         if not to_numpy:
 
-            return torch.cat((self.robot_state.root_state.get_p(), 
-                    self.robot_state.root_state.get_q(), 
-                    self.robot_state.jnts_state.get_q()), 
+            return torch.cat((self.robot_state.root_state.get_p(self.controller_index), 
+                    self.robot_state.root_state.get_q(self.controller_index), 
+                    self.robot_state.jnts_state.get_q(self.controller_index)), 
                     dim=1
                     ).T
 

@@ -253,15 +253,15 @@ class KyonEnv(RobotVecEnv):
                         robot_name: str, 
                         step_index: int = -1):
         
-        self.cluster_clients[robot_name].robot_states.root_state.p[:, :] = torch.sub(self.task.root_p[robot_name], 
-                                                                self.task.root_abs_offsets[robot_name]) # we only get the relative position
+        self.cluster_clients[robot_name].robot_states.root_state.get_p(gpu = True)[:, :] = torch.sub(self.task.root_p[robot_name], 
+                                                                                    self.task.root_abs_offsets[robot_name]) # we only get the relative position
         # w.r.t. the initial spawning pose
-        self.cluster_clients[robot_name].robot_states.root_state.q[:, :] = self.task.root_q[robot_name]
-        self.cluster_clients[robot_name].robot_states.root_state.v[:, :] = self.task.root_v[robot_name]
-        self.cluster_clients[robot_name].robot_states.root_state.omega[:, :] = self.task.root_omega[robot_name]
+        self.cluster_clients[robot_name].robot_states.root_state.get_q(gpu = True)[:, :] = self.task.root_q[robot_name]
+        self.cluster_clients[robot_name].robot_states.root_state.get_v(gpu = True)[:, :] = self.task.root_v[robot_name]
+        self.cluster_clients[robot_name].robot_states.root_state.get_omega(gpu = True)[:, :] = self.task.root_omega[robot_name]
 
-        self.cluster_clients[robot_name].robot_states.jnt_state.q[:, :] = self.task.jnts_q[robot_name]
-        self.cluster_clients[robot_name].robot_states.jnt_state.v[:, :] = self.task.jnts_v[robot_name]
+        self.cluster_clients[robot_name].robot_states.jnts_state.get_q(gpu = True)[:, :] = self.task.jnts_q[robot_name]
+        self.cluster_clients[robot_name].robot_states.jnts_state.get_v(gpu = True)[:, :] = self.task.jnts_v[robot_name]
 
         # contact state
 
