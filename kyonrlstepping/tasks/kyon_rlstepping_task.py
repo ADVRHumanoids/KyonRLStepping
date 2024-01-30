@@ -95,6 +95,12 @@ class KyonRlSteppingTask(CustomTask):
         self.startup_wheel_damping = startup_wheel_damping
 
         self.jnt_imp_cntrl_shared_data = {}
+
+        self.using_gpu = False
+
+        if self.torch_device == torch.device("cuda")
+
+            self.using_gpu = True
     
     def _custom_post_init(self):
 
@@ -219,9 +225,9 @@ class KyonRlSteppingTask(CustomTask):
             
             # if new actions are received, also update references
             self.jnt_imp_controllers[robot_name].set_refs(
-                                        pos_ref = actions.jnts_state.get_q(gpu=True), 
-                                        vel_ref = actions.jnts_state.get_v(gpu=True), 
-                                        eff_ref = actions.jnts_state.get_eff(gpu=True))
+                                        pos_ref = actions.jnts_state.get_q(gpu=self.using_gpu), 
+                                        vel_ref = actions.jnts_state.get_v(gpu=self.using_gpu), 
+                                        eff_ref = actions.jnts_state.get_eff(gpu=self.using_gpu))
         
         # # jnt imp. controller actions are always applied
         self.jnt_imp_controllers[robot_name].apply_cmds()
