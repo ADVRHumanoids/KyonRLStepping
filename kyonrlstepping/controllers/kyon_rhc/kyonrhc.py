@@ -328,9 +328,9 @@ class KyonRHC(RHController):
     
     def _assemble_meas_robot_state(self, 
                         to_numpy: bool = False):
-
+        
         if to_numpy:
-            
+
             return torch.cat((self.robot_state.root_state.get_p(self.controller_index), 
                     self.robot_state.root_state.get_q(self.controller_index), 
                     self.robot_state.jnts_state.get_q(self.controller_index), 
