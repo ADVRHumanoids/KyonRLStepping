@@ -85,8 +85,8 @@ class KyonEnv(RobotVecEnv):
 
         self._is_cluster_ready = False
         self._trigger_solution = True
-        
-        self.controllers_were_active = False
+                
+        self.using_gpu = task.using_gpu
     
     def step(self, 
         actions = None):
@@ -135,25 +135,27 @@ class KyonEnv(RobotVecEnv):
 
             # 2) this runs at a dt = simulation dt i.e. the highest possible rate,
             #    using the latest available RHC solution (the new one is not available yet)
-            if self.cluster_clients[self.robot_names[i]].cluster_ready() and \
-                self.cluster_clients[self.robot_names[i]].controllers_active:
-                
-                if not self.controllers_were_active:
+            if self.cluster_clients[self.robot_names[i]].cluster_ready():
+                                    
+                now_active = self.cluster_clients[self.robot_names[i]].rhc_status.activation_state.torch_view
+                not_active_before = ~self.cluster_clients[self.robot_names[i]].controllers_were_active
                     
-                    # transition from controllers stopped to active -->
-                    # we set the joint impedance controllers to the desired runtime state 
+                # transition from controllers stopped to active -->
+                # we set the joint impedance controllers to the desired runtime state 
+                transitioned = torch.nonzero(now_active & not_active_before).squeeze()
 
+                if not transitioned.shape[0] == 0:
+                    # some controllers transitioned to running state
                     self.task.update_jnt_imp_control(robot_name = self.robot_names[i], 
                                     jnt_stiffness = self.task.startup_jnt_stiffness, 
                                     jnt_damping = self.task.startup_jnt_damping, 
                                     wheel_stiffness = self.task.startup_wheel_stiffness, 
-                                    wheel_damping =self.task.startup_wheel_damping)
+                                    wheel_damping = self.task.startup_wheel_damping,
+                                    robot_indxs = transitioned)
 
                 self.task.pre_physics_step(robot_name = self.robot_names[i], 
                                 actions = self.cluster_clients[self.robot_names[i]].rhc_cmds)
                 
-                self.controllers_were_active = self.cluster_clients[self.robot_names[i]].controllers_active
-
             else:
                 
                 # either cluster is not ready yet (initializing) or the RHC controllers
@@ -253,15 +255,15 @@ class KyonEnv(RobotVecEnv):
                         robot_name: str, 
                         step_index: int = -1):
         
-        self.cluster_clients[robot_name].robot_states.root_state.get_p(gpu = True)[:, :] = torch.sub(self.task.root_p[robot_name], 
+        self.cluster_clients[robot_name].robot_states.root_state.get_p(gpu = self.using_gpu)[:, :] = torch.sub(self.task.root_p[robot_name], 
                                                                                     self.task.root_abs_offsets[robot_name]) # we only get the relative position
         # w.r.t. the initial spawning pose
-        self.cluster_clients[robot_name].robot_states.root_state.get_q(gpu = True)[:, :] = self.task.root_q[robot_name]
-        self.cluster_clients[robot_name].robot_states.root_state.get_v(gpu = True)[:, :] = self.task.root_v[robot_name]
-        self.cluster_clients[robot_name].robot_states.root_state.get_omega(gpu = True)[:, :] = self.task.root_omega[robot_name]
+        self.cluster_clients[robot_name].robot_states.root_state.get_q(gpu = self.using_gpu)[:, :] = self.task.root_q[robot_name]
+        self.cluster_clients[robot_name].robot_states.root_state.get_v(gpu = self.using_gpu)[:, :] = self.task.root_v[robot_name]
+        self.cluster_clients[robot_name].robot_states.root_state.get_omega(gpu = self.using_gpu)[:, :] = self.task.root_omega[robot_name]
 
-        self.cluster_clients[robot_name].robot_states.jnts_state.get_q(gpu = True)[:, :] = self.task.jnts_q[robot_name]
-        self.cluster_clients[robot_name].robot_states.jnts_state.get_v(gpu = True)[:, :] = self.task.jnts_v[robot_name]
+        self.cluster_clients[robot_name].robot_states.jnts_state.get_q(gpu = self.using_gpu)[:, :] = self.task.jnts_q[robot_name]
+        self.cluster_clients[robot_name].robot_states.jnts_state.get_v(gpu = self.using_gpu)[:, :] = self.task.jnts_v[robot_name]
 
         # contact state
 
@@ -274,7 +276,8 @@ class KyonEnv(RobotVecEnv):
             if not self.gpu_pipeline_enabled:
 
                 # assigning measured net contact forces
-                self.cluster_clients[robot_name].contact_states.contact_state.get(contact_link)[:, :] = \
+                self.cluster_clients[robot_name].robot_states.contact_wrenches.get_f_contact(contact_name=contact_link,
+                                                                                    gpu=self.using_gpu)[:, :] = \
                     self.task.omni_contact_sensors[robot_name].get(dt = self.task.integration_dt, 
                                                             contact_link = contact_link,
                                                             clone = False)

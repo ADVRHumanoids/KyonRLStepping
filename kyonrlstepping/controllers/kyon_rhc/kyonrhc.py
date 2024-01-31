@@ -116,7 +116,7 @@ class KyonRHC(RHController):
 
         self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf)
 
-        self._assign_server_side_jnt_names(self._get_robot_jnt_names())
+        self._assign_controller_side_jnt_names(jnt_names=self._get_robot_jnt_names())
 
         self._prb = Problem(self._n_intervals, 
                         receding=True, 
@@ -124,7 +124,7 @@ class KyonRHC(RHController):
         self._prb.setDt(self._dt)
 
         self._homer = RobotHomer(srdf_path=self.srdf_path, 
-                            jnt_names_prb=self._server_side_jnt_names)
+                            jnt_names_prb=self._get_robot_jnt_names())
 
         import numpy as np
         base_init = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0])

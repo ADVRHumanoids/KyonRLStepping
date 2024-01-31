@@ -15,8 +15,7 @@ if __name__ == "__main__":
                             window_length=window_length, 
                             window_buffer_factor=window_buffer_factor, 
                             verbose=True, 
-                            namespace=namespace,
-                            add_sim_data = True)
+                            namespace=namespace)
     
     # adding some of the available extensions
     gui_extensions = []

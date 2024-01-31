@@ -9,7 +9,8 @@ from typing import List
 class KyonRHClusterSrvr(ControlClusterSrvr):
     
     def __init__(self, 
-            robot_name: str, 
+            namespace: str, 
+            cluster_size: int,
             isolated_cores_only: bool = False,
             use_only_physical_cores: bool = False,
             core_ids_override_list: List[int] = None,
@@ -17,11 +18,10 @@ class KyonRHClusterSrvr(ControlClusterSrvr):
 
         self._temp_path = "/tmp/" + f"{self.__class__.__name__}"
         
-        self.namespace = robot_name
-
         self.robot_pkg_name = "kyon"
 
-        super().__init__(namespace = self.namespace, 
+        super().__init__(namespace = namespace, 
+                        cluster_size=cluster_size,
                         isolated_cores_only = isolated_cores_only,
                         use_only_physical_cores = use_only_physical_cores,
                         core_ids_override_list = core_ids_override_list,

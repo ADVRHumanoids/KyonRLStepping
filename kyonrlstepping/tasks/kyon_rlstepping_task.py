@@ -1,7 +1,7 @@
 from omni_robo_gym.tasks.custom_task import CustomTask
 
-from control_cluster_bridge.utilities.data import RhcCmds
-from control_cluster_bridge.utilities.data import JntImpCntrlData
+from control_cluster_bridge.utilities.shared_data.rhc_data import RhcCmds
+from control_cluster_bridge.utilities.shared_data.jnt_imp_control import JntImpCntrlData
 
 from typing import List
 
@@ -95,12 +95,6 @@ class KyonRlSteppingTask(CustomTask):
         self.startup_wheel_damping = startup_wheel_damping
 
         self.jnt_imp_cntrl_shared_data = {}
-
-        self.using_gpu = False
-
-        if self.torch_device == torch.device("cuda")
-
-            self.using_gpu = True
     
     def _custom_post_init(self):
 
@@ -273,4 +267,4 @@ class KyonRlSteppingTask(CustomTask):
             robot_name = self.robot_names[i]
 
             # closing shared memory
-            self.jnt_imp_cntrl_shared_data[robot_name].terminate()
+            self.jnt_imp_cntrl_shared_data[robot_name].close()
