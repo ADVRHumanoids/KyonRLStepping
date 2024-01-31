@@ -152,17 +152,18 @@ class KyonEnv(RobotVecEnv):
                                     wheel_stiffness = self.task.startup_wheel_stiffness, 
                                     wheel_damping = self.task.startup_wheel_damping,
                                     robot_indxs = transitioned)
-
-                self.task.pre_physics_step(robot_name = self.robot_names[i], 
-                                actions = self.cluster_clients[self.robot_names[i]].rhc_cmds)
+                    
+                    self.task.pre_physics_step(robot_name = self.robot_names[i], 
+                                    actions = self.cluster_clients[self.robot_names[i]].rhc_cmds,
+                                    robot_indxs = transitioned)
                 
-            else:
-                
-                # either cluster is not ready yet (initializing) or the RHC controllers
-                # are not active yet
+                else:
 
-                self.task.pre_physics_step(robot_name = self.robot_names[i],
-                                actions = None)
+                    # either cluster is not ready yet (initializing) or the RHC controllers
+                    # are not active yet
+
+                    self.task.pre_physics_step(robot_name = self.robot_names[i],
+                                    actions = None)                
         
         # 3) simulation stepping # integration_dt
         if self.debug:

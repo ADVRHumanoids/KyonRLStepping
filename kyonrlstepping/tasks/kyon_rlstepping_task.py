@@ -200,8 +200,17 @@ class KyonRlSteppingTask(CustomTask):
 
     def pre_physics_step(self, 
             robot_name: str, 
-            actions: RhcCmds = None) -> None:
+            actions: RhcCmds = None,
+            robot_indxs: torch.Tensor = None) -> None:
 
+        if robot_indxs is not None:
+
+            if not isinstance(robot_indxs, torch.Tensor):
+                    
+                msg = "Provided robot_indxs should be a torch tensor of indexes!"
+            
+                raise Exception(f"[{self.__class__.__name__}]" + f"[{self.journal.exception}]: " + msg)
+        
         # always updated imp. controller internal state
         success = self.jnt_imp_controllers[robot_name].update_state(pos = self.jnts_q[robot_name], 
                                                     vel = self.jnts_v[robot_name],
@@ -218,10 +227,21 @@ class KyonRlSteppingTask(CustomTask):
         if actions is not None:
             
             # if new actions are received, also update references
-            self.jnt_imp_controllers[robot_name].set_refs(
-                                        pos_ref = actions.jnts_state.get_q(gpu=self.using_gpu), 
-                                        vel_ref = actions.jnts_state.get_v(gpu=self.using_gpu), 
-                                        eff_ref = actions.jnts_state.get_eff(gpu=self.using_gpu))
+
+            if robot_indxs is None:
+
+                self.jnt_imp_controllers[robot_name].set_refs(
+                                            pos_ref = actions.jnts_state.get_q(gpu=self.using_gpu), 
+                                            vel_ref = actions.jnts_state.get_v(gpu=self.using_gpu), 
+                                            eff_ref = actions.jnts_state.get_eff(gpu=self.using_gpu),
+                                            robot_indxs = robot_indxs)
+            else:
+
+                self.jnt_imp_controllers[robot_name].set_refs(
+                                            pos_ref = actions.jnts_state.get_q(gpu=self.using_gpu)[robot_indxs, :], 
+                                            vel_ref = actions.jnts_state.get_v(gpu=self.using_gpu)[robot_indxs, :], 
+                                            eff_ref = actions.jnts_state.get_eff(gpu=self.using_gpu)[robot_indxs, :],
+                                            robot_indxs = robot_indxs)
         
         # # jnt imp. controller actions are always applied
         self.jnt_imp_controllers[robot_name].apply_cmds()
