@@ -11,10 +11,13 @@ from rhcviz.utils.namings import NamingConventions
 from rhcviz.utils.string_list_encoding import StringArray
 
 from control_cluster_bridge.utilities.defs import Journal
-from control_cluster_bridge.utilities.shared_mem import SharedMemClient, SharedStringArray
-from control_cluster_bridge.utilities.defs import cluster_size_name
-from control_cluster_bridge.utilities.defs import jnt_names_rhc_name
-from control_cluster_bridge.utilities.defs import env_selector_name
+
+from control_cluster_bridge.utilities.shared_data.rhc_data import RhcStatus, RobotState
+
+from SharsorIPCpp.PySharsorIPC import dtype
+
+from SharsorIPCpp.PySharsor.wrappers.shared_data_view import SharedDataView
+from SharsorIPCpp.PySharsorIPC import VLevel
 
 from kyonrlstepping.utils.rhc2shared import RHC2SharedNamings
 
@@ -40,21 +43,24 @@ class Shared2ROSInternal:
         self.namespace = namespace # defines uniquely the kind of controller 
         # (associated with a specific robot)
         
-        # to retrieve the number of controllers (associated with namespace)
-        self.cluster_size_clnt = SharedMemClient(name=cluster_size_name(), 
-                                    namespace=self.namespace,
-                                    dtype=torch.int64, 
-                                    wait_amount=0.3, 
-                                    verbose=self.verbose)
-        self.cluster_size_clnt.attach()
-        self.cluster_size = self.cluster_size_clnt.tensor_view[0, 0].item()
+        # to retrieve the number of controllers
+        self.rhc_status = RhcStatus(is_server=False,
+                                    namespace=self.namespace, 
+                                    verbose=True,
+                                    vlevel=VLevel.V2)
+        self.rhc_status.run()
+        self.cluster_size = self.rhc_status.cluster_size
+        self.rhc_status.close() # not needed anymore
 
-        self.env_index = SharedMemClient(name=env_selector_name(), 
-                                        namespace=self.namespace, 
-                                        dtype=torch.int64, 
-                                        wait_amount=0.3, 
-                                        verbose=self.verbose)
-        self.env_index.attach()
+        self.env_index = SharedDataView(namespace = self.namespace,
+                basename = "EnvSelector",
+                is_server = False, 
+                verbose = True, 
+                vlevel = VLevel.V2,
+                safe = False,
+                dtype=dtype.Int)
+        
+        self.env_index.run()
 
         # shared mem. namings
         self.names = []
@@ -103,7 +109,6 @@ class Shared2ROSInternal:
         self.client_factories_rhc_q = []
         self.client_factories_robot_q = []
 
-        self.jnt_names_from_cluster_shared = None
         self.cluster_jnt_names = []
 
         self._init_rhc_q_bridge() # init. shared mem. clients for rhc q
@@ -126,16 +131,17 @@ class Shared2ROSInternal:
 
             self.client_factories_robot_q[i].attach()
 
-        # for sending joint names to RHCViz (reading from shared mem)
-        self.jnt_names_from_cluster_shared = SharedStringArray(length=-1, 
-                                    name=jnt_names_rhc_name(), 
-                                    namespace=self.namespace,
-                                    is_server=False, 
-                                    wait_amount=0.1, 
-                                    verbose=self.verbose)
-        self.jnt_names_from_cluster_shared.start()
-        # reads joint names from shared mem
-        self.cluster_jnt_names = self.jnt_names_from_cluster_shared.read()
+        # jnt names from shared mem
+        robot_state = RobotState(namespace=self.namespace,
+                            is_server=False, 
+                            with_gpu_mirror=False, 
+                            safe=False,
+                            verbose=self.verbose,
+                            vlevel=VLevel.V2)
+        robot_state.run()
+
+        self.cluster_jnt_names = robot_state.jnt_names()
+        robot_state.close() # not needed anymore
         
         rospy.init_node('RHC2ROSBridge')
 
@@ -187,7 +193,9 @@ class Shared2ROSInternal:
         
         success = False
 
-        cluster_idx = self.env_index.tensor_view[0, 0].item()
+        self.env_index.synch_all(read=False, wait=True)
+
+        cluster_idx = self.env_index.torch_view[0, 0].item()
 
         if self._initialized:
             
