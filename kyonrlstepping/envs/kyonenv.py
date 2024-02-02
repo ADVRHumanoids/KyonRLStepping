@@ -4,7 +4,7 @@ from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_client import KyonRHClu
 
 from SharsorIPCpp.PySharsorIPC import VLevel, Journal, LogType
 
-from typing import List
+from typing import List, Union
 
 import torch 
 import numpy as np
@@ -179,8 +179,6 @@ class KyonEnv(RobotVecEnv):
                 self._trigger_cluster[robot_name]:
 
                 just_activated = control_cluster.get_transitioned_controllers()
-
-                print(f"Just activated {just_activated}")
 
                 if just_activated is not None:
                     
@@ -373,13 +371,13 @@ class KyonEnv(RobotVecEnv):
                     robot_name: str, 
                     env_indxs: torch.Tensor = None):
         
-        if not isinstance(env_indxs, (torch.Tensor, None)):
+        if not isinstance(env_indxs, Union[torch.Tensor, None]):
             
             msg = "Provided env_indxs should be a torch tensor of indexes!"
         
             raise Exception(f"[{self.__class__.__name__}]" + f"[{self.journal.exception}]: " + msg)
         
-        else:
+        if env_indxs is not None:
 
             if not len(env_indxs.shape) == 1:
 
