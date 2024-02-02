@@ -11,6 +11,7 @@ import torch
 from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_isaac
 
 class KyonRlSteppingTask(CustomTask):
+    
     def __init__(self, 
             integration_dt: float,
             num_envs = 1,
@@ -87,7 +88,7 @@ class KyonRlSteppingTask(CustomTask):
         
         self.use_diff_velocities = use_diff_velocities
         
-        self.debug_mode_jnt_imp = debug_mode_jnt_imp
+        self._debug_mode_jnt_imp = debug_mode_jnt_imp
 
         self.startup_jnt_stiffness = startup_jnt_stiffness
         self.startup_jnt_damping = startup_jnt_damping
@@ -115,10 +116,10 @@ class KyonRlSteppingTask(CustomTask):
                                             vlevel = VLevel.V2)
 
             self.jnt_imp_cntrl_shared_data[robot_name].run()
-            
+
     def _update_jnt_imp_cntrl_shared_data(self):
 
-        if self.debug_mode_jnt_imp:
+        if self._debug_mode_jnt_imp:
 
             for i in range(0, len(self.robot_names)):
             
@@ -165,7 +166,7 @@ class KyonRlSteppingTask(CustomTask):
                 if not success:
                     
                     message = f"[{self.__class__.__name__}]" + \
-                        f"[{self.journal.status}]" + \
+                        f"[{self._journal.status}]" + \
                         ": Could not update all jnt. imp. controller info on shared memory," + \
                         " probably because the data was already owned at the time of writing. Data might be lost"
 
@@ -198,22 +199,23 @@ class KyonRlSteppingTask(CustomTask):
         super().reset(env_ids=env_ids, 
                     robot_names=robot_names)
 
-    def pre_physics_step(self, 
-            robot_name: str, 
-            actions: RhcCmds = None,
-            robot_indxs: torch.Tensor = None) -> None:
+    def _step_jnt_imp_control(self,
+                        robot_name: str, 
+                        actions: RhcCmds = None,
+                        env_indxs: torch.Tensor = None):
 
-        if robot_indxs is not None:
+        if env_indxs is not None:
 
-            if not isinstance(robot_indxs, torch.Tensor):
+            if not isinstance(env_indxs, torch.Tensor):
                     
-                msg = "Provided robot_indxs should be a torch tensor of indexes!"
+                msg = "Provided env_indxs should be a torch tensor of indexes!"
             
-                raise Exception(f"[{self.__class__.__name__}]" + f"[{self.journal.exception}]: " + msg)
+                raise Exception(f"[{self.__class__.__name__}]" + f"[{self._journal.exception}]: " + msg)
         
-        # always updated imp. controller internal state
-        success = self.jnt_imp_controllers[robot_name].update_state(pos = self.jnts_q[robot_name], 
-                                                    vel = self.jnts_v[robot_name],
+        # always updated imp. controller internal state (jnt imp control is supposed to be
+        # always running)
+        success = self.jnt_imp_controllers[robot_name].update_state(pos = self.jnts_q(robot_name=robot_name), 
+                                                    vel = self.jnts_v(robot_name=robot_name),
                                                     eff = None)
         
         if not all(success):
@@ -228,25 +230,35 @@ class KyonRlSteppingTask(CustomTask):
             
             # if new actions are received, also update references
 
-            if robot_indxs is None:
+            if env_indxs is None:
 
                 self.jnt_imp_controllers[robot_name].set_refs(
                                             pos_ref = actions.jnts_state.get_q(gpu=self.using_gpu), 
                                             vel_ref = actions.jnts_state.get_v(gpu=self.using_gpu), 
                                             eff_ref = actions.jnts_state.get_eff(gpu=self.using_gpu),
-                                            robot_indxs = robot_indxs)
+                                            robot_indxs = env_indxs)
             else:
 
                 self.jnt_imp_controllers[robot_name].set_refs(
-                                            pos_ref = actions.jnts_state.get_q(gpu=self.using_gpu)[robot_indxs, :], 
-                                            vel_ref = actions.jnts_state.get_v(gpu=self.using_gpu)[robot_indxs, :], 
-                                            eff_ref = actions.jnts_state.get_eff(gpu=self.using_gpu)[robot_indxs, :],
-                                            robot_indxs = robot_indxs)
+                                            pos_ref = actions.jnts_state.get_q(gpu=self.using_gpu)[env_indxs, :], 
+                                            vel_ref = actions.jnts_state.get_v(gpu=self.using_gpu)[env_indxs, :], 
+                                            eff_ref = actions.jnts_state.get_eff(gpu=self.using_gpu)[env_indxs, :],
+                                            robot_indxs = env_indxs)
         
         # # jnt imp. controller actions are always applied
         self.jnt_imp_controllers[robot_name].apply_cmds()
 
-        self._update_jnt_imp_cntrl_shared_data() # only if flag is enabled
+        self._update_jnt_imp_cntrl_shared_data() # only if debug_mode_jnt_imp is enabled
+        
+    def pre_physics_step(self, 
+            robot_name: str, 
+            actions: RhcCmds = None,
+            env_indxs: torch.Tensor = None) -> None:
+
+        # just step joint impedance control
+        self._step_jnt_imp_control(robot_name = robot_name,
+                                actions = actions,
+                                env_indxs = env_indxs)
 
     def get_observations(self):
         
@@ -280,7 +292,7 @@ class KyonRlSteppingTask(CustomTask):
 
         return True
 
-    def terminate(self):
+    def close(self):
 
         for i in range(0, len(self.robot_names)):
             

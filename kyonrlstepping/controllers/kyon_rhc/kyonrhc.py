@@ -304,21 +304,21 @@ class KyonRHC(RHController):
         # (to be done for the simulator)
         return torch.tensor(self._ti.solution['q'][7:, 1], 
                         dtype=self.array_dtype).reshape(1,  
-                                        self.robot_cmds.jnt_cmd.q.shape[1]).fmod(2 * torch.pi)
+                                        self.robot_cmds.n_jnts()).fmod(2 * torch.pi)
     
     def _get_cmd_jnt_v_from_sol(self):
 
         return torch.tensor(self._ti.solution['v'][6:, 1], 
-                        dtype=self.array_dtype).reshape(1, 
-                                        self.robot_cmds.jnt_cmd.v.shape[1])
+                        dtype=self.array_dtype).reshape(1,  
+                                        self.robot_cmds.n_jnts())
 
     def _get_cmd_jnt_eff_from_sol(self):
         
         efforts_on_first_node = self._ti.eval_efforts_on_first_node()
 
         return torch.tensor(efforts_on_first_node[6:, 0], 
-                        dtype=self.array_dtype).reshape(1, 
-                self.robot_cmds.jnt_cmd.eff.shape[1])
+                        dtype=self.array_dtype).reshape(1,  
+                                        self.robot_cmds.n_jnts())
     
     def _get_additional_slvr_info(self):
 
@@ -340,7 +340,7 @@ class KyonRHC(RHController):
                     dim=1
                     ).numpy().T
         
-        if not to_numpy:
+        else:
 
             return torch.cat((self.robot_state.root_state.get_p(self.controller_index), 
                     self.robot_state.root_state.get_q(self.controller_index), 
@@ -350,8 +350,6 @@ class KyonRHC(RHController):
                     self.robot_state.jnts_state.get_v(self.controller_index)), 
                     dim=1
                     ).T
-
-        return 
     
     def _assemble_meas_robot_configuration(self, 
                         to_numpy: bool = False):
@@ -364,15 +362,13 @@ class KyonRHC(RHController):
                     dim=1
                     ).numpy().T
         
-        if not to_numpy:
+        else:
 
             return torch.cat((self.robot_state.root_state.get_p(self.controller_index), 
                     self.robot_state.root_state.get_q(self.controller_index), 
                     self.robot_state.jnts_state.get_q(self.controller_index)), 
                     dim=1
                     ).T
-
-        return 
     
     def _update_open_loop(self):
 

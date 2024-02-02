@@ -140,7 +140,7 @@ task = KyonRlSteppingTask(integration_dt = integration_dt,
         # and profiles it
 
 env.set_task(task, 
-        cluster_dt = control_clust_dt,
+        cluster_dt = [control_clust_dt],
         backend="torch", 
         sim_params = sim_params, 
         np_array_dtype = dtype_np, 
@@ -161,9 +161,14 @@ sim_params["enable_livestream"] = enable_livestream
 sim_params["enable_viewport"] = enable_viewport
 sim_params["env_debug"] = env_debug
 
-shared_sim_info = SharedSimInfo(is_server=True, 
-                            sim_params_dict=sim_params) 
-shared_sim_info.run()
+shared_sim_infos = []
+for i in range(len(robot_names)):
+    shared_sim_infos.append(SharedSimInfo(
+                            namespace=robot_names[i],
+                            is_server=True, 
+                            sim_params_dict=sim_params) )
+
+    shared_sim_infos[i].run()
 
 import time
 rt_time_reset = 100
@@ -190,22 +195,24 @@ while env._simulation_app.is_running():
     start_time_step = time.perf_counter()
 
     obs, rewards, dones, info = env.step() 
-        
-    shared_sim_info.write(dyn_info_name=["sim_rt_factor", 
-                                        "total_rt_factor", 
-                                        "env_stepping_dt",
-                                        "world_stepping_dt",
-                                        "time_to_get_agent_data",
-                                        "cluster_state_update_dt",
-                                        "cluster_sol_time"
-                                        ],
-                        val=[rt_factor, 
-                            rt_factor * num_envs,
-                            time.perf_counter() - start_time_step,
-                            env.debug_data["time_to_step_world"],
-                            env.debug_data["time_to_get_agent_data"],
-                            env.debug_data["cluster_state_update_dt"],
-                            env.debug_data["cluster_sol_time"][f"{robot_names[0]}"]])
+    
+    for i in range(len(robot_names)):
+
+        shared_sim_infos[i].write(dyn_info_name=["sim_rt_factor", 
+                                            "total_rt_factor", 
+                                            "env_stepping_dt",
+                                            "world_stepping_dt",
+                                            "time_to_get_agent_data",
+                                            "cluster_state_update_dt",
+                                            "cluster_sol_time"
+                                            ],
+                            val=[rt_factor, 
+                                rt_factor * num_envs,
+                                time.perf_counter() - start_time_step,
+                                env.debug_data["time_to_step_world"],
+                                env.debug_data["time_to_get_agent_data"],
+                                env.debug_data["cluster_state_update_dt"][robot_names[i]],
+                                env.debug_data["cluster_sol_time"][robot_names[i]]])
     
     i+=1 # updating simulation iteration number
     rt_factor_counter = rt_factor_counter + 1
@@ -216,7 +223,7 @@ while env._simulation_app.is_running():
 
 print("[main][info]: closing environment and simulation")
 
-shared_sim_info.terminate()
+shared_sim_info.close()
 
 task.terminate()
 
