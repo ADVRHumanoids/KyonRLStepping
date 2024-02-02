@@ -222,7 +222,7 @@ class KyonEnv(RobotVecEnv):
                             actions = control_cluster.get_actions(),
                             env_indxs = active) # applies updated rhc actions to low-level
             # joint imp. control only for active controllers     
-        
+
         # 3) simulation stepping (@ integration_dt) (for all robots and all environments)
         self._step_world()
 
@@ -250,9 +250,8 @@ class KyonEnv(RobotVecEnv):
                         self.cluster_timers[robot_name]  = time.perf_counter()
 
                     # update cluster state 
-                    active_controllers = control_cluster.get_active_controllers()
                     self._update_cluster_state(robot_name = robot_name, 
-                                    env_indxs = active_controllers)
+                                    env_indxs = active)
                     
                     if self.debug:
 
@@ -374,17 +373,19 @@ class KyonEnv(RobotVecEnv):
                     robot_name: str, 
                     env_indxs: torch.Tensor = None):
         
-        if not isinstance(env_indxs, torch.Tensor):
+        if not isinstance(env_indxs, (torch.Tensor, None)):
             
             msg = "Provided env_indxs should be a torch tensor of indexes!"
         
-            raise Exception(f"[{self.__class__.__name__}]" + f"[{self._journal.exception}]: " + msg)
+            raise Exception(f"[{self.__class__.__name__}]" + f"[{self.journal.exception}]: " + msg)
         
-        if not len(env_indxs.shape) == 1:
+        else:
 
-            msg = "Provided env_indxs should be a 1D torch tensor!"
-        
-            raise Exception(f"[{self.__class__.__name__}]" + f"[{self._journal.exception}]: " + msg)
+            if not len(env_indxs.shape) == 1:
+
+                msg = "Provided env_indxs should be a 1D torch tensor!"
+            
+                raise Exception(f"[{self.__class__.__name__}]" + f"[{self.journal.exception}]: " + msg)
 
         # floating base
         relative_pos = torch.sub(self.task.root_p(robot_name=robot_name,
