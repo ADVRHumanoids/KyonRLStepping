@@ -165,16 +165,22 @@ class KyonEnv(RobotVecEnv):
             
             robot_name = self.robot_names[i]
 
+            control_cluster = self.cluster_clients[robot_name]
+
             # running cluster client if not already running
-            if not self.cluster_clients[robot_name].is_running():
+            if not control_cluster.is_running():
                 
-                self.cluster_clients[robot_name].run()
+                control_cluster.run()
+
+                self._init_safe_cluster_actions(robot_name=robot_name)
 
             # 1) this runs at a dt = cluster_clients[robot_name] dt (sol. triggering) 
-            if self.cluster_clients[robot_name].is_cluster_instant(self.step_counter) and \
+            if control_cluster.is_cluster_instant(self.step_counter) and \
                 self._trigger_cluster[robot_name]:
 
-                just_activated = self.cluster_clients[robot_name].get_transitioned_controllers()
+                just_activated = control_cluster.get_transitioned_controllers()
+
+                print(f"Just activated {just_activated}")
 
                 if just_activated is not None:
                     
@@ -205,15 +211,15 @@ class KyonEnv(RobotVecEnv):
 
                 # every control_cluster_dt, trigger the solution of the active controllers in the cluster
                 # with the latest available state
-                self.cluster_clients[robot_name].trigger_solution()
+                control_cluster.trigger_solution()
 
             # 2) this runs at a dt = simulation dt i.e. the highest possible rate,
             #    using the latest available RHC solution (the new one is not available yet)
             # (sets low level cmds to jnt imp controller)
-            active = self.cluster_clients[robot_name].get_transitioned_controllers()
+            active = control_cluster.get_active_controllers()
 
             self.task.pre_physics_step(robot_name = robot_name, 
-                            actions = self.cluster_clients[robot_name].get_actions(),
+                            actions = control_cluster.get_actions(),
                             env_indxs = active) # applies updated rhc actions to low-level
             # joint imp. control only for active controllers     
         
@@ -225,7 +231,7 @@ class KyonEnv(RobotVecEnv):
             robot_name = self.robot_names[i]
 
             # this runs at a dt = control_cluster dt
-            if self.cluster_clients[robot_name].is_cluster_instant(self.step_counter):
+            if control_cluster.is_cluster_instant(self.step_counter):
             
                 if not self._trigger_cluster[robot_name]:                        
             
@@ -234,7 +240,7 @@ class KyonEnv(RobotVecEnv):
                     # cluster
                 
                     # 3) wait for solution (will also read latest computed cmds)
-                    self.cluster_clients[robot_name].wait_for_solution() # this is blocking
+                    control_cluster.wait_for_solution() # this is blocking
                     
                     self._trigger_cluster[robot_name] = True # this allows for the next trigger 
 
@@ -244,7 +250,7 @@ class KyonEnv(RobotVecEnv):
                         self.cluster_timers[robot_name]  = time.perf_counter()
 
                     # update cluster state 
-                    active_controllers = self.cluster_clients[robot_name].get_active_controllers()
+                    active_controllers = control_cluster.get_active_controllers()
                     self._update_cluster_state(robot_name = robot_name, 
                                     env_indxs = active_controllers)
                     
@@ -254,7 +260,7 @@ class KyonEnv(RobotVecEnv):
                             time.perf_counter() - self.cluster_timers[robot_name]
                         
                         self.debug_data["cluster_sol_time"][robot_name] = \
-                            self.cluster_clients[robot_name].solution_time
+                            control_cluster.solution_time
                         
                 else: # we are in the same step() call as the cluster trigger
 
@@ -299,6 +305,29 @@ class KyonEnv(RobotVecEnv):
 
         return None
     
+    def _init_safe_cluster_actions(self,
+                            robot_name: str):
+
+        # this does not actually write on shared memory, 
+        # but it's enough to get safe actions before the 
+        # cluster 
+        control_cluster = self.cluster_clients[robot_name]
+
+        rhc_cmds = control_cluster.get_actions()
+
+        n_jnts = rhc_cmds.n_jnts()
+        
+        homing = self.task.homers[robot_name].get_homing()
+
+        null_action = torch.zeros((self.task.num_envs, n_jnts), 
+                        dtype=self.task.torch_dtype)
+        
+        rhc_cmds.jnts_state.set_q(q = homing, gpu = self.using_gpu)
+
+        rhc_cmds.jnts_state.set_v(v = null_action, gpu = self.using_gpu)
+
+        rhc_cmds.jnts_state.set_eff(eff = null_action, gpu = self.using_gpu)
+
     def _step_world(self):
 
         if self.debug:
