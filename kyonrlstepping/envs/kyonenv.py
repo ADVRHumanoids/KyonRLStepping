@@ -175,41 +175,46 @@ class KyonEnv(RobotVecEnv):
                 self._init_safe_cluster_actions(robot_name=robot_name)
 
             # 1) this runs at a dt = cluster_clients[robot_name] dt (sol. triggering) 
-            if control_cluster.is_cluster_instant(self.step_counter) and \
-                self._trigger_cluster[robot_name]:
-
-                just_activated = control_cluster.get_transitioned_controllers()
-
-                if just_activated is not None:
+            if control_cluster.is_cluster_instant(self.step_counter):
+                
+                if self._trigger_cluster[robot_name]:
                     
-                    # transition from controllers stopped to active -->
-                    # we perform some itialization steps (jnt imp. controllers includes)
+                    control_cluster.pre_trigger_steps() # performs pre-trigger steps, like retrieving
+                    # values of some activation flags
 
-                    # we get the current absolute positions for the transitioned controllers and 
-                    # use them as references
-                    self.task.update_root_offsets(robot_name,
-                                    env_indxs = just_activated) 
+                    just_activated = control_cluster.get_transitioned_controllers() # retrieves just 
+                    # activated controllers
 
-                    # we update the default root state now, so that we
-                    # can use it at the next call to reset
-                    self.task.synch_default_root_states(robot_name = robot_name,
-                                    env_indxs = just_activated)
+                    if just_activated is not None:
+                        
+                        # transition of some controllers to being triggered after being just activated
 
-                    # we initialize vals of the state for the activated controllers
-                    self._update_cluster_state(robot_name = robot_name, 
-                                    env_indxs = just_activated)
+                        # we get the current absolute positions for the transitioned controllers and 
+                        # use them as references
+                        self.task.update_root_offsets(robot_name,
+                                        env_indxs = just_activated) 
 
-                    # some controllers transitioned to running state    
-                    self.task.update_jnt_imp_control(robot_name = robot_name, 
-                                    jnt_stiffness = self.task.startup_jnt_stiffness, 
-                                    jnt_damping = self.task.startup_jnt_damping, 
-                                    wheel_stiffness = self.task.startup_wheel_stiffness, 
-                                    wheel_damping = self.task.startup_wheel_damping,
-                                    env_indxs = just_activated)
+                        # we update the default root state now, so that we
+                        # can use it at the next call to reset
+                        self.task.synch_default_root_states(robot_name = robot_name,
+                                        env_indxs = just_activated)
 
-                # every control_cluster_dt, trigger the solution of the active controllers in the cluster
-                # with the latest available state
-                control_cluster.trigger_solution()
+                        # we initialize values of states for the activated controllers
+                        self._update_cluster_state(robot_name = robot_name, 
+                                        env_indxs = just_activated)
+
+                        # some controllers transitioned to running state -> we set the 
+                        # running gain state for the low-level imp. controller
+                        self.task.update_jnt_imp_control_gains(robot_name = robot_name, 
+                                        jnt_stiffness = self.task.startup_jnt_stiffness, 
+                                        jnt_damping = self.task.startup_jnt_damping, 
+                                        wheel_stiffness = self.task.startup_wheel_stiffness, 
+                                        wheel_damping = self.task.startup_wheel_damping,
+                                        env_indxs = just_activated)
+                        
+                    # every control_cluster_dt, trigger the solution of the active controllers in the cluster
+                    # with the latest available state
+                    control_cluster.trigger_solution()
 
             # 2) this runs at a dt = simulation dt i.e. the highest possible rate,
             #    using the latest available RHC solution (the new one is not available yet)
@@ -236,7 +241,7 @@ class KyonEnv(RobotVecEnv):
                     # we reach the next control instant -> we get the solution
                     # we also reset the flag, so next call to step() will trigger again the
                     # cluster
-                
+
                     # 3) wait for solution (will also read latest computed cmds)
                     control_cluster.wait_for_solution() # this is blocking
                     
@@ -250,7 +255,7 @@ class KyonEnv(RobotVecEnv):
                     # update cluster state 
                     self._update_cluster_state(robot_name = robot_name, 
                                     env_indxs = active)
-                    
+                        
                     if self.debug:
 
                         self.debug_data["cluster_state_update_dt"][robot_name] = \
@@ -385,38 +390,40 @@ class KyonEnv(RobotVecEnv):
             
                 raise Exception(f"[{self.__class__.__name__}]" + f"[{self.journal.exception}]: " + msg)
 
+        control_cluster = self.cluster_clients[robot_name]
+
         # floating base
         relative_pos = torch.sub(self.task.root_p(robot_name=robot_name,
                                             env_idxs=env_indxs), 
                                 self.task.root_offsets(robot_name=robot_name, 
                                                         env_idxs=env_indxs))
 
-        self.cluster_clients[robot_name].get_state().root_state.set_p(p = relative_pos,
+        control_cluster.get_state().root_state.set_p(p = relative_pos,
                                                             robot_idxs = env_indxs,
                                                             gpu = self.using_gpu) # we only set the relative position
         # w.r.t. the initial spawning pose
-        self.cluster_clients[robot_name].get_state().root_state.set_q(q = self.task.root_q(robot_name=robot_name,
+        control_cluster.get_state().root_state.set_q(q = self.task.root_q(robot_name=robot_name,
                                                                                             env_idxs=env_indxs),
                                                                 robot_idxs = env_indxs,
                                                                 gpu = self.using_gpu)
 
-        self.cluster_clients[robot_name].get_state().root_state.set_v(v=self.task.root_v(robot_name=robot_name,
+        control_cluster.get_state().root_state.set_v(v=self.task.root_v(robot_name=robot_name,
                                                                                             env_idxs=env_indxs),
                                                                 robot_idxs = env_indxs,
                                                                 gpu = self.using_gpu) 
 
-        self.cluster_clients[robot_name].get_state().root_state.set_omega(gpu = self.using_gpu,
+        control_cluster.get_state().root_state.set_omega(gpu = self.using_gpu,
                                                                     robot_idxs = env_indxs,
                                                                     omega=self.task.root_omega(robot_name=robot_name,
                                                                                             env_idxs=env_indxs)) 
 
         # joints
-        self.cluster_clients[robot_name].get_state().jnts_state.set_q(q=self.task.jnts_q(robot_name=robot_name,
+        control_cluster.get_state().jnts_state.set_q(q=self.task.jnts_q(robot_name=robot_name,
                                                                                             env_idxs=env_indxs), 
                                                                     robot_idxs = env_indxs,
                                                                     gpu = self.using_gpu)
 
-        self.cluster_clients[robot_name].get_state().jnts_state.set_v(v=self.task.jnts_v(robot_name=robot_name,
+        control_cluster.get_state().jnts_state.set_v(v=self.task.jnts_v(robot_name=robot_name,
                                                                                             env_idxs=env_indxs),
                                                                     robot_idxs = env_indxs,
                                                                     gpu = self.using_gpu) 
