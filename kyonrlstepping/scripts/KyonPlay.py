@@ -178,7 +178,7 @@ sim_time = 0.0
 i = 0
 start_time = time.perf_counter()
 start_time_loop = 0
-rt_factor_reset_n = 1000
+rt_factor_reset_n = 100
 rt_factor_counter = 0
 reset_rt_factor = True
 while env._simulation_app.is_running():
@@ -223,8 +223,8 @@ while env._simulation_app.is_running():
 
 print("[main][info]: closing environment and simulation")
 
-shared_sim_info.close()
+for i in range(len(robot_names)):
 
-task.terminate()
+        shared_sim_infos[i].close()
 
 env.close()
