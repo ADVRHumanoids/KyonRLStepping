@@ -220,7 +220,7 @@ class KyonEnv(RobotVecEnv):
                         # reset jnt imp. controllers for deactivated controllers
                         
                         self.task.reset_jnt_imp_control(robot_name=robot_name,
-                                env_idxs=just_deactivated.tolist())
+                                env_indxs=just_deactivated)
 
                     # every control_cluster_dt, trigger the solution of the active controllers in the cluster
                     # with the latest available state
@@ -301,7 +301,7 @@ class KyonEnv(RobotVecEnv):
         return observations, rewards, dones, info
     
     def reset(self,
-            env_ids: List[int]=None,
+            env_indxs: torch.Tensor = None,
             robot_names: List[str]=None,
             reset_world: bool = False):
 
@@ -309,7 +309,7 @@ class KyonEnv(RobotVecEnv):
 
             self._world.reset()
 
-        self.task.reset(env_ids = env_ids,
+        self.task.reset(env_indxs = env_indxs,
             robot_names = robot_names)
         
         # perform a simulation step

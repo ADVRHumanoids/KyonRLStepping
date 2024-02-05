@@ -193,10 +193,10 @@ class KyonRlSteppingTask(CustomTask):
         a = 1
     
     def reset(self, 
-            env_ids: List[int]=None,
+            env_indxs: torch.Tensor = None,
             robot_names: List[str]=None):
 
-        super().reset(env_ids=env_ids, 
+        super().reset(env_indxs=env_indxs, 
                     robot_names=robot_names)
 
     def _step_jnt_imp_control(self,
@@ -216,7 +216,8 @@ class KyonRlSteppingTask(CustomTask):
         # always running)
         success = self.jnt_imp_controllers[robot_name].update_state(pos = self.jnts_q(robot_name=robot_name), 
                                                     vel = self.jnts_v(robot_name=robot_name),
-                                                    eff = None)
+                                                    eff = None # not needed by jnt imp control
+                                                    )
         
         if not all(success):
             
