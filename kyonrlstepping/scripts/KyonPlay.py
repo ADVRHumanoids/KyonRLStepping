@@ -9,7 +9,7 @@ from kyonrlstepping.envs.kyonenv import KyonEnv
 
 from control_cluster_bridge.utilities.shared_data.sim_data import SharedSimInfo
 
-num_envs = 1
+num_envs = 5
 
 # simulation parameters
 sim_params = {}
