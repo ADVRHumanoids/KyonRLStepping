@@ -219,7 +219,7 @@ class KyonEnv(RobotVecEnv):
 
                         # reset jnt imp. controllers for deactivated controllers
                         
-                        self.task.reset_jnt_imp_control(robot_name=rob_names[i],
+                        self.task.reset_jnt_imp_control(robot_name=robot_name,
                                 env_idxs=just_deactivated.tolist())
 
                     # every control_cluster_dt, trigger the solution of the active controllers in the cluster
