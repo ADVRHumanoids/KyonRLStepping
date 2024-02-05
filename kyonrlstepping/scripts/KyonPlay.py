@@ -9,7 +9,7 @@ from kyonrlstepping.envs.kyonenv import KyonEnv
 
 from control_cluster_bridge.utilities.shared_data.sim_data import SharedSimInfo
 
-num_envs = 5
+num_envs = 1
 
 # simulation parameters
 sim_params = {}
@@ -95,7 +95,7 @@ for i in range(0, len(contact_prims["kyon0"])):
     
     sensor_radii["kyon0"][contact_prims["kyon0"][i]] = 0.124
 
-headless = True
+headless = False
 enable_livestream = False
 enable_viewport = False
 env_debug = True

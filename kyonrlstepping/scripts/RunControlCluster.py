@@ -19,7 +19,6 @@ def generate_controllers(robot_name: str):
     for i in range(0, control_cluster_srvr.cluster_size):
 
         cluster_controllers.append(KyonRHC(
-                controller_index = i,
                 urdf_path=control_cluster_srvr._urdf_path, 
                 srdf_path=control_cluster_srvr._srdf_path,
                 cluster_size=control_cluster_srvr.cluster_size,
@@ -50,7 +49,7 @@ dtype = torch.float32 # this has to be the same wrt the cluster client, otherwis
 # messages are not read properly
 
 robot_name = "kyon0"
-cluster_size = 5
+cluster_size = 1
 
 core_ids_override_list = None
 # core_ids_override_list = [6, 8]

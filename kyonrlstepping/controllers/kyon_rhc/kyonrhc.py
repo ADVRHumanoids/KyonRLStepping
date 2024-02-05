@@ -20,7 +20,6 @@ import time
 class KyonRHC(RHController):
 
     def __init__(self, 
-            controller_index: int,
             srdf_path: str,
             urdf_path: str,
             config_path: str,
@@ -65,8 +64,7 @@ class KyonRHC(RHController):
 
             self.urdf = file.read()
 
-        super().__init__(controller_index = controller_index, 
-                        cluster_size = cluster_size,
+        super().__init__(cluster_size = cluster_size,
                         srdf_path = srdf_path,
                         n_nodes = self._n_intervals + 1,
                         namespace = self.robot_name,
@@ -82,23 +80,23 @@ class KyonRHC(RHController):
         self.rhc_costs={}
         self.rhc_constr={}
 
-        if self.publish_sol:
+        # if self.publish_sol:
             
-            # object to forward individual internal rhc state to shared memery
-            # for external debugging
-            self.rhc2shared_bridge = RHC2SharedInternal( 
-                                        namespace=self.robot_name,
-                                        index=self.controller_index,
-                                        n_jnts=self.n_dofs,
-                                        n_rhc_nodes=self._n_intervals,
-                                        verbose=self._verbose,
-                                        basename="RHC2SharedInternal")
+        #     # object to forward individual internal rhc state to shared memery
+        #     # for external debugging
+        #     self.rhc2shared_bridge = RHC2SharedInternal( 
+        #                                 namespace=self.robot_name,
+        #                                 index=self.controller_index,
+        #                                 n_jnts=self.n_dofs,
+        #                                 n_rhc_nodes=self._n_intervals,
+        #                                 verbose=self._verbose,
+        #                                 basename="RHC2SharedInternal")
             
-            self.rhc2shared_bridge.run()
+        #     self.rhc2shared_bridge.run()
         
-        else:
+        # else:
 
-            self.rhc2shared_bridge = None
+        self.rhc2shared_bridge = None
             
     def _init_problem(self):
         
@@ -430,9 +428,11 @@ class KyonRHC(RHController):
     
     def _publish_rhc_sol_data(self):
 
-        self.rhc2shared_bridge.update(q_opt=self._ti.solution['q'], 
-                                q_robot=self._assemble_meas_robot_configuration(to_numpy=True))
+        # self.rhc2shared_bridge.update(q_opt=self._ti.solution['q'], 
+        #                         q_robot=self._assemble_meas_robot_configuration(to_numpy=True))
 
+        a = 1
+        
     def _publish_rob_state_data(self):
 
         a = 2
