@@ -182,8 +182,11 @@ class KyonEnv(RobotVecEnv):
                     control_cluster.pre_trigger_steps() # performs pre-trigger steps, like retrieving
                     # values of some activation flags
 
-                    just_activated = control_cluster.get_transitioned_controllers() # retrieves just 
+                    just_activated = control_cluster.get_just_activated() # retrieves just 
                     # activated controllers
+                    
+                    just_deactivated = control_cluster.get_just_deactivated() # retrieves just 
+                    # deactivated controllers
 
                     if just_activated is not None:
                         
@@ -211,7 +214,14 @@ class KyonEnv(RobotVecEnv):
                                         wheel_stiffness = self.task.startup_wheel_stiffness, 
                                         wheel_damping = self.task.startup_wheel_damping,
                                         env_indxs = just_activated)
+
+                    if just_deactivated is not None:
+
+                        # reset jnt imp. controllers for deactivated controllers
                         
+                        self.task.reset_jnt_imp_control(robot_name=rob_names[i],
+                                env_idxs=just_deactivated.tolist())
+
                     # every control_cluster_dt, trigger the solution of the active controllers in the cluster
                     # with the latest available state
                     control_cluster.trigger_solution()

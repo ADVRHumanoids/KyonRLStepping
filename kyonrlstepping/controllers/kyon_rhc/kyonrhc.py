@@ -608,7 +608,7 @@ class KyonRHC(RHController):
 
         # to be overridden by child class
         
-        return self._ti.solution['a']
+        return None
     
     def _get_f_dot_from_sol(self):
 
