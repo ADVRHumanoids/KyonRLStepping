@@ -75,8 +75,6 @@ class KyonRHC(RHController):
 
         self.add_data_lenght = add_data_lenght # length of the array holding additional info from the solver
 
-        self._quat_remap = [1, 2, 3, 0] # mapping from robot quat. to Horizon's quaternion convention
-
         self.rhc_costs={}
         self.rhc_constr={}
 
@@ -97,17 +95,14 @@ class KyonRHC(RHController):
         # else:
 
         self.rhc2shared_bridge = None
-            
+    
+    def _get_quat_remap(self):
+
+        # overrides parent
+
+        return [1, 2, 3, 0] # mapping from robot quat. to Horizon's quaternion convention
+    
     def _init_problem(self):
-        
-        stat = f"Initializing RHC problem " + \
-            f"with dt: {self._dt} s, t_horizon: {self._t_horizon} s, n_intervals: {self._n_intervals}"
-        
-        Journal.log(self.__class__.__name__,
-                    "_init_problem",
-                    stat,
-                    LogType.STAT,
-                    throw_when_excep = True)
         
         self.urdf = self.urdf.replace('continuous', 'revolute') # continous joint is parametrized
         # in So2, so will add 
@@ -121,8 +116,7 @@ class KyonRHC(RHController):
                         casadi_type=cs.SX)
         self._prb.setDt(self._dt)
 
-        self._homer = RobotHomer(srdf_path=self.srdf_path, 
-                            jnt_names_prb=self._get_robot_jnt_names())
+        self._init_robot_homer()
 
         import numpy as np
         base_init = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0])
@@ -258,12 +252,6 @@ class KyonRHC(RHController):
         self.n_contacts = len(self._model.cmap.keys())
         
         # self.horizon_anal = analyzer.ProblemAnalyzer(self._prb)
-
-        Journal.log(self.__class__.__name__,
-                    "_init_problem",
-                    "RHC problem initialized.",
-                    LogType.STAT,
-                    throw_when_excep = True)
         
     def _init_rhc_task_cmds(self) -> KyonRhcTaskRef:
 
