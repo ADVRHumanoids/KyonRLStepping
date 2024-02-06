@@ -340,6 +340,8 @@ class KyonEnv(RobotVecEnv):
 
         rhc_cmds.jnts_state.set_eff(eff = null_action, gpu = self.using_gpu)
 
+        rhc_cmds.synch_to_shared_mem() # write init to shared mem
+
     def _step_world(self):
 
         if self.debug:

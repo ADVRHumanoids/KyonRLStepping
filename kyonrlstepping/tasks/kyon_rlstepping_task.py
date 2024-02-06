@@ -113,7 +113,7 @@ class KyonRlSteppingTask(CustomTask):
                                             jnt_names = self.jnt_imp_controllers[robot_name].jnts_names,
                                             namespace = robot_name, 
                                             verbose = True, 
-                                            vlevel = VLevel.V2)
+                                            vlevel = VLevel.V0)
 
             self.jnt_imp_cntrl_shared_data[robot_name].run()
 
@@ -231,20 +231,22 @@ class KyonRlSteppingTask(CustomTask):
             
             # if new actions are received, also update references
 
-            if env_indxs is None:
-
-                self.jnt_imp_controllers[robot_name].set_refs(
-                                            pos_ref = actions.jnts_state.get_q(gpu=self.using_gpu), 
-                                            vel_ref = actions.jnts_state.get_v(gpu=self.using_gpu), 
-                                            eff_ref = actions.jnts_state.get_eff(gpu=self.using_gpu),
-                                            robot_indxs = env_indxs)
-            else:
-
-                self.jnt_imp_controllers[robot_name].set_refs(
+            if env_indxs is not None:
+                
+                # only use actions if env_indxs is provided
+                success = self.jnt_imp_controllers[robot_name].set_refs(
                                             pos_ref = actions.jnts_state.get_q(gpu=self.using_gpu)[env_indxs, :], 
                                             vel_ref = actions.jnts_state.get_v(gpu=self.using_gpu)[env_indxs, :], 
                                             eff_ref = actions.jnts_state.get_eff(gpu=self.using_gpu)[env_indxs, :],
                                             robot_indxs = env_indxs)
+
+            if not all(success):
+            
+                print(success)
+
+                exception = "Could not update jnt imp refs!!"
+                
+                raise Exception(exception)
         
         # # jnt imp. controller actions are always applied
         self.jnt_imp_controllers[robot_name].apply_cmds()

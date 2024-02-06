@@ -9,7 +9,7 @@ from kyonrlstepping.envs.kyonenv import KyonEnv
 
 from control_cluster_bridge.utilities.shared_data.sim_data import SharedSimInfo
 
-num_envs = 1
+num_envs = 2
 
 # simulation parameters
 sim_params = {}
@@ -39,7 +39,7 @@ sim_params["enable_stabilization"] = True
 # sim_params["friction_correlation_distance"] = 0.025
 # sim_params["enable_sleeping"] = True
 # Per-actor settings ( can override in actor_options )
-sim_params["solver_position_iteration_count"] = 2 # defaults to 4
+sim_params["solver_position_iteration_count"] = 4 # defaults to 4
 sim_params["solver_velocity_iteration_count"] = 1 # defaults to 1
 sim_params["sleep_threshold"] = 0.0 # Mass-normalized kinetic energy threshold below which an actor may go to sleep.
 # Allowed range [0, max_float).
