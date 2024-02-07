@@ -182,11 +182,20 @@ class KyonEnv(RobotVecEnv):
                     control_cluster.pre_trigger_steps() # performs pre-trigger steps, like retrieving
                     # values of some activation flags
 
+                    failed = control_cluster.get_failed_controllers() # retrieve failed controllers, if any
+
                     just_activated = control_cluster.get_just_activated() # retrieves just 
                     # activated controllers
                     
                     just_deactivated = control_cluster.get_just_deactivated() # retrieves just 
                     # deactivated controllers
+
+                    if failed is not None:
+
+                        self.reset(env_indxs=failed,
+                                robot_names=[robot_name], 
+                                reset_world=False,
+                                reset_cluster=True)
 
                     if just_activated is not None:
                         
@@ -300,11 +309,36 @@ class KyonEnv(RobotVecEnv):
 
         return observations, rewards, dones, info
     
+    def reset_cluster(self,
+            env_indxs: torch.Tensor = None,
+            robot_names: List[str]=None):
+        
+        rob_names = robot_names
+        
+        if rob_names is None:
+            
+            rob_names = self.robot_names
+
+        for i in range(len(rob_names)):
+            
+            robot_name = rob_names[i]
+
+            control_cluster = self.cluster_clients[robot_name]
+
+            control_cluster.reset_controllers(idxs=env_indxs)
+        
     def reset(self,
             env_indxs: torch.Tensor = None,
             robot_names: List[str]=None,
-            reset_world: bool = False):
+            reset_world: bool = False,
+            reset_cluster: bool = False):
 
+        if reset_cluster:
+
+            # reset clusters
+            self.reset_cluster(env_indxs=env_indxs,
+                    robot_names=robot_names)
+            
         if reset_world:
 
             self._world.reset()
@@ -314,6 +348,19 @@ class KyonEnv(RobotVecEnv):
         
         # perform a simulation step
         self._world.step(render=self._render)
+
+        rob_names = robot_names
+        
+        if rob_names is None:
+            
+            rob_names = self.robot_names
+
+        if reset_cluster:
+
+            for i in range(len(rob_names)):
+
+                self._update_cluster_state(robot_name=rob_names[i],
+                                env_indxs=env_indxs)
 
         return None
     
@@ -333,7 +380,7 @@ class KyonEnv(RobotVecEnv):
 
         null_action = torch.zeros((self.task.num_envs, n_jnts), 
                         dtype=self.task.torch_dtype)
-        
+
         rhc_cmds.jnts_state.set_q(q = homing, gpu = self.using_gpu)
 
         rhc_cmds.jnts_state.set_v(v = null_action, gpu = self.using_gpu)
