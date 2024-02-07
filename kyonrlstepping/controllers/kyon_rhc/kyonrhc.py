@@ -306,11 +306,17 @@ class KyonRHC(RHController):
                         dtype=self.array_dtype).reshape(1,  
                                         self.robot_cmds.n_jnts())
     
-    def _get_additional_slvr_info(self):
+    def _get_rhc_cost(self):
 
-        return torch.tensor([self._ti.solution["opt_cost"], 
-                            self._ti.solution["n_iter2sol"]], 
-                        dtype=self.array_dtype)
+        return self._ti.solution["opt_cost"]
+    
+    def _get_rhc_residual(self):
+
+        return self._ti.solution["residual_norm"]
+    
+    def _get_rhc_niter_to_sol(self):
+
+        return self._ti.solution["n_iter2sol"]
     
     def _assemble_meas_robot_state(self, 
                         to_numpy: bool = False):
@@ -388,7 +394,7 @@ class KyonRHC(RHController):
     def _update_closed_loop(self):
 
         shift_num = -1 # shift data by one node
-
+        
         # building ig for state
         xig = np.roll(self._ti.solution['x_opt'], 
                 shift_num, axis=1) # rolling state sol.
@@ -537,6 +543,7 @@ class KyonRHC(RHController):
         
         # resets controller ig and initial
         # states/inputs
+
         self._ti.reset()
 
     def _get_cost_data(self):
