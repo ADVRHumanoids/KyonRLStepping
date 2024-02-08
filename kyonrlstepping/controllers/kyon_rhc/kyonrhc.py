@@ -35,7 +35,8 @@ class KyonRHC(RHController):
             profile_all = False,
             array_dtype = torch.float32, 
             publish_sol = False,
-            debug_sol = True # whether to publish rhc rebug data
+            debug_sol = True, # whether to publish rhc rebug data,
+            solver_deb_prints = False
             ):
 
         self.step_counter = 0
@@ -43,6 +44,8 @@ class KyonRHC(RHController):
     
         self.max_solver_iter = max_solver_iter
         
+        self._solver_deb_prints = solver_deb_prints
+
         self._custom_timer_start = time.perf_counter()
         self._profile_all = profile_all
 
@@ -138,7 +141,7 @@ class KyonRHC(RHController):
         self._ti = TaskInterface(prb=self._prb, 
                             model=self._model, 
                             max_solver_iter=self.max_solver_iter,
-                            debug = self._debug, 
+                            debug = self._solver_deb_prints, 
                             verbose = self._verbose)
         
         self._ti.setTaskFromYaml(self.config_path)

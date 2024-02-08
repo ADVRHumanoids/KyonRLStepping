@@ -2,7 +2,7 @@ import os
 script_name = os.path.splitext(os.path.basename(os.path.abspath(__file__)))[0]
 
 from kyonrlstepping.controllers.kyon_rhc.kyonrhc import KyonRHC
-from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_srvr import KyonRHClusterSrvr
+from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_client import KyonRhcClusterClient
 from kyonrlstepping.controllers.kyon_rhc.utils.sysutils import PathsGetter
 kyonrhc_paths = PathsGetter
 
@@ -29,15 +29,17 @@ def generate_controllers(robot_name: str):
                 max_solver_iter = max_solver_iter,
                 verbose = verbose, 
                 debug = debug,
+                solver_deb_prints = solver_deb_prints,
                 profile_all = profile_all,
                 array_dtype = dtype,
                 publish_sol=debug_solution))
 
     return cluster_controllers
 
-verbose = True
+verbose = False
 
 debug = True
+solver_deb_prints = False
 profile_all = True
 debug_solution = True
 
@@ -49,11 +51,11 @@ dtype = torch.float32 # this has to be the same wrt the cluster client, otherwis
 # messages are not read properly
 
 robot_name = "kyon0"
-cluster_size = 2
+cluster_size = 5
 
 core_ids_override_list = None
 # core_ids_override_list = [6, 8]
-control_cluster_srvr = KyonRHClusterSrvr(namespace=robot_name, 
+control_cluster_srvr = KyonRhcClusterClient(namespace=robot_name, 
                                     cluster_size=cluster_size,
                                     isolated_cores_only = True, 
                                     use_only_physical_cores = False,
@@ -70,7 +72,7 @@ for i in range(0, control_cluster_srvr.cluster_size):
 
     result = control_cluster_srvr.add_controller(controllers[i])
 
-control_cluster_srvr.start() # spawns the controllers on separate processes
+control_cluster_srvr.run() # spawns the controllers on separate processes
 
 try:
 

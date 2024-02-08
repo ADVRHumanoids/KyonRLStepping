@@ -9,7 +9,7 @@ from kyonrlstepping.envs.kyonenv import KyonEnv
 
 from control_cluster_bridge.utilities.shared_data.sim_data import SharedSimInfo
 
-num_envs = 2
+num_envs = 5
 
 # simulation parameters
 sim_params = {}
@@ -95,7 +95,7 @@ for i in range(0, len(contact_prims["kyon0"])):
     
     sensor_radii["kyon0"][contact_prims["kyon0"][i]] = 0.124
 
-headless = False
+headless = True
 enable_livestream = False
 enable_viewport = False
 env_debug = True
@@ -166,21 +166,24 @@ for i in range(len(robot_names)):
     shared_sim_infos.append(SharedSimInfo(
                             namespace=robot_names[i],
                             is_server=True, 
-                            sim_params_dict=sim_params) )
+                            sim_params_dict=sim_params,
+                            force_reconnection=False) )
 
     shared_sim_infos[i].run()
 
 import time
-rt_time_reset = 100
 rt_factor = 1.0
 real_time = 0.0
 sim_time = 0.0
+
 i = 0
+
 start_time = time.perf_counter()
 start_time_loop = 0
 rt_factor_reset_n = 10
 rt_factor_counter = 0
 reset_rt_factor = True
+
 while env._simulation_app.is_running():
     
     if ((i + 1) % rt_factor_reset_n) == 0 \

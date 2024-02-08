@@ -1,4 +1,4 @@
-from omni_robo_gym.tasks.custom_task import CustomTask
+from omni_robo_gym.tasks.custom_task import IsaacTask
 
 from control_cluster_bridge.utilities.shared_data.rhc_data import RhcCmds
 from control_cluster_bridge.utilities.shared_data.jnt_imp_control import JntImpCntrlData
@@ -10,7 +10,7 @@ import torch
 
 from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_isaac
 
-class KyonRlSteppingTask(CustomTask):
+class KyonRlSteppingTask(IsaacTask):
     
     def __init__(self, 
             integration_dt: float,
@@ -56,7 +56,7 @@ class KyonRlSteppingTask(CustomTask):
                 contact_prims[robot_names[i]] = [] # no contact sensors
 
         # trigger __init__ of parent class
-        CustomTask.__init__(self,
+        IsaacTask.__init__(self,
                     name = self.__class__.__name__, 
                     integration_dt = integration_dt,
                     robot_names = robot_names,

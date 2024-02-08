@@ -1,6 +1,6 @@
-from omni_robo_gym.gym.omni_vect_env.vec_envs import RobotVecEnv
-from omni_robo_gym.utils.math_utils import quat_to_omega
-from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_client import KyonRHClusterClient
+from omni_robo_gym.gym.omni_vect_env.vec_envs import IsaacSimEnv
+
+from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_server import KyonRhcClusterServer
 
 from SharsorIPCpp.PySharsorIPC import VLevel, Journal, LogType
 
@@ -11,7 +11,7 @@ import numpy as np
 
 import time
 
-class KyonEnv(RobotVecEnv):
+class KyonEnv(IsaacSimEnv):
 
     def __init__(self,
                 headless: bool = True, 
@@ -37,7 +37,7 @@ class KyonEnv(RobotVecEnv):
         self.env_timer = time.perf_counter()
 
         self.step_counter = 0
-        self.cluster_clients = {}
+        self.cluster_servers = {}
         self._trigger_cluster = {}
         self._cluster_dt = {}
 
@@ -109,7 +109,7 @@ class KyonEnv(RobotVecEnv):
                 n_contact_sensors = -1
                 contact_names = None
 
-            self.cluster_clients[robot_name] = KyonRHClusterClient(cluster_size=task.num_envs, 
+            self.cluster_servers[robot_name] = KyonRhcClusterServer(cluster_size=task.num_envs, 
                         device=task.torch_device, 
                         cluster_dt=self._cluster_dt[robot_name], 
                         control_dt=task.integration_dt(), 
@@ -134,7 +134,7 @@ class KyonEnv(RobotVecEnv):
 
         for i in range(len(self.robot_names)):
 
-            self.cluster_clients[self.robot_names[i]].close()
+            self.cluster_servers[self.robot_names[i]].close()
         
         self.task.close() # performs closing steps for task
 
@@ -165,7 +165,7 @@ class KyonEnv(RobotVecEnv):
             
             robot_name = self.robot_names[i]
 
-            control_cluster = self.cluster_clients[robot_name]
+            control_cluster = self.cluster_servers[robot_name]
 
             # running cluster client if not already running
             if not control_cluster.is_running():
@@ -323,7 +323,7 @@ class KyonEnv(RobotVecEnv):
             
             robot_name = rob_names[i]
 
-            control_cluster = self.cluster_clients[robot_name]
+            control_cluster = self.cluster_servers[robot_name]
 
             control_cluster.reset_controllers(idxs=env_indxs)
         
@@ -370,7 +370,7 @@ class KyonEnv(RobotVecEnv):
         # this does not actually write on shared memory, 
         # but it's enough to get safe actions before the 
         # cluster 
-        control_cluster = self.cluster_clients[robot_name]
+        control_cluster = self.cluster_servers[robot_name]
 
         rhc_cmds = control_cluster.get_actions()
 
@@ -405,9 +405,9 @@ class KyonEnv(RobotVecEnv):
                     robot_name: str, 
                     env_indxs: torch.Tensor = None):
 
-        for i in range(0, self.cluster_clients[robot_name].n_contact_sensors):
+        for i in range(0, self.cluster_servers[robot_name].n_contact_sensors):
             
-            contact_link = self.cluster_clients[robot_name].contact_linknames[i]
+            contact_link = self.cluster_servers[robot_name].contact_linknames[i]
             
             if not self.using_gpu:
                 
@@ -416,7 +416,7 @@ class KyonEnv(RobotVecEnv):
                                                             env_indxs = env_indxs,
                                                             clone = False)
                 # assigning measured net contact forces
-                self.cluster_clients[robot_name].get_state().contact_wrenches.set_f_contact(f=f_contact,
+                self.cluster_servers[robot_name].get_state().contact_wrenches.set_f_contact(f=f_contact,
                                             contact_name=contact_link,
                                             robot_idxs = env_indxs,
                                             gpu=self.using_gpu)
@@ -449,7 +449,7 @@ class KyonEnv(RobotVecEnv):
             
                 raise Exception(f"[{self.__class__.__name__}]" + f"[{self.journal.exception}]: " + msg)
 
-        control_cluster = self.cluster_clients[robot_name]
+        control_cluster = self.cluster_servers[robot_name]
 
         # floating base
         relative_pos = torch.sub(self.task.root_p(robot_name=robot_name,
