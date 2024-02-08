@@ -108,9 +108,9 @@ env = KyonEnv(headless=headless,
 
 # now we can import the task (not before, since Omni plugins are loaded 
 # upon environment initialization)
-from kyonrlstepping.tasks.kyon_rlstepping_task import KyonRlSteppingTask
+from kyonrlstepping.tasks.kyon_rlstepping_task import KyonIsaacTask
                             
-task = KyonRlSteppingTask(integration_dt = integration_dt,
+task = KyonIsaacTask(integration_dt = integration_dt,
         num_envs = num_envs, 
         cloning_offset = np.array([[0.0, 0.0, 1.3]] * num_envs), 
         env_spacing=6,
@@ -197,7 +197,7 @@ while env._simulation_app.is_running():
 
     start_time_step = time.perf_counter()
 
-    obs, rewards, dones, info = env.step() 
+    env.step() 
     
     for i in range(len(robot_names)):
 

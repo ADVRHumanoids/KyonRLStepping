@@ -10,7 +10,7 @@ import torch
 
 from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_isaac
 
-class KyonRlSteppingTask(IsaacTask):
+class KyonIsaacTask(IsaacTask):
     
     def __init__(self, 
             integration_dt: float,
