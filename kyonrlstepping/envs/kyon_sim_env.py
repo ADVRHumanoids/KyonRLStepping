@@ -1,4 +1,4 @@
-from omni_robo_gym.gym.omni_vect_env.vec_envs import IsaacSimEnv
+from omni_robo_gym.envs.isaac_env import IsaacSimEnv
 
 from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_server import KyonRhcClusterServer
 
@@ -292,7 +292,7 @@ class KyonEnv(IsaacSimEnv):
             
             self.env_timer = time.perf_counter()
 
-        self.task.get_observations()
+        self.task.get_states()
 
         if self.debug:
                         

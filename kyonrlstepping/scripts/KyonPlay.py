@@ -5,7 +5,7 @@ import numpy as np
 import torch
 
 #from stable_baselines3 import PPO
-from kyonrlstepping.envs.kyonenv import KyonEnv 
+from kyonrlstepping.envs.kyon_sim_env import KyonEnv 
 
 from control_cluster_bridge.utilities.shared_data.sim_data import SharedSimInfo
 
@@ -95,7 +95,7 @@ for i in range(0, len(contact_prims["kyon0"])):
     
     sensor_radii["kyon0"][contact_prims["kyon0"][i]] = 0.124
 
-headless = True
+headless = False
 enable_livestream = False
 enable_viewport = False
 env_debug = True
@@ -205,7 +205,7 @@ while env._simulation_app.is_running():
                                             "total_rt_factor", 
                                             "env_stepping_dt",
                                             "world_stepping_dt",
-                                            "time_to_get_agent_data",
+                                            "time_to_get_states_from_sim",
                                             "cluster_state_update_dt",
                                             "cluster_sol_time"
                                             ],
@@ -213,7 +213,7 @@ while env._simulation_app.is_running():
                                 rt_factor * num_envs,
                                 time.perf_counter() - start_time_step,
                                 env.debug_data["time_to_step_world"],
-                                env.debug_data["time_to_get_agent_data"],
+                                env.debug_data["time_to_get_states_from_sim"],
                                 env.debug_data["cluster_state_update_dt"][robot_names[i]],
                                 env.debug_data["cluster_sol_time"][robot_names[i]]])
     
