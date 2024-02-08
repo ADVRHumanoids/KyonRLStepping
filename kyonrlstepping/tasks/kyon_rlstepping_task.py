@@ -263,38 +263,6 @@ class KyonRlSteppingTask(IsaacTask):
                                 actions = actions,
                                 env_indxs = env_indxs)
 
-    def get_observations(self):
-        
-        if self.use_diff_velocities:
-            
-            self._get_robots_state(dt = self.integration_dt) # updates robot states
-            # but velocities are obtained via num. differentiation
-        
-        else:
-
-            self._get_robots_state() # velocities directly from simulator (can 
-            # introduce relevant artifacts, making them unrealistic)
-
-        return self.obs
-
-    def calculate_metrics(self) -> None:
-
-        # compute reward based on angle of pole and cart velocity
-        reward = 0
-
-        return reward
-
-    def is_done(self) -> None:
-        # cart_pos = self.obs[:, 0]
-        # pole_pos = self.obs[:, 2]
-
-        # # reset the robot if cart has reached reset_dist or pole is too far from upright
-        # resets = torch.where(torch.abs(cart_pos) > self._reset_dist, 1, 0)
-        # resets = torch.where(torch.abs(pole_pos) > math.pi / 2, 1, resets)
-        # self.resets = resets
-
-        return True
-
     def close(self):
 
         for i in range(0, len(self.robot_names)):
