@@ -290,25 +290,6 @@ class KyonEnv(IsaacSimEnv):
 
         self.step_counter += 1
 
-        # RL stuff
-        if self.debug:
-            
-            self.env_timer = time.perf_counter()
-            
-        observations = self.task.get_observations()
-
-        rewards = self.task.calculate_metrics()
-
-        dones = self.task.is_done()
-
-        info = {}
-
-        if self.debug:
-                        
-            self.debug_data["time_to_get_agent_data"] = time.perf_counter() - self.env_timer
-
-        return observations, rewards, dones, info
-    
     def reset_cluster(self,
             env_indxs: torch.Tensor = None,
             robot_names: List[str]=None):
