@@ -1,12 +1,9 @@
 from control_cluster_bridge.controllers.rhc import RHController
-from control_cluster_bridge.utilities.homing import RobotHomer
-
 from kyonrlstepping.controllers.kyon_rhc.horizon_imports import * 
 
 from kyonrlstepping.controllers.kyon_rhc.kyonrhc_taskref import KyonRhcTaskRef
+from kyonrlstepping.controllers.kyon_rhc.kyonrhc_taskref import KyonRhcRefs
 from kyonrlstepping.controllers.kyon_rhc.gait_manager import GaitManager
-
-from kyonrlstepping.utils.rhc2shared import RHC2SharedInternal
 
 from SharsorIPCpp.PySharsorIPC import VLevel
 from SharsorIPCpp.PySharsorIPC import Journal, LogType
@@ -149,10 +146,10 @@ class KyonRHC(RHController):
         # setting initial CoM ref, so that it's coherent
         CoM = self._kin_dyn.centerOfMass()
         init_CoM_pos = CoM(q=init)['com']
-        CoM_pose = self._ti.getTask('CoM_pose')
+        base_pos = self._ti.getTask('base_position')
         CoM_tmp = base_init.copy()
         CoM_tmp[2] = init_CoM_pos[2] + base_init[2]
-        CoM_pose.setRef(np.atleast_2d(CoM_tmp).T)
+        base_pos.setRef(np.atleast_2d(CoM_tmp).T)
 
         self._tg = trajectoryGenerator.TrajectoryGenerator()
 
@@ -256,15 +253,19 @@ class KyonRHC(RHController):
         
         # self.horizon_anal = analyzer.ProblemAnalyzer(self._prb)
         
-    def _init_rhc_task_cmds(self) -> KyonRhcTaskRef:
-
-        return KyonRhcTaskRef(gait_manager=self._gm, 
-                        n_contacts=len(self._model.cmap.keys()), 
-                        index=self.controller_index, 
-                        q_remapping=self._quat_remap, 
-                        dtype=self.array_dtype, 
-                        verbose=self._verbose, 
-                        namespace=self.robot_name)
+    def _init_rhc_task_cmds(self):
+        
+        rhc_refs = KyonRhcRefs(gait_manager=self._gm,
+                    robot_index=self.controller_index,
+                    namespace=self.namespace,
+                    safe=False, 
+                    verbose=self._verbose,
+                    vlevel=VLevel.V2)
+        
+        rhc_refs.rob_refs.set_jnts_remapping(jnts_remapping=self._to_controller)
+        rhc_refs.rob_refs.set_q_remapping(q_remapping=self._get_quat_remap())
+            
+        return rhc_refs
     
     def _get_robot_jnt_names(self):
 
@@ -467,8 +468,8 @@ class KyonRHC(RHController):
 
             self._custom_timer_start = time.perf_counter()
 
-        self.rhc_task_refs.update() # updates rhc references
-        # with the latests available
+        self.rhc_refs.step() # updates rhc references
+        # with the latests available data on shared memory
 
         if self._profile_all:
 

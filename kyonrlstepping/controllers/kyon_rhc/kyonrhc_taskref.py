@@ -1,84 +1,209 @@
 from kyonrlstepping.controllers.kyon_rhc.gait_manager import GaitManager
 
-from control_cluster_bridge.utilities.rhc_defs import RhcTaskRefs
+from control_cluster_bridge.utilities.shared_data.rhc_data import RhcRefs
+from SharsorIPCpp.PySharsorIPC import VLevel
+from SharsorIPCpp.PySharsorIPC import LogType
+from SharsorIPCpp.PySharsorIPC import Journal
 
-import torch
-
-from typing import List, Dict
+from typing import List
 
 import numpy as np
+import torch
 
-class KyonRhcTaskRef(RhcTaskRefs):
+class KyonRhcRefs(RhcRefs):
 
     def __init__(self, 
             gait_manager: GaitManager, 
-            n_contacts: int,
-            index: int,
-            q_remapping: List[int] = None,
-            dtype = torch.float32, 
-            verbose=False, 
-            namespace = "kyon0"):
+            robot_index: int,
+            namespace = "kyon0",
+            safe = False,
+            verbose = True,
+            vlevel = VLevel.V2):
         
-        super().__init__( 
-                n_contacts=n_contacts,
-                index=index,
-                q_remapping=q_remapping,
-                namespace=namespace,
-                dtype=dtype, 
-                verbose=verbose)
+        self.robot_index = robot_index
+        self.robot_index_torch = torch.tensor(self.robot_index)
 
+        super().__init__( 
+                is_server=False,
+                with_gpu_mirror=False,
+                namespace=namespace,
+                safe=safe,
+                verbose=verbose,
+                vlevel=vlevel)
+
+        if not isinstance(gait_manager, GaitManager):
+
+            exception = f"Provided gait_manager argument should be of GaitManager type!"
+
+            Journal.log(self.__class__.__name__,
+                "__init__",
+                exception,
+                LogType.EXCEP,
+                throw_when_excep = True)
+            
         # handles phase transitions
         self.gait_manager = gait_manager
 
         # task references
         # self.final_base_xy = self.gait_manager.task_interface.getTask('final_base_xy')
-        self.CoM_pose = self.gait_manager.task_interface.getTask('CoM_pose')
+        self.base_position = self.gait_manager.task_interface.getTask('base_position')
         self.base_orientation = self.gait_manager.task_interface.getTask('base_orientation')
 
-    def update(self):
-        
-        # contact phases
-        if self.phase_id.get_phase_id() < 0 and \
-            self.gait_manager.contact_phases['ball_1'].getEmptyNodes() > 0:
+    def run(self):
 
-            # we assume timelines to be synchronized
+        super.run()
 
-            is_contact = (self.phase_id.get_contacts().numpy() > 0.5).flatten().tolist() 
-            # contact if contact_flags[i] > 0.5
+        if not (self.robot_index < self.rob_refs.n_robots()):
+
+            exception = f"Provided \(0-based\) robot index {self.robot_index} exceeds number of " + \
+                " available robots {self.rob_refs.n_robots()}."
+
+            Journal.log(self.__class__.__name__,
+                "__init__",
+                exception,
+                LogType.EXCEP,
+                throw_when_excep = True)
             
-            self.gait_manager.cycle(is_contact)
+        contact_names = self.gait_manager.task_interface.model.cmap.keys()
+
+        if not (self.n_contacts == len(contact_names)):
+
+            exception = f"N of contacts within problem {len(contact_names)} does not match n of contacts {self.n_contacts}"
+
+            Journal.log(self.__class__.__name__,
+                "__init__",
+                exception,
+                LogType.EXCEP,
+                throw_when_excep = True)
+                        
+    def step(self):
+        
+        if self.is_running():
+            
+            # updates data from shared mem
+            self.rob_refs.synch_from_shared_mem()
+            self.phase_id.synch_all(read=True, wait=True)
+            self.contact_flags.synch_all(read=True, wait=True)
+
+            phase_id = self.phase_id.read_wait(row_index=self.robot_index,
+                                col_index=0)[0]
+            
+            # contact phases
+            if phase_id == np.nan and \
+                self.gait_manager.contact_phases['ball_1'].getEmptyNodes() > 0: # there are available nodes on the horizon 
+
+                # we assume timelines of the same amount at each rhc instant
+
+                contact_flags = self.contact_flags.torch_view[self.robot_index, :]
+
+                is_contact = contact_flags.flatten().tolist() 
+                # contact if contact_flags[i] > 0.5
                 
+                self.gait_manager.cycle(is_contact)
+                    
+            else:
+
+                if self.phase_id.get_phase_id() == 0:
+
+                    self.gait_manager.stand()
+                
+                if self.phase_id.get_phase_id() == 1:
+
+                    self.gait_manager.walk()
+
+                if self.phase_id.get_phase_id() == 2:
+
+                    self.gait_manager.crawl()
+
+                if self.phase_id.get_phase_id() == 3:
+
+                    self.gait_manager.trot()
+
+                if self.phase_id.get_phase_id() == 4:
+
+                    self.gait_manager.trot_jumped()
+
+                if self.phase_id.get_phase_id() == 5:
+
+                    self.gait_manager.jump()
+
+                if self.phase_id.get_phase_id() == 6:
+
+                    self.gait_manager.wheelie()
+
+            # updated internal references with latest available ones
+            # self.final_base_xy.setRef(self.base_pose.get_pose().numpy().T)
+            
+            base_pos_ref = self.rob_refs.root_state.get_p(robot_idxs=self.robot_index_torch)
+            base_q_ref = self.rob_refs.root_state.get_q(robot_idxs=self.robot_index_torch)
+
+            self.base_position.setRef(base_pos_ref.numpy().T)
+
+            self.base_orientation.setRef(base_q_ref.numpy().T)
+        
         else:
 
-            if self.phase_id.get_phase_id() == 0:
+            exception = f"{self.__class__.__name__} is not running"
 
-                self.gait_manager.stand()
+            Journal.log(self.__class__.__name__,
+                "step",
+                exception,
+                LogType.EXCEP,
+                throw_when_excep = True)
             
-            if self.phase_id.get_phase_id() == 1:
+    def reset(self,
+            p_ref: torch.Tensor,
+            q_ref: torch.Tensor):
+        
+        if (not isinstance(p_ref, torch.Tensor)) or \
+            (not isinstance(q_ref, torch.Tensor)):
 
-                self.gait_manager.walk()
+            exception = f"p_ref and q_ref should be torch tensors"
 
-            if self.phase_id.get_phase_id() == 2:
+            Journal.log(self.__class__.__name__,
+                "reset",
+                exception,
+                LogType.EXCEP,
+                throw_when_excep = True)
+            
+        if (not len(p_ref.shape) == 2) or \
+            (not len(q_ref.shape) == 2):
 
-                self.gait_manager.crawl()
+            exception = f"p_ref and q_ref should be 2D torch tensors"
 
-            if self.phase_id.get_phase_id() == 3:
+            Journal.log(self.__class__.__name__,
+                "reset",
+                exception,
+                LogType.EXCEP,
+                throw_when_excep = True)
 
-                self.gait_manager.trot()
+        if (not len(p_ref.shape[0]) == 1) or \
+            (not len(q_ref.shape[0]) == 1):
 
-            if self.phase_id.get_phase_id() == 4:
+            exception = f"First dim. of p_ref and q_ref should be 1D"
 
-                self.gait_manager.trot_jumped()
+            Journal.log(self.__class__.__name__,
+                "reset",
+                exception,
+                LogType.EXCEP,
+                throw_when_excep = True)
+            
+        if (not len(p_ref.shape[1]) == 3) or \
+            (not len(q_ref.shape[1]) == 4):
 
-            if self.phase_id.get_phase_id() == 5:
+            exception = f"Second dim. of either p_ref or q_ref is not consinstent." + \
+                            "it should be, respectively, 3 and 4 \(quaternion\)"
 
-                self.gait_manager.jump()
+            Journal.log(self.__class__.__name__,
+                "reset",
+                exception,
+                LogType.EXCEP,
+                throw_when_excep = True)
+        
+        self.phase_id.torch_view[self.robot_index, :] = torch.full((1, self.n_contacts), True) # reset to contact state
+        self.rob_refs.root_state.set_p(robot_idxs=self.robot_index_torch, p = p_ref)
+        self.rob_refs.root_state.set_q(robot_idxs=self.robot_index_torch, q = q_ref)
 
-            if self.phase_id.get_phase_id() == 6:
+        # should also empty the timeline for stepping phases
+        
 
-                self.gait_manager.wheelie()
-
-        # updated internal references with latest available ones
-        # self.final_base_xy.setRef(self.base_pose.get_pose().numpy().T)
-        self.CoM_pose.setRef(self.com_pose.get_com_pose().numpy().T)
-        self.base_orientation.setRef(self.base_pose.get_pose(use_remapping=True).numpy().T)

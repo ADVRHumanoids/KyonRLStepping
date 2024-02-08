@@ -22,9 +22,9 @@ constraints:
   # - base_orientation
 
 costs:
-  - CoM_pose
   - joint_regularization
   - joint_posture
+  - base_position
   - base_orientation
 
 .define:
@@ -37,7 +37,7 @@ costs:
     - &w_jnt_f_reg 0.0001
     - &wheel_radius 0.124
 
-CoM_pose: # actually is not CoM, it's just a Cartesian on the base_link
+base_position: 
   type: Cartesian
   distal_link: base_link
   indices: [0, 1, 2]
