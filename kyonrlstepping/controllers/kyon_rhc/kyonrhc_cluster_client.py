@@ -41,7 +41,7 @@ class KyonRhcClusterClient(ControlClusterClient):
         
         Journal.log(self.__class__.__name__,
                         "_generate_srdf",
-                        "generating SRDF for Control Cluster server",
+                        "generating SRDF",
                         LogType.STAT,
                         throw_when_excep = True)
     
@@ -65,7 +65,7 @@ class KyonRhcClusterClient(ControlClusterClient):
 
             Journal.log(self.__class__.__name__,
                         "_generate_srdf",
-                        "generated SRDF for Control Cluster server",
+                        "generated SRDF",
                         LogType.STAT,
                         throw_when_excep = True)
             
@@ -81,7 +81,7 @@ class KyonRhcClusterClient(ControlClusterClient):
         
         Journal.log(self.__class__.__name__,
                         "_generate_urdf",
-                        "Generating URDF for Control Cluster server",
+                        "Generating URDF",
                         LogType.STAT,
                         throw_when_excep = True)
         
@@ -106,7 +106,7 @@ class KyonRhcClusterClient(ControlClusterClient):
             
             Journal.log(self.__class__.__name__,
                         "_generate_srdf",
-                        "Generated URDF for Control Cluster server",
+                        "Generated URDF",
                         LogType.STAT,
                         throw_when_excep = True)
             
