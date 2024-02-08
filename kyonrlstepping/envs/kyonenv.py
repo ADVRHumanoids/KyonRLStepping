@@ -29,7 +29,7 @@ class KyonEnv(IsaacSimEnv):
         # debug data
         self.debug_data = {}
         self.debug_data["time_to_step_world"] = np.nan
-        self.debug_data["time_to_get_agent_data"] = np.nan
+        self.debug_data["time_to_get_states_from_sim"] = np.nan
         self.debug_data["cluster_sol_time"] = {}
         self.debug_data["cluster_state_update_dt"] = {}
 
@@ -287,6 +287,16 @@ class KyonEnv(IsaacSimEnv):
 
                     self._trigger_cluster[robot_name] = False # -> next cluster instant we get/wait the solution
                     # from the cluster                
+
+        if self.debug:
+            
+            self.env_timer = time.perf_counter()
+
+        self.task.get_observations()
+
+        if self.debug:
+                        
+            self.debug_data["time_to_get_states_from_sim"] = time.perf_counter() - self.env_timer
 
         self.step_counter += 1
 
