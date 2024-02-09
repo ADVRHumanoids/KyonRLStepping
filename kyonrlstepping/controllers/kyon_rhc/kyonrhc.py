@@ -1,7 +1,6 @@
 from control_cluster_bridge.controllers.rhc import RHController
 from kyonrlstepping.controllers.kyon_rhc.horizon_imports import * 
 
-from kyonrlstepping.controllers.kyon_rhc.kyonrhc_taskref import KyonRhcTaskRef
 from kyonrlstepping.controllers.kyon_rhc.kyonrhc_taskref import KyonRhcRefs
 from kyonrlstepping.controllers.kyon_rhc.gait_manager import GaitManager
 
@@ -64,6 +63,8 @@ class KyonRHC(RHController):
 
             self.urdf = file.read()
 
+        self._base_init = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+
         super().__init__(cluster_size = cluster_size,
                         srdf_path = srdf_path,
                         n_nodes = self._n_intervals + 1,
@@ -118,22 +119,20 @@ class KyonRHC(RHController):
 
         self._init_robot_homer()
 
-        import numpy as np
-        base_init = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0])
-
-        init = base_init.tolist() + list(self._homer.get_homing())
+        init = self._base_init.tolist() + list(self._homer.get_homing())
 
         FK = self._kin_dyn.fk('ball_1') # just to get robot reference height
         
         kyon_wheel_radius = 0.124 # hardcoded!!!!
 
         init_pos_foot = FK(q=init)['ee_pos']
-        base_init[2] = -init_pos_foot[2] + kyon_wheel_radius
+
+        self._base_init[2] = -init_pos_foot[2] + kyon_wheel_radius # override init
 
         self._model = FullModelInverseDynamics(problem=self._prb,
                                 kd=self._kin_dyn,
                                 q_init=self._homer.get_homing_map(),
-                                base_init=base_init)
+                                base_init=self._base_init)
         
         self._ti = TaskInterface(prb=self._prb, 
                             model=self._model, 
@@ -143,13 +142,10 @@ class KyonRHC(RHController):
         
         self._ti.setTaskFromYaml(self.config_path)
 
-        # setting initial CoM ref, so that it's coherent
-        CoM = self._kin_dyn.centerOfMass()
-        init_CoM_pos = CoM(q=init)['com']
+        # setting initial base pos ref
         base_pos = self._ti.getTask('base_position')
-        CoM_tmp = base_init.copy()
-        CoM_tmp[2] = init_CoM_pos[2] + base_init[2]
-        base_pos.setRef(np.atleast_2d(CoM_tmp).T)
+
+        base_pos.setRef(np.atleast_2d(self._base_init).T)
 
         self._tg = trajectoryGenerator.TrajectoryGenerator()
 
@@ -262,9 +258,18 @@ class KyonRHC(RHController):
                     verbose=self._verbose,
                     vlevel=VLevel.V2)
         
+        self._base_init
+
+        rhc_refs.run()
+
         rhc_refs.rob_refs.set_jnts_remapping(jnts_remapping=self._to_controller)
         rhc_refs.rob_refs.set_q_remapping(q_remapping=self._get_quat_remap())
-            
+              
+        # writing initializations
+        rhc_refs.reset(p_ref=np.atleast_2d(self._base_init)[:, 0:3], 
+            q_ref=np.atleast_2d(self._base_init)[:, 3:7] # will be remapped according to just set q_remapping
+            )
+        
         return rhc_refs
     
     def _get_robot_jnt_names(self):
@@ -547,8 +552,14 @@ class KyonRHC(RHController):
         
         # resets controller ig and initial
         # states/inputs
-
         self._ti.reset()
+
+        # resets rhc references
+        if self.rhc_refs is not None:
+
+            self.rhc_refs.reset(p_ref=np.atleast_2d(self._base_init)[:, 0:3], 
+                            q_ref=np.atleast_2d(self._base_init)[:, 3:7]
+                            )
 
     def _get_cost_data(self):
         
