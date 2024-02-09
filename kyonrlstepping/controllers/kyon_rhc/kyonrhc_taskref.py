@@ -124,30 +124,30 @@ class KyonRhcRefs(RhcRefs):
                             throw_when_excep = True)
             
             elif phase_id == 0:
-
+                
                 self.gait_manager.stand()
             
-            elif phase_id == 0:
+            elif phase_id == 1:
 
                 self.gait_manager.walk()
 
-            elif phase_id == 0:
+            elif phase_id == 2:
 
                 self.gait_manager.crawl()
 
-            elif phase_id == 0:
+            elif phase_id == 3:
                 
                 self.gait_manager.trot()
                 
-            elif phase_id == 0:
+            elif phase_id == 4:
                 
                 self.gait_manager.trot_jumped()
 
-            elif phase_id == 0:
+            elif phase_id == 5:
 
                 self.gait_manager.jump()
             
-            elif phase_id == 0:
+            elif phase_id == 6:
 
                 self.gait_manager.wheelie()
 

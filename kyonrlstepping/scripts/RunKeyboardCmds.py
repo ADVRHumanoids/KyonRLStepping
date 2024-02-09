@@ -5,4 +5,4 @@ if __name__ == "__main__":
     keyb_cmds = RhcRefsFromKeyboard(namespace="kyon0", 
                             verbose=True)
 
-    keyb_cmds.start()
+    keyb_cmds.run()
