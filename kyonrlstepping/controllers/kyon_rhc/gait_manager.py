@@ -26,7 +26,7 @@ class GaitManager:
 
     def reset(self):
 
-        self.phase_manager.reset()
+        # self.phase_manager.clear()
         self.task_interface.reset()
 
     def cycle_short(self, cycle_list):
