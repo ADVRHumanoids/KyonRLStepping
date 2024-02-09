@@ -24,6 +24,11 @@ class GaitManager:
 
         # self.zmp_timeline = self.phase_manager.getTimelines()['zmp_timeline']
 
+    def reset(self):
+
+        self.phase_manager.reset()
+        self.task_interface.reset()
+
     def cycle_short(self, cycle_list):
         # how do I know that the stance phase is called stance_{c} or flight_{c}?
         for flag_contact, contact_name in zip(cycle_list, self.contact_phases.keys()):

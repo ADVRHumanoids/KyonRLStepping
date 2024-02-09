@@ -25,7 +25,7 @@ def generate_controllers(robot_name: str):
                 robot_name=robot_name,
                 config_path = kyonrhc_config_path,
                 dt=0.03,
-                n_intervals=30, 
+                n_nodes=31, 
                 max_solver_iter = max_solver_iter,
                 verbose = verbose, 
                 debug = debug,
@@ -57,7 +57,7 @@ core_ids_override_list = None
 # core_ids_override_list = [6, 8]
 control_cluster_srvr = KyonRhcClusterClient(namespace=robot_name, 
                                     cluster_size=cluster_size,
-                                    isolated_cores_only = True, 
+                                    isolated_cores_only = False, 
                                     use_only_physical_cores = False,
                                     core_ids_override_list = core_ids_override_list,
                                     verbose=verbose) # this blocks until connection with the client is established

@@ -21,7 +21,7 @@ class KyonRHC(RHController):
             config_path: str,
             cluster_size: int, # needed by shared mem manager
             robot_name: str = "kyon0",
-            n_intervals:float = 25,
+            n_nodes:float = 25,
             dt: float = 0.02,
             max_solver_iter = 1, # defaults to rt-iteration
             add_data_lenght: int = 2,
@@ -50,10 +50,6 @@ class KyonRHC(RHController):
         self.robot_name = robot_name
         
         self._enable_replay = enable_replay
-        
-        self._n_intervals = n_intervals
-        self._dt = dt
-        self._t_horizon = self._n_intervals * self._dt
 
         self.config_path = config_path
 
@@ -67,7 +63,8 @@ class KyonRHC(RHController):
 
         super().__init__(cluster_size = cluster_size,
                         srdf_path = srdf_path,
-                        n_nodes = self._n_intervals + 1,
+                        n_nodes = n_nodes,
+                        dt = dt,
                         namespace = self.robot_name,
                         verbose = verbose, 
                         debug = debug,
@@ -271,6 +268,10 @@ class KyonRHC(RHController):
             )
         
         return rhc_refs
+    
+    def _get_contact_names(self):
+
+        return list(self._ti.model.cmap.keys())
     
     def _get_robot_jnt_names(self):
 
@@ -550,9 +551,9 @@ class KyonRHC(RHController):
 
     def _reset(self):
         
-        # resets controller ig and initial
-        # states/inputs
-        self._ti.reset()
+        # reset task interface (ig, solvers, etc..) + 
+        # phase manager
+        self._gm.reset()
 
         # resets rhc references
         if self.rhc_refs is not None:
@@ -639,7 +640,5 @@ class KyonRHC(RHController):
     
     def _get_constr_from_sol(self,
                     constr_name: str):
-
-        # to be overridden by child class
         
         return self.rhc_constr[constr_name]
