@@ -18,7 +18,8 @@ class KyonRhcRefs(RhcRefs):
             namespace = "kyon0",
             RhcRefs = True,
             verbose = True,
-            vlevel = VLevel.V2):
+            vlevel = VLevel.V2,
+            safe = True):
         
         self.robot_index = robot_index
         self.robot_index_torch = torch.tensor(self.robot_index)
