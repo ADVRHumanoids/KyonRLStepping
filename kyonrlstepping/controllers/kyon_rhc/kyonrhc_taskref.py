@@ -16,7 +16,7 @@ class KyonRhcRefs(RhcRefs):
             gait_manager: GaitManager, 
             robot_index: int,
             namespace = "kyon0",
-            safe = False,
+            RhcRefs = True,
             verbose = True,
             vlevel = VLevel.V2):
         

@@ -53,8 +53,8 @@ dtype = torch.float32 # this has to be the same wrt the cluster client, otherwis
 robot_name = "kyon0"
 cluster_size = 5
 
-core_ids_override_list = None
-# core_ids_override_list = [6, 8]
+# core_ids_override_list = None
+core_ids_override_list = [11, 12, 13, 14, 15]
 control_cluster_srvr = KyonRhcClusterClient(namespace=robot_name, 
                                     cluster_size=cluster_size,
                                     isolated_cores_only = False, 

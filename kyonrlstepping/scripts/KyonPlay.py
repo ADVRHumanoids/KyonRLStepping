@@ -95,7 +95,7 @@ for i in range(0, len(contact_prims["kyon0"])):
     
     sensor_radii["kyon0"][contact_prims["kyon0"][i]] = 0.124
 
-headless = False
+headless = True
 enable_livestream = False
 enable_viewport = False
 env_debug = True

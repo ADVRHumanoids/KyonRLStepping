@@ -149,9 +149,42 @@ class KyonRHC(RHController):
         self._pm = pymanager.PhaseManager(self._n_intervals)
 
         # adding timelines
+        self._init_contact_timelines()
+
+        self._ti.model.q.setBounds(self._ti.model.q0, self._ti.model.q0, nodes=0)
+        self._ti.model.v.setBounds(self._ti.model.v0, self._ti.model.v0, nodes=0)
+        # ti.model.a.setBounds(np.zeros([model.a.shape[0], 1]), np.zeros([model.a.shape[0], 1]), nodes=0)
+        self._ti.model.q.setInitialGuess(self._ti.model.q0)
+        self._ti.model.v.setInitialGuess(self._ti.model.v0)
+
+        f0 = [0, 0, self._kin_dyn.mass() / 4 * 9.8]
+        for _, cforces in self._ti.model.cmap.items():
+            for c in cforces:
+                c.setInitialGuess(f0)
+
+        self._ti.finalize()
+
+        self._ti.bootstrap()
+
+        self._ti.init_inv_dyn_for_res() # we initialize some objects for sol. postprocessing purposes
+
+        self._ti.load_initial_guess()
+
+        contact_phase_map = {c: f'{c}_timeline' for c in self._model.cmap.keys()}
+        
+        self._gm = GaitManager(self._ti, self._pm, contact_phase_map)
+
+        self.n_dofs = self._get_ndofs() # after loading the URDF and creating the controller we
+        # know n_dofs -> we assign it (by default = None)
+
+        self.n_contacts = len(self._model.cmap.keys())
+        
+        # self.horizon_anal = analyzer.ProblemAnalyzer(self._prb)
+    
+    def _init_contact_timelines(self):
+
         c_phases = dict()
         for c in self._model.cmap.keys():
-
             c_phases[c] = self._pm.addTimeline(f'{c}_timeline')
 
         stance_duration_default = 5
@@ -216,36 +249,6 @@ class KyonRHC(RHController):
             c_phases[c].addPhase(stance)
             c_phases[c].addPhase(stance)
 
-        self._ti.model.q.setBounds(self._ti.model.q0, self._ti.model.q0, nodes=0)
-        self._ti.model.v.setBounds(self._ti.model.v0, self._ti.model.v0, nodes=0)
-        # ti.model.a.setBounds(np.zeros([model.a.shape[0], 1]), np.zeros([model.a.shape[0], 1]), nodes=0)
-        self._ti.model.q.setInitialGuess(self._ti.model.q0)
-        self._ti.model.v.setInitialGuess(self._ti.model.v0)
-
-        f0 = [0, 0, self._kin_dyn.mass() / 4 * 9.8]
-        for _, cforces in self._ti.model.cmap.items():
-            for c in cforces:
-                c.setInitialGuess(f0)
-
-        self._ti.finalize()
-
-        self._ti.bootstrap()
-
-        self._ti.init_inv_dyn_for_res() # we initialize some objects for sol. postprocessing purposes
-
-        self._ti.load_initial_guess()
-
-        contact_phase_map = {c: f'{c}_timeline' for c in self._model.cmap.keys()}
-        
-        self._gm = GaitManager(self._ti, self._pm, contact_phase_map)
-
-        self.n_dofs = self._get_ndofs() # after loading the URDF and creating the controller we
-        # know n_dofs -> we assign it (by default = None)
-
-        self.n_contacts = len(self._model.cmap.keys())
-        
-        # self.horizon_anal = analyzer.ProblemAnalyzer(self._prb)
-        
     def _init_rhc_task_cmds(self):
         
         rhc_refs = KyonRhcRefs(gait_manager=self._gm,
@@ -555,6 +558,9 @@ class KyonRHC(RHController):
         # phase manager
         self._gm.reset()
 
+        # we also re-initialize contact timelines
+        # self._init_contact_timelines()
+
         # resets rhc references
         if self.rhc_refs is not None:
 
@@ -600,7 +606,7 @@ class KyonRHC(RHController):
     def _get_v_from_sol(self):
 
         # to be overridden by child class
-        
+
         return self._ti.solution['v']
     
     def _get_a_from_sol(self):
@@ -619,6 +625,18 @@ class KyonRHC(RHController):
 
         # to be overridden by child class
         
+        contact_names = self.robot_state.contact_names()
+
+        try: 
+            
+            data = [self._ti.solution["f_" + key] for key in contact_names]
+
+            return np.concatenate(data, axis=0)
+
+        except:
+
+            return None
+
         return None
     
     def _get_f_dot_from_sol(self):
