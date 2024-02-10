@@ -2,6 +2,10 @@ from kyonrlstepping.utils.rhc2ros import Shared2ROSInternal
 
 from perf_sleep.pyperfsleep import PerfSleep
 
+from SharsorIPCpp.PySharsorIPC import VLevel
+from SharsorIPCpp.PySharsorIPC import LogType
+from SharsorIPCpp.PySharsorIPC import Journal
+
 import argparse
 import os
 
@@ -46,11 +50,12 @@ if __name__ == '__main__':
 
     perf_timer = PerfSleep()
     
-    info = f"[RHC2RosBridge]" + \
-                f"[{bridge.journal.info}]" + \
-                f": starting bridge with update dt {update_dt} s"
-    
-    print(info)
+    info = f": starting bridge with update dt {update_dt} s"
+    Journal.log("RHC2RosBridge",
+        "",
+        info,
+        LogType.INFO,
+        throw_when_excep = True)
 
     start_time = 0.0
     elapsed_time = 0.0
@@ -71,12 +76,13 @@ if __name__ == '__main__':
 
         if time_to_sleep_ns < 0:
 
-            warning = f"[RHC2RosBridge]" + \
-                f"[{bridge.journal.warning}]" + \
-                f": could not match desired update dt of {update_dt} s. " + \
+            warning = f": Could not match desired update dt of {update_dt} s. " + \
                 f"Elapsed time to update {elapsed_time}."
-
-            print(warning)
+            Journal.log("RHC2RosBridge",
+                "",
+                warning,
+                LogType.WARN,
+                throw_when_excep = True)
 
         perf_timer.clock_sleep(time_to_sleep_ns) # nanoseconds (actually resolution is much
                     # poorer)
