@@ -23,14 +23,14 @@ from std_msgs.msg import Float64MultiArray
 from std_msgs.msg import String
 
 from typing import List
-class Shared2ROSInternal:
+
+class RhcToVizBridge:
 
     # bridge from shared mem to ROS
     
     def __init__(self, 
             namespace: str, 
             verbose = False,
-            shared_mem_basename: str = "RHC2SharedInternal",
             rhcviz_basename = "RHCViz",
             robot_selector: List = [0, None]):
 
@@ -38,7 +38,6 @@ class Shared2ROSInternal:
 
         self.verbose = verbose
 
-        self.shared_mem_basename = shared_mem_basename
         self.namespace = namespace # defines uniquely the kind of controller 
         # (associated with a specific robot)
 
@@ -72,6 +71,9 @@ class Shared2ROSInternal:
         self.robot_state = None
 
         self._current_index = 0
+
+        self._update_counter = 0
+        self._print_frequency = 100
 
         self._is_running = False
 
@@ -149,6 +151,9 @@ class Shared2ROSInternal:
                                 safe=False,
                                 verbose=True,
                                 vlevel=VLevel.V2)
+        self.robot_state.set_q_remapping(q_remapping=[1, 2, 3, 0]) # remapping from w, i, j, k
+        # to rviz conventions (i, k, k, w)
+        
         self.robot_state.run()
 
         self.cluster_size = self.robot_state.n_robots()
@@ -237,7 +242,26 @@ class Shared2ROSInternal:
         if not self.robot_state is None:
 
             self.robot_state.close()
+    
+    def _sporadic_log(self,
+                calling_methd: str,
+                msg: str,
+                logtype: LogType = LogType.INFO):
+
+        if self.verbose and \
+            (self._update_counter+1) % self._print_frequency == 0: 
             
+            Journal.log(self.__class__.__name__,
+                calling_methd,
+                msg,
+                logtype,
+                throw_when_excep = True)
+    
+    def _contains_nan(self,
+                    data: np.ndarray):
+        
+        return np.isnan(data).any()
+    
     def _publish(self):
         
         # continously publish also joint names 
@@ -246,11 +270,31 @@ class Shared2ROSInternal:
         # publish rhc_q
         rhc_q = self.rhc_internal_clients[self._current_index].q.numpy_view[:, :].flatten()
 
-        root_q_robot = self.robot_state.root_state.get_q_full()[self._current_index, :]
+        root_p_robot = self.robot_state.root_state.get_p(robot_idxs=self._current_index)
+        root_q_robot = self.robot_state.root_state.get_q(robot_idxs=self._current_index) # with remapping
+
+        root_q_full = np.concatenate((root_p_robot, root_q_robot), axis=1).flatten()
+
         jnts_q_robot = self.robot_state.jnts_state.get_q()[self._current_index, :]
-        robot_q = np.concatenate((root_q_robot, jnts_q_robot), axis=0)
 
-        self.rhc_q_pub.publish(Float64MultiArray(data=rhc_q))
+        robot_q = np.concatenate((root_q_full, jnts_q_robot), axis=0)
 
+        if not self._contains_nan(rhc_q):
+
+            self.rhc_q_pub.publish(Float64MultiArray(data=rhc_q))
+
+        else:
+
+            self._sporadic_log(calling_methd="_publish", 
+                        msg="rhc q data contains some NaN. That data will not be published")
+            
         # publish robot_q
-        self.robot_q_pub.publish(Float64MultiArray(data=robot_q))
+        
+        if not self._contains_nan(robot_q):
+
+            self.robot_q_pub.publish(Float64MultiArray(data=robot_q))
+        
+        else:
+
+            self._sporadic_log(calling_methd="_publish", 
+                        msg="robot q data contains some NaN. That data will not be published")

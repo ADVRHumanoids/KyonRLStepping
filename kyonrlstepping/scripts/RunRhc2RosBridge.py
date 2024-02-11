@@ -1,4 +1,4 @@
-from kyonrlstepping.utils.rhc2ros import Shared2ROSInternal
+from kyonrlstepping.utils.rhc2viz import RhcToVizBridge
 
 from perf_sleep.pyperfsleep import PerfSleep
 
@@ -42,9 +42,10 @@ if __name__ == '__main__':
     debug = args.debug
     verbose = args.verbose
 
-    bridge = Shared2ROSInternal(namespace=robot_name, 
-                        verbose=verbose, 
-                        shared_mem_basename="RHC2SharedInternal")
+    bridge = RhcToVizBridge(namespace=robot_name, 
+                        verbose=verbose,
+                        rhcviz_basename="RHCViz", 
+                        robot_selector=[0, None])
     
     bridge.run()
 
