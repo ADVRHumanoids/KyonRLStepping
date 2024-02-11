@@ -64,8 +64,14 @@ class RhcToVizBridge:
                             String, 
                             queue_size=10)       
 
+        self.rhc_jntnames_pub = rospy.Publisher(self.ros_names.rhc_jntnames(basename=self.rhcviz_basename, 
+                                        namespace=self.namespace), 
+                            String, 
+                            queue_size=10)   
+
         self.cluster_size = None
-        self.jnt_names = None
+        self.jnt_names_robot = None
+        self.jnt_names_rhc = None
 
         self.rhc_internal_clients = None
         self.robot_state = None
@@ -153,11 +159,11 @@ class RhcToVizBridge:
                                 vlevel=VLevel.V2)
         self.robot_state.set_q_remapping(q_remapping=[1, 2, 3, 0]) # remapping from w, i, j, k
         # to rviz conventions (i, k, k, w)
-        
+
         self.robot_state.run()
 
         self.cluster_size = self.robot_state.n_robots()
-        self.jnt_names = self.robot_state.jnt_names()
+        self.jnt_names_robot = self.robot_state.jnt_names()
 
         self._check_selector()
 
@@ -192,11 +198,15 @@ class RhcToVizBridge:
 
         # publishing joint names on topic 
         string_array = StringArray()
-        self.jnt_names_encoded = string_array.encode(self.jnt_names) # encoding 
+        self.jnt_names_robot_encoded = string_array.encode(self.jnt_names_robot) # encoding 
         # jnt names in a ; separated string
 
         self.handshaker.set_n_nodes(self.rhc_internal_clients[0].q.n_cols) # signal to RHViz client
         # the number of nodes of the RHC problem
+
+        self.jnt_names_rhc = self.rhc_internal_clients[0].jnt_names() # assumes all controllers work on the same robot
+        self.jnt_names_rhc_encoded = string_array.encode(self.jnt_names_rhc) # encoding 
+        # jnt names ifor rhc controllers
 
         self._is_running = True
 
@@ -204,7 +214,7 @@ class RhcToVizBridge:
         
         success = False
 
-        self.env_index.synch_all(read=False, wait=True)
+        self.env_index.synch_all(read=True, wait=True)
 
         self._current_index = self.env_index.torch_view[0, 0].item()
 
@@ -265,7 +275,9 @@ class RhcToVizBridge:
     def _publish(self):
         
         # continously publish also joint names 
-        self.robot_jntnames_pub.publish(String(data=self.jnt_names_encoded))
+        self.robot_jntnames_pub.publish(String(data=self.jnt_names_robot_encoded))
+        
+        self.rhc_jntnames_pub.publish(String(data=self.jnt_names_rhc_encoded))
 
         # publish rhc_q
         rhc_q = self.rhc_internal_clients[self._current_index].q.numpy_view[:, :].flatten()
