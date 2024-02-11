@@ -1,4 +1,3 @@
-from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_horizon
 from rhcviz.utils.xrdf_gen import UrdfGenerator
 
 class KyonUrdfGen(UrdfGenerator):

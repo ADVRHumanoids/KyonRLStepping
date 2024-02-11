@@ -5,7 +5,7 @@ import numpy as np
 import torch
 
 #from stable_baselines3 import PPO
-from kyonrlstepping.envs.kyon_sim_env import KyonEnv 
+from kyonrlstepping.envs.kyon_sim_env import KyonLRhcIsaacSimEnv 
 
 from control_cluster_bridge.utilities.shared_data.sim_data import SharedSimInfo
 
@@ -100,7 +100,7 @@ enable_livestream = False
 enable_viewport = False
 env_debug = True
     
-env = KyonEnv(headless=headless,
+env = KyonLRhcIsaacSimEnv(headless=headless,
         sim_device = 0,
         enable_livestream=enable_livestream, 
         enable_viewport=enable_viewport,
@@ -108,9 +108,9 @@ env = KyonEnv(headless=headless,
 
 # now we can import the task (not before, since Omni plugins are loaded 
 # upon environment initialization)
-from kyonrlstepping.tasks.kyon_rlstepping_task import KyonIsaacTask
+from kyonrlstepping.tasks.kyon_rlstepping_task import KyonLRHcIsaacTask
                             
-task = KyonIsaacTask(integration_dt = integration_dt,
+task = KyonLRHcIsaacTask(integration_dt = integration_dt,
         num_envs = num_envs, 
         cloning_offset = np.array([[0.0, 0.0, 1.3]] * num_envs), 
         env_spacing=6,
@@ -127,8 +127,6 @@ task = KyonIsaacTask(integration_dt = integration_dt,
         startup_jnt_damping = 0,
         startup_wheel_stiffness = 0.0,
         startup_wheel_damping=10.0,
-        robot_names = robot_names,
-        robot_pkg_names = robot_pkg_names,
         contact_prims = contact_prims,
         contact_offsets = contact_offsets,
         sensor_radii = sensor_radii,
