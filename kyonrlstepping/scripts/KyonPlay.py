@@ -140,8 +140,8 @@ task = KyonLRHcIsaacTask(integration_dt = integration_dt,
 env.set_task(task, 
         cluster_dt = [control_clust_dt],
         backend="torch", 
+        is_training = [True],
         sim_params = sim_params, 
-        np_array_dtype = dtype_np, 
         cluster_client_verbose=True, 
         cluster_client_debug=True) # add the task to the environment 
 # (includes spawning robots and launching the cluster client for the controllers)

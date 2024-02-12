@@ -1,10 +1,17 @@
-# create task and register task
-from cartpole_task import CartpoleTask
+from lrhc_control.envs.lrhc_training_env import LRhcTrainingEnv
+from SharsorIPCpp.PySharsorIPC import VLevel
 
-task = CartpoleTask(name="Cartpole")
-env.set_task(task, backend="torch")
+from stable_baselines3 import PPO
 
-# create agent from stable baselines
+namespace = "kyon0"
+env = LRhcTrainingEnv(namespace=namespace,
+                verbose=True,
+                vlevel=VLevel.V2)
+
+while True:
+
+    env.step(action=None)
+
 model = PPO(
     "MlpPolicy",
     env,
@@ -18,9 +25,9 @@ model = PPO(
     vf_coef=0.5,
     max_grad_norm=1.0,
     verbose=1,
-    tensorboard_log="./cartpole_tensorboard",
+    tensorboard_log="./lrhc_tensorboard",
 )
 model.learn(total_timesteps=100000)
-model.save("ppo_cartpole")
+model.save("lrhc_kyon")
 
 env.close()
