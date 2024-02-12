@@ -1,8 +1,7 @@
-from kyonrlstepping.utils.rhc2viz import RhcToVizBridge
+from lrhc_control.utils.rhc2viz import RhcToVizBridge
 
 from perf_sleep.pyperfsleep import PerfSleep
 
-from SharsorIPCpp.PySharsorIPC import VLevel
 from SharsorIPCpp.PySharsorIPC import LogType
 from SharsorIPCpp.PySharsorIPC import Journal
 

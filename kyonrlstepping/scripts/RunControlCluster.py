@@ -1,8 +1,8 @@
 import os
 script_name = os.path.splitext(os.path.basename(os.path.abspath(__file__)))[0]
 
-from kyonrlstepping.controllers.kyon_rhc.kyonrhc import KyonRHC
-from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_client import KyonRhcClusterClient
+from kyonrlstepping.controllers.kyon_rhc.kyon_rhc import KyonRhc
+from kyonrlstepping.controllers.kyon_rhc.kyonrhc_cluster_client import KyonLRhcClusterClient
 from kyonrlstepping.controllers.kyon_rhc.utils.sysutils import PathsGetter
 kyonrhc_paths = PathsGetter
 
@@ -18,7 +18,7 @@ def generate_controllers(robot_name: str):
     cluster_controllers = []
     for i in range(0, control_cluster_srvr.cluster_size):
 
-        cluster_controllers.append(KyonRHC(
+        cluster_controllers.append(KyonRhc(
                 urdf_path=control_cluster_srvr._urdf_path, 
                 srdf_path=control_cluster_srvr._srdf_path,
                 cluster_size=control_cluster_srvr.cluster_size,
@@ -53,9 +53,9 @@ dtype = torch.float32 # this has to be the same wrt the cluster client, otherwis
 robot_name = "kyon0"
 cluster_size = 5
 
-# core_ids_override_list = None
-core_ids_override_list = [11, 12, 13, 14, 15]
-control_cluster_srvr = KyonRhcClusterClient(namespace=robot_name, 
+core_ids_override_list = None
+# core_ids_override_list = [11, 12, 13, 14, 15]
+control_cluster_srvr = KyonLRhcClusterClient(namespace=robot_name, 
                                     cluster_size=cluster_size,
                                     isolated_cores_only = False, 
                                     use_only_physical_cores = False,
