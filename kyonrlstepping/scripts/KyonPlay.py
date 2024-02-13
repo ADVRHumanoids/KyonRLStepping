@@ -141,6 +141,7 @@ env.set_task(task,
         cluster_dt = [control_clust_dt],
         backend="torch", 
         is_training = [True],
+        n_pre_training_steps = 500,
         sim_params = sim_params, 
         cluster_client_verbose=True, 
         cluster_client_debug=True) # add the task to the environment 
@@ -170,7 +171,7 @@ for i in range(len(robot_names)):
     shared_sim_infos[i].run()
 
 import time
-rt_factor = 1.0
+rt_factor = 0.0
 real_time = 0.0
 sim_time = 0.0
 
@@ -178,8 +179,7 @@ i = 0
 
 start_time = time.perf_counter()
 start_time_loop = 0
-rt_factor_reset_n = 10
-rt_factor_counter = 0
+rt_factor_reset_n = 3
 reset_rt_factor = True
 
 while env._simulation_app.is_running():
@@ -216,7 +216,6 @@ while env._simulation_app.is_running():
                                 env.debug_data["cluster_sol_time"][robot_names[i]]])
     
     i+=1 # updating simulation iteration number
-    rt_factor_counter = rt_factor_counter + 1
         
     real_time = time.perf_counter() - start_time
     sim_time += sim_params["physics_dt"]
