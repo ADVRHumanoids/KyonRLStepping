@@ -1,4 +1,4 @@
-from lrhc_control.envs.lrhc_training_env import LRhcTrainingVecEnv
+from lrhc_control.envs.heightchange_env import LRhcHeightChange
 from SharsorIPCpp.PySharsorIPC import VLevel
 
 from stable_baselines3 import PPO
@@ -26,7 +26,7 @@ if __name__ == "__main__":
         set_affinity(args.cores)
         
     namespace = "kyon0"
-    env = LRhcTrainingVecEnv(namespace=namespace,
+    env = LRhcHeightChange(namespace=namespace,
                     verbose=True,
                     vlevel=VLevel.V2)
 
