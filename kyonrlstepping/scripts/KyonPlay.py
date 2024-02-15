@@ -142,8 +142,8 @@ task = KyonLRHcIsaacTask(integration_dt = integration_dt,
 env.set_task(task, 
         cluster_dt = [control_clust_dt],
         backend="torch", 
-        is_training = [False],
-        n_pre_training_steps = 500,
+        is_training = [True],
+        n_pre_training_steps = 100, # n of env steps before connecting to training client
         sim_params = sim_params, 
         cluster_client_verbose=True, 
         cluster_client_debug=True) # add the task to the environment 

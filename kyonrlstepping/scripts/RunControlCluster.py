@@ -36,7 +36,7 @@ def generate_controllers(robot_name: str):
 
     return cluster_controllers
 
-verbose = True
+verbose = False
 
 debug = True
 solver_deb_prints = False
