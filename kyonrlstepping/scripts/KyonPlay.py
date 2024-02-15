@@ -114,7 +114,7 @@ from kyonrlstepping.tasks.kyon_rlstepping_task import KyonLRHcIsaacTask
                             
 task = KyonLRHcIsaacTask(integration_dt = integration_dt,
         num_envs = num_envs, 
-        cloning_offset = np.array([[0.0, 0.0, 1.3]] * num_envs), 
+        cloning_offset = np.array([[0.0, 0.0, 0.6]] * num_envs), 
         env_spacing=6,
         spawning_radius=1.0, 
         use_flat_ground=True, 

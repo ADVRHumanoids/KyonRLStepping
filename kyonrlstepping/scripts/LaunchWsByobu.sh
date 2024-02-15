@@ -143,6 +143,12 @@ go_to_pane 0
 
 split_h
 execute_command "cd ${WORKING_DIR}"
+source_mamba_env
+increase_file_limits_locally
+prepare_command "reset && python KyonTrain.py"
+
+split_h
+execute_command "cd ${WORKING_DIR}"
 execute_command "source /opt/ros/noetic/setup.bash"
 execute_command "source ~/RL_ws/hhcm/setup.bash"
 source_mamba_env
