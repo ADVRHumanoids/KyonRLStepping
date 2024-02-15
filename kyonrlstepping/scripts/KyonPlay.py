@@ -9,6 +9,8 @@ from kyonrlstepping.envs.kyon_sim_env import KyonLRhcIsaacSimEnv
 
 from control_cluster_bridge.utilities.shared_data.sim_data import SharedSimInfo
 
+from omni_robo_gym.utils.rt_factor import RtFactor
+
 num_envs = 5
 
 # simulation parameters
@@ -140,7 +142,7 @@ task = KyonLRHcIsaacTask(integration_dt = integration_dt,
 env.set_task(task, 
         cluster_dt = [control_clust_dt],
         backend="torch", 
-        is_training = [True],
+        is_training = [False],
         n_pre_training_steps = 500,
         sim_params = sim_params, 
         cluster_client_verbose=True, 
@@ -170,33 +172,19 @@ for i in range(len(robot_names)):
 
     shared_sim_infos[i].run()
 
-import time
-rt_factor = 0.0
-real_time = 0.0
-sim_time = 0.0
-
-i = 0
-
-start_time = time.perf_counter()
-start_time_loop = 0
-rt_factor_reset_n = 3
-reset_rt_factor = True
+rt_factor = RtFactor(dt_nom=sim_params["physics_dt"],
+            window_size=50000)
 
 while env._simulation_app.is_running():
     
-    if ((i + 1) % rt_factor_reset_n) == 0 \
-        and reset_rt_factor:
+    if rt_factor.reset_due():
 
-        rt_factor_counter = 0
-
-        start_time = time.perf_counter()
-
-        sim_time = 0
-
-    start_time_step = time.perf_counter()
+        rt_factor.reset()
 
     env.step() 
     
+    rt_factor.update()
+
     for i in range(len(robot_names)):
 
         shared_sim_infos[i].write(dyn_info_name=["sim_rt_factor", 
@@ -207,24 +195,16 @@ while env._simulation_app.is_running():
                                             "cluster_state_update_dt",
                                             "cluster_sol_time"
                                             ],
-                            val=[rt_factor, 
-                                rt_factor * num_envs,
-                                time.perf_counter() - start_time_step,
+                            val=[rt_factor.get(), 
+                                rt_factor.get() * num_envs,
+                                rt_factor.get_avrg_step_time(),
                                 env.debug_data["time_to_step_world"],
                                 env.debug_data["time_to_get_states_from_sim"],
                                 env.debug_data["cluster_state_update_dt"][robot_names[i]],
                                 env.debug_data["cluster_sol_time"][robot_names[i]]])
-    
-    i+=1 # updating simulation iteration number
-        
-    real_time = time.perf_counter() - start_time
-    sim_time += sim_params["physics_dt"]
-    rt_factor = sim_time / real_time
-
-print("[main][info]: closing environment and simulation")
 
 for i in range(len(robot_names)):
 
-        shared_sim_infos[i].close()
+    shared_sim_infos[i].close()
 
 env.close()
