@@ -114,7 +114,7 @@ from kyonrlstepping.tasks.kyon_rlstepping_task import KyonLRHcIsaacTask
                             
 task = KyonLRHcIsaacTask(integration_dt = integration_dt,
         num_envs = num_envs, 
-        cloning_offset = np.array([[0.0, 0.0, 0.6]] * num_envs), 
+        cloning_offset = np.array([[0.0, 0.0, 0.8]] * num_envs), 
         env_spacing=6,
         spawning_radius=1.0, 
         use_flat_ground=True, 
@@ -143,7 +143,7 @@ env.set_task(task,
         cluster_dt = [control_clust_dt],
         backend="torch", 
         is_training = [True],
-        n_pre_training_steps = 100, # n of env steps before connecting to training client
+        n_pre_training_steps = 10, # n of env steps before connecting to training client
         sim_params = sim_params, 
         cluster_client_verbose=True, 
         cluster_client_debug=True) # add the task to the environment 
