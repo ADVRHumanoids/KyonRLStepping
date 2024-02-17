@@ -51,7 +51,7 @@ dtype = torch.float32 # this has to be the same wrt the cluster client, otherwis
 # messages are not read properly
 
 robot_name = "kyon0"
-cluster_size = 5
+cluster_size = 8
 
 core_ids_override_list = None
 # core_ids_override_list = [11, 12, 13, 14, 15]
