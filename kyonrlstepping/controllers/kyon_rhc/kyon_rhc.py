@@ -520,14 +520,15 @@ class KyonRhc(RHController):
         
         except Exception as e:
             
-            exception = f"Rti() failed" + \
-              f" with exception{type(e).__name__}"
-            
-            Journal.log(self.__class__.__name__ + str(self.controller_index),
-                            "solve",
-                            exception,
-                            LogType.EXCEP,
-                            throw_when_excep = False)
+            if self._verbose:
+                exception = f"Rti() failed" + \
+                f" with exception{type(e).__name__}"
+                
+                Journal.log(self.__class__.__name__ + str(self.controller_index),
+                                "solve",
+                                exception,
+                                LogType.EXCEP,
+                                throw_when_excep = False)
             
             if self.publish_sol:
                 
