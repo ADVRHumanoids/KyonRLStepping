@@ -9,7 +9,7 @@ SLEEP_FOR=0.1
 WS_NAME="RlWorkspace"
 WORKING_DIR="$HOME/RL_ws/hhcm/src/KyonRLStepping/kyonrlstepping/scripts"
 MAMBAENVNAME="KyonRLSteppingIsaac2023.1.0"
-N_FILES=12288
+N_FILES=14336
 
 # Array of directories
 directories=(
