@@ -21,12 +21,12 @@ max_solver_iter = 1
 perf_timer = PerfSleep()
 
 robot_name = "kyon0"
-cluster_size = 32
+cluster_size = 24
 
 perf_timer = PerfSleep()
 
 core_ids_override_list = None
-core_ids_override_list = list(range(4, 35 + 1))
+# core_ids_override_list = list(range(4, 15 + 1))
 control_cluster_client = KyonLRhcClusterClient(namespace=robot_name, 
                                     cluster_size=cluster_size,
                                     isolated_cores_only = False, 

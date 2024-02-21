@@ -34,11 +34,9 @@ if __name__ == "__main__":
                     verbose=True,
                     vlevel=VLevel.V2)
 
-    ppo = CleanPPO(env=env)
+    ppo = CleanPPO(env=env, verbose=True)
     ppo.setup(run_name="UUUUUAAAA")
     
     while True:
         
-        print(f"Memory usage: {get_memory_usage()} GB")
-
         ppo.step()
