@@ -51,10 +51,11 @@ dtype = torch.float32 # this has to be the same wrt the cluster client, otherwis
 # messages are not read properly
 
 robot_name = "kyon0"
-cluster_size = 8
+cluster_size = 2
 
 core_ids_override_list = None
-# core_ids_override_list = [11, 12, 13, 14, 15]
+# core_ids_override_list = list(range(8, 8 + 1))
+core_ids_override_list = [30, 31]
 control_cluster_srvr = KyonLRhcClusterClient(namespace=robot_name, 
                                     cluster_size=cluster_size,
                                     isolated_cores_only = False, 

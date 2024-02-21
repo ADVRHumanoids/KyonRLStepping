@@ -7,6 +7,8 @@ from stable_baselines3 import PPO
 
 import os, argparse
 
+from control_cluster_bridge.utilities.cpu_utils.core_utils import get_memory_usage
+
 # Function to set CPU affinity
 def set_affinity(cores):
     try:
@@ -36,5 +38,7 @@ if __name__ == "__main__":
     ppo.setup(run_name="UUUUUAAAA")
     
     while True:
+        
+        print(f"Memory usage: {get_memory_usage()} GB")
 
         ppo.step()

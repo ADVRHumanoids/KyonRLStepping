@@ -1,6 +1,6 @@
 from control_cluster_bridge.utilities.debugger_gui.cluster_debugger import RtClusterDebugger
 from control_cluster_bridge.utilities.debugger_gui.gui_exts import JntImpMonitor
-from lrhc_control.utils.gui_exts.training_env import TrainingEnvData
+from lrhc_control.utils.gui_exts.training_env import TrainingEnvData, AgentPerformanceWindow
 
 import os
 import argparse
@@ -54,6 +54,13 @@ if __name__ == "__main__":
             namespace = namespace,
             verbose = True,
             add_settings_tab = True))
+    # gui_extensions.append(AgentPerformanceWindow(update_data_dt = data_update_dt,
+    #         update_plot_dt = plot_update_dt,
+    #         window_duration = window_length,
+    #         window_buffer_factor = window_buffer_factor,
+    #         namespace = namespace,
+    #         verbose = True,
+    #         add_settings_tab = True))
 
     cluster_debugger.add_spawnable_tab(gui_extensions)
 

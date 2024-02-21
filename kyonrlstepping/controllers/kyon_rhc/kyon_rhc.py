@@ -464,7 +464,7 @@ class KyonRhc(RHController):
             self._custom_timer_start = time.perf_counter()
 
         self.rhc_refs.step() # updates rhc references
-        # with the latests available data on shared memory
+        # # with the latests available data on shared memory
 
         if self._profile_all:
 
