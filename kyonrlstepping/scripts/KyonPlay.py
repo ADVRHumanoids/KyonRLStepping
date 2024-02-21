@@ -11,7 +11,7 @@ from control_cluster_bridge.utilities.shared_data.sim_data import SharedSimInfo
 
 from omni_robo_gym.utils.rt_factor import RtFactor
 
-num_envs = 24
+num_envs = 10
 
 # simulation parameters
 sim_params = {}

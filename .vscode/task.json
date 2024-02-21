@@ -1,0 +1,46 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "activateCondaEnv",
+            "type": "shell",
+            "command": "mamba",
+            "args": ["activate", "KyonRLSteppingIsaac2023.1.0"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "setupIsaacSim",
+            "type": "shell",
+            "command": "source",
+            "args": ["~/.local/share/ov/pkg/isaac_sim-2023.1.0-hotfix.1/setup_conda_env.sh"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "activateCondaEnv"
+        },
+        {
+            "label": "sourceRL",
+            "type": "shell",
+            "command": "source",
+            "args": ["~/RL_ws/hhcm/setup.bash"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "setupIsaacSim"
+        },
+        {
+            "label": "runScript",
+            "type": "shell",
+            "command": "python",
+            "args": ["kyonrlstepping/scripts/KyonPlay.py"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "sourceRL"
+        }
+    ]
+}
+
+
