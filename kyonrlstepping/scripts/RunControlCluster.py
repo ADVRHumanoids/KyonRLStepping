@@ -10,19 +10,21 @@ import torch
 
 from perf_sleep.pyperfsleep import PerfSleep
 
-def generate_controllers(robot_name: str):
+def generate_controllers(robot_name: str,
+                    codegen_dir: str):
 
     kyonrhc_config_path = kyonrhc_paths().CONFIGPATH
 
     # create controllers
     cluster_controllers = []
-    for i in range(0, control_cluster_srvr.cluster_size):
+    for i in range(0, control_cluster_client.cluster_size):
 
         cluster_controllers.append(KyonRhc(
-                urdf_path=control_cluster_srvr._urdf_path, 
-                srdf_path=control_cluster_srvr._srdf_path,
-                cluster_size=control_cluster_srvr.cluster_size,
+                urdf_path=control_cluster_client._urdf_path, 
+                srdf_path=control_cluster_client._srdf_path,
+                cluster_size=control_cluster_client.cluster_size,
                 robot_name=robot_name,
+                codegen_dir=codegen_dir + f"/KyonRhc{i}",
                 config_path = kyonrhc_config_path,
                 dt=0.03,
                 n_nodes=31, 
@@ -55,25 +57,25 @@ cluster_size = 2
 
 core_ids_override_list = None
 # core_ids_override_list = list(range(8, 8 + 1))
-core_ids_override_list = [30, 31]
-control_cluster_srvr = KyonLRhcClusterClient(namespace=robot_name, 
+core_ids_override_list = [15]
+control_cluster_client = KyonLRhcClusterClient(namespace=robot_name, 
                                     cluster_size=cluster_size,
                                     isolated_cores_only = False, 
                                     use_only_physical_cores = False,
                                     core_ids_override_list = core_ids_override_list,
                                     verbose=verbose) # this blocks until connection with the client is established
 
-control_cluster_srvr.pre_init() # pre-initialization steps
+control_cluster_client.pre_init() # pre-initialization steps
 
-controllers = generate_controllers(robot_name)
+controllers = generate_controllers(robot_name, control_cluster_client.codegen_dir())
     
-for i in range(0, control_cluster_srvr.cluster_size):
+for i in range(0, control_cluster_client.cluster_size):
     
     # we add the controllers
 
-    result = control_cluster_srvr.add_controller(controllers[i])
+    result = control_cluster_client.add_controller(controllers[i])
 
-control_cluster_srvr.run() # spawns the controllers on separate processes
+control_cluster_client.run() # spawns the controllers on separate processes
 
 try:
 
@@ -90,7 +92,7 @@ except KeyboardInterrupt:
     # This block will execute when Control-C is pressed
     print(f"[{script_name}]" + "[info]: KeyboardInterrupt detected. Cleaning up...")
 
-    control_cluster_srvr.terminate() # closes all processes
+    control_cluster_client.terminate() # closes all processes
 
     import sys
     sys.exit()
