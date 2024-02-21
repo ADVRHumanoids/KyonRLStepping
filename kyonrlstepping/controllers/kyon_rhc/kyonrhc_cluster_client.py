@@ -1,6 +1,8 @@
 from lrhc_control.controllers.rhc.lrhc_cluster_client import LRhcClusterClient
 
+from kyonrlstepping.controllers.kyon_rhc.kyon_rhc import KyonRhc
 from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_horizon
+from kyonrlstepping.controllers.kyon_rhc.utils.sysutils import PathsGetter
 
 from typing import List
 
@@ -16,6 +18,8 @@ class KyonLRhcClusterClient(LRhcClusterClient):
         
         robot_pkg_name = "kyon"
 
+        self._kyonrhc_paths = PathsGetter()
+
         super().__init__(namespace = namespace, 
                         robot_pkg_name = robot_pkg_name,
                         cluster_size=cluster_size,
@@ -24,9 +28,29 @@ class KyonLRhcClusterClient(LRhcClusterClient):
                         core_ids_override_list = core_ids_override_list,
                         verbose = verbose)
     
-        
     def _xrdf_cmds(self):
         
         cmds = get_xrdf_cmds_horizon(robot_pkg_name = self.robot_pkg_name)
 
         return cmds
+
+    def _generate_controller(self,
+                        idx: int):
+        
+        controller = KyonRhc(
+                urdf_path=self._urdf_path, 
+                srdf_path=self._srdf_path,
+                cluster_size=self.cluster_size,
+                robot_name=self.namespace,
+                codegen_dir=self.codegen_dir() + f"/KyonRhc{idx}",
+                config_path = self._kyonrhc_paths.CONFIGPATH,
+                dt=0.03,
+                n_nodes=31, 
+                max_solver_iter = 1,
+                verbose = self.verbose, 
+                debug = True,
+                solver_deb_prints = False,
+                profile_all = True,
+                publish_sol=True)
+
+        return controller 

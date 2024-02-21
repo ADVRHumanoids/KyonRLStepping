@@ -2,8 +2,6 @@ from lrhc_control.controllers.rhc.horizon_based.horizon_imports import *
 
 from lrhc_control.controllers.rhc.horizon_based.hybrid_quad_rhc import HybridQuadRhc
 
-import torch
-
 class KyonRhc(HybridQuadRhc):
 
     def __init__(self, 
@@ -21,7 +19,6 @@ class KyonRhc(HybridQuadRhc):
             verbose = False, 
             debug = False, 
             profile_all = False,
-            array_dtype = torch.float32, 
             publish_sol = False,
             debug_sol = True, # whether to publish rhc rebug data,
             solver_deb_prints = False,
@@ -41,7 +38,6 @@ class KyonRhc(HybridQuadRhc):
             verbose=verbose, 
             debug=debug, 
             profile_all=profile_all,
-            array_dtype=array_dtype,
             publish_sol=publish_sol,
             debug_sol=debug_sol, # whether to publish rhc rebug data,
             solver_deb_prints=solver_deb_prints)
