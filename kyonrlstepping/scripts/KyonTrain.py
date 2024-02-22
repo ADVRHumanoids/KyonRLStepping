@@ -7,7 +7,7 @@ from stable_baselines3 import PPO
 
 import os, argparse
 
-from control_cluster_bridge.utilities.cpu_utils.core_utils import get_memory_usage
+from datetime import datetime
 
 # Function to set CPU affinity
 def set_affinity(cores):
@@ -35,6 +35,7 @@ if __name__ == "__main__":
                     vlevel=VLevel.V2)
 
     ppo = CleanPPO(env=env)
+    run_name = datetime.now().strftime('%Y%m%d%H%M%S')
     ppo.setup(run_name="MorningTest", verbose=True)
     
     while True:

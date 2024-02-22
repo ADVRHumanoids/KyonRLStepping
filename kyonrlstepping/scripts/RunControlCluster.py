@@ -39,13 +39,13 @@ if __name__ == "__main__":
     max_solver_iter = 1
 
     robot_name = "kyon0"
-    cluster_size = 10
+    cluster_size = 1
 
     core_ids_override_list = None
     # core_ids_override_list = list(range(4, 15 + 1))
     control_cluster_client = KyonLRhcClusterClient(namespace=robot_name, 
                                         cluster_size=cluster_size,
-                                        isolated_cores_only = True, 
+                                        isolated_cores_only = False, 
                                         use_only_physical_cores = False,
                                         core_ids_override_list = core_ids_override_list,
                                         verbose=verbose) # this blocks until connection with the client is established
