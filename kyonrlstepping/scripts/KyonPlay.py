@@ -171,7 +171,7 @@ for i in range(len(robot_names)):
                             is_server=True, 
                             sim_params_dict=sim_params,
                             verbose=True,
-                            vlevel=VLevel.V3,
+                            vlevel=VLevel.V2,
                             force_reconnection=True) )
 
     shared_sim_infos[i].run()
@@ -186,10 +186,10 @@ while env._simulation_app.is_running():
         if rt_factor.reset_due():
 
             rt_factor.reset()
-
-            env.step() 
             
-            rt_factor.update()
+        env.step() 
+        
+        rt_factor.update()
 
         for i in range(len(robot_names)):
 
@@ -209,7 +209,7 @@ while env._simulation_app.is_running():
                                     env.debug_data["cluster_state_update_dt"][robot_names[i]],
                                     env.debug_data["cluster_sol_time"][robot_names[i]]])
 
-    except KeyboardInterrupt:
+    except:
         
         for i in range(len(robot_names)):
 
