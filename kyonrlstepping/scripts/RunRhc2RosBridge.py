@@ -84,7 +84,7 @@ if __name__ == '__main__':
                 LogType.WARN,
                 throw_when_excep = True)
 
-        perf_timer.clock_sleep(time_to_sleep_ns) # nanoseconds (actually resolution is much
+        perf_timer.thread_sleep(time_to_sleep_ns) # nanoseconds (actually resolution is much
                     # poorer)
 
         actual_loop_dt = time.perf_counter() - start_time

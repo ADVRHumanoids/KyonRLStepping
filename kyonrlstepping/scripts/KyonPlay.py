@@ -11,7 +11,7 @@ from control_cluster_bridge.utilities.shared_data.sim_data import SharedSimInfo
 
 from omni_robo_gym.utils.rt_factor import RtFactor
 
-num_envs = 10
+num_envs = 5
 
 # simulation parameters
 sim_params = {}
@@ -142,7 +142,7 @@ task = KyonLRHcIsaacTask(integration_dt = integration_dt,
 env.set_task(task, 
         cluster_dt = [control_clust_dt],
         backend="torch", 
-        is_training = [True],
+        is_training = [False],
         n_pre_training_steps = 10, # n of env steps before connecting to training client
         sim_params = sim_params, 
         cluster_client_verbose=True, 

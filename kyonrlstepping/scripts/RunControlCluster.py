@@ -21,15 +21,15 @@ max_solver_iter = 1
 perf_timer = PerfSleep()
 
 robot_name = "kyon0"
-cluster_size = 10
+cluster_size = 4
 
 perf_timer = PerfSleep()
 
 core_ids_override_list = None
-# core_ids_override_list = list(range(4, 15 + 1))
+# core_ids_override_list = list(range(0, 31 + 1))
 control_cluster_client = KyonLRhcClusterClient(namespace=robot_name, 
                                     cluster_size=cluster_size,
-                                    isolated_cores_only = True, 
+                                    isolated_cores_only = False, 
                                     use_only_physical_cores = False,
                                     core_ids_override_list = core_ids_override_list,
                                     verbose=verbose) # this blocks until connection with the client is established
@@ -43,7 +43,7 @@ try:
     while True:
         
         nsecs = int(0.1 * 1e9)
-        perf_timer.clock_sleep(nsecs) # we don't want to drain all the CPU
+        perf_timer.thread_sleep(nsecs) # we don't want to drain all the CPU
         # with a busy wait
 
         pass

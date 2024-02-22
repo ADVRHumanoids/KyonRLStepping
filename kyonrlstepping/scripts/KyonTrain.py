@@ -35,7 +35,7 @@ if __name__ == "__main__":
                     vlevel=VLevel.V2)
 
     ppo = CleanPPO(env=env)
-    ppo.setup(run_name="UUUUUAAAA", verbose=True)
+    ppo.setup(run_name="MorningTest", verbose=True)
     
     while True:
         
