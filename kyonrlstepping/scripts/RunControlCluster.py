@@ -39,7 +39,7 @@ if __name__ == "__main__":
     max_solver_iter = 1
 
     robot_name = "kyon0"
-    cluster_size = 1
+    cluster_size = 2
 
     core_ids_override_list = None
     # core_ids_override_list = list(range(4, 15 + 1))

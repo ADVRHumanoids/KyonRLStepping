@@ -11,7 +11,9 @@ from control_cluster_bridge.utilities.shared_data.sim_data import SharedSimInfo
 
 from omni_robo_gym.utils.rt_factor import RtFactor
 
-num_envs = 1
+from SharsorIPCpp.PySharsorIPC import VLevel
+
+num_envs = 2
 
 # simulation parameters
 sim_params = {}
@@ -168,43 +170,52 @@ for i in range(len(robot_names)):
                             namespace=robot_names[i],
                             is_server=True, 
                             sim_params_dict=sim_params,
-                            force_reconnection=False) )
+                            verbose=True,
+                            vlevel=VLevel.V3,
+                            force_reconnection=True) )
 
     shared_sim_infos[i].run()
 
 rt_factor = RtFactor(dt_nom=sim_params["physics_dt"],
             window_size=50000)
 
-while env._simulation_app.is_running():
+while True:
     
-    if rt_factor.reset_due():
+    try:
 
-        rt_factor.reset()
+        if rt_factor.reset_due():
 
-    env.step() 
-    
-    rt_factor.update()
+            rt_factor.reset()
 
-    for i in range(len(robot_names)):
+            env.step() 
+            
+            rt_factor.update()
 
-        shared_sim_infos[i].write(dyn_info_name=["sim_rt_factor", 
-                                            "total_rt_factor", 
-                                            "env_stepping_dt",
-                                            "world_stepping_dt",
-                                            "time_to_get_states_from_sim",
-                                            "cluster_state_update_dt",
-                                            "cluster_sol_time"
-                                            ],
-                            val=[rt_factor.get(), 
-                                rt_factor.get() * num_envs,
-                                rt_factor.get_avrg_step_time(),
-                                env.debug_data["time_to_step_world"],
-                                env.debug_data["time_to_get_states_from_sim"],
-                                env.debug_data["cluster_state_update_dt"][robot_names[i]],
-                                env.debug_data["cluster_sol_time"][robot_names[i]]])
+        for i in range(len(robot_names)):
 
-for i in range(len(robot_names)):
+            shared_sim_infos[i].write(dyn_info_name=["sim_rt_factor", 
+                                                "total_rt_factor", 
+                                                "env_stepping_dt",
+                                                "world_stepping_dt",
+                                                "time_to_get_states_from_sim",
+                                                "cluster_state_update_dt",
+                                                "cluster_sol_time"
+                                                ],
+                                val=[rt_factor.get(), 
+                                    rt_factor.get() * num_envs,
+                                    rt_factor.get_avrg_step_time(),
+                                    env.debug_data["time_to_step_world"],
+                                    env.debug_data["time_to_get_states_from_sim"],
+                                    env.debug_data["cluster_state_update_dt"][robot_names[i]],
+                                    env.debug_data["cluster_sol_time"][robot_names[i]]])
 
-    shared_sim_infos[i].close()
+    except KeyboardInterrupt:
+        
+        for i in range(len(robot_names)):
 
-env.close()
+            shared_sim_infos[i].close()
+
+        env.close()
+
+        break
+
