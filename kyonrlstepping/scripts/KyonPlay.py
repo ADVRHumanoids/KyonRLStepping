@@ -179,7 +179,7 @@ for i in range(len(robot_names)):
 rt_factor = RtFactor(dt_nom=sim_params["physics_dt"],
             window_size=50000)
 
-while True:
+while env._simulation_app.is_running():
     
     try:
 
