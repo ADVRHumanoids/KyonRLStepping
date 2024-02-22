@@ -7,8 +7,6 @@ kyonrhc_paths = PathsGetter
 
 import torch
 
-from perf_sleep.pyperfsleep import PerfSleep
-
 import os, argparse
 
 # Function to set CPU affinity
@@ -40,12 +38,8 @@ if __name__ == "__main__":
 
     max_solver_iter = 1
 
-    perf_timer = PerfSleep()
-
     robot_name = "kyon0"
     cluster_size = 10
-
-    perf_timer = PerfSleep()
 
     core_ids_override_list = None
     # core_ids_override_list = list(range(4, 15 + 1))
@@ -59,25 +53,5 @@ if __name__ == "__main__":
     control_cluster_client.pre_init() # pre-initialization steps
         
     control_cluster_client.run() # spawns the controllers on separate processes
-
-    try:
-
-        while True:
-            
-            nsecs = int(0.1 * 1e9)
-            perf_timer.thread_sleep(nsecs) # we don't want to drain all the CPU
-            # with a busy wait
-
-            pass
-
-    except KeyboardInterrupt:
-
-        # This block will execute when Control-C is pressed
-        print(f"[{script_name}]" + "[info]: KeyboardInterrupt detected. Cleaning up...")
-
-        control_cluster_client.terminate() # closes all processes
-        
-        import sys
-        sys.exit()
 
 
