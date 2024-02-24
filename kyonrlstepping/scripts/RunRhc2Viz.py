@@ -19,6 +19,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Multi Robot Visualizer")
     parser.add_argument('--robot_type', type=str, default='kyon')
     parser.add_argument('--robot_name', type=str, default='kyon')
+    parser.add_argument('--dpath', type=str)
     parser.add_argument('--nodes_perc', type=int, default=100)
     parser.add_argument('--cores', nargs='+', type=int, help='List of CPU cores to set 	affinity to')
     args = parser.parse_args()
@@ -32,15 +33,16 @@ if __name__ == '__main__':
     # generating urdf using rospkg (robot desc. need to be visible
     # to ROS)
 
-    kyon_urdf_gen = KyonUrdfGen(robotname=args.robot_type, 
+    kyon_urdf_gen = KyonUrdfGen(descr_path = args.dpath, 
+            robotname=args.robot_type, 
             name= args.robot_type + "Urdf")
     
     rhcviz = RHCViz(urdf_file_path=kyon_urdf_gen.urdf_path, 
         rviz_config_path=syspaths.DEFAULT_RVIZ_CONFIG_PATH,
         namespace=args.robot_name, 
         basename="RHCViz", 
-        rate = 10,
-        cpu_cores = [12],
+        rate = 100,
+        cpu_cores = [0],
         use_only_collisions=False,
         nodes_perc = args.nodes_perc       
         )

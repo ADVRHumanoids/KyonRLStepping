@@ -165,7 +165,7 @@ split_h
 execute_command "cd ${WORKING_DIR}"
 execute_command "source /opt/ros/noetic/setup.bash"
 execute_command "source ~/RL_ws/hhcm/setup.bash"
-prepare_command "reset && python3 RunRhc2Viz.py --nodes_perc 10 --robot_type kyon --robot_name kyon0"
+prepare_command "reset && python3 RunRhc2Viz.py --nodes_perc 10 --robot_type kyon --robot_name kyon0 --dpath ${HOME}/RL_ws/hhcm/src/iit-kyon-ros-pkg/kyon_urdf"
 
 # tab2
 new_tab
