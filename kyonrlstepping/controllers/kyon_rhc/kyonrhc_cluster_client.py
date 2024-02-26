@@ -14,9 +14,12 @@ class KyonLRhcClusterClient(LRhcClusterClient):
             isolated_cores_only: bool = False,
             use_only_physical_cores: bool = False,
             core_ids_override_list: List[int] = None,
-            verbose: bool = False):
+            verbose: bool = False,
+            open_loop: bool = True):
         
         robot_pkg_name = "kyon"
+
+        self._open_loop = open_loop
 
         self._kyonrhc_paths = PathsGetter()
 
@@ -47,6 +50,7 @@ class KyonLRhcClusterClient(LRhcClusterClient):
                 dt=0.03,
                 n_nodes=31, 
                 max_solver_iter = 1,
+                open_loop = self._open_loop,
                 verbose = self.verbose, 
                 debug = True,
                 solver_deb_prints = False,

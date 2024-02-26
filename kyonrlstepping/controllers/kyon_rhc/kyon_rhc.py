@@ -14,7 +14,7 @@ class KyonRhc(HybridQuadRhc):
             n_nodes:float = 25,
             dt: float = 0.02,
             max_solver_iter = 1, # defaults to rt-iteration
-            add_data_lenght: int = 2,
+            open_loop: bool = True,
             enable_replay = False, 
             verbose = False, 
             debug = False, 
@@ -33,7 +33,7 @@ class KyonRhc(HybridQuadRhc):
             n_nodes=n_nodes,
             dt=dt,
             max_solver_iter=max_solver_iter, # defaults to rt-iteration
-            add_data_lenght=add_data_lenght,
+            open_loop=open_loop,
             enable_replay=enable_replay, 
             verbose=verbose, 
             debug=debug, 
