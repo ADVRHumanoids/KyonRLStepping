@@ -38,6 +38,6 @@ if __name__ == "__main__":
     run_name = datetime.now().strftime('%Y%m%d%H%M%S')
     ppo.setup(run_name="MorningTest", verbose=True)
     
-    while True:
+    while not ppo.is_done():
         
-        ppo.step()
+        ppo.learn()
