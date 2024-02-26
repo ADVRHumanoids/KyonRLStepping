@@ -13,7 +13,7 @@ from omni_robo_gym.utils.rt_factor import RtFactor
 
 from SharsorIPCpp.PySharsorIPC import VLevel
 
-num_envs = 10
+num_envs = 24
 
 # simulation parameters
 sim_params = {}
@@ -127,8 +127,8 @@ task = KyonLRHcIsaacTask(integration_dt = integration_dt,
         default_jnt_damping=50.0, 
         default_wheel_stiffness = 0.0,
         default_wheel_damping=10.0,
-        startup_jnt_stiffness = 0,
-        startup_jnt_damping = 0,
+        startup_jnt_stiffness = 100,
+        startup_jnt_damping = 20,
         startup_wheel_stiffness = 0.0,
         startup_wheel_damping=10.0,
         contact_prims = contact_prims,
