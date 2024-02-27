@@ -209,7 +209,9 @@ while env._simulation_app.is_running():
                                     env.debug_data["cluster_state_update_dt"][robot_names[i]],
                                     env.debug_data["cluster_sol_time"][robot_names[i]]])
 
-    except:
+    except Exception as e:
+        
+        print(f"An exception occurred: {e}")
         
         for i in range(len(robot_names)):
 
