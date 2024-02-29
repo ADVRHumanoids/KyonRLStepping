@@ -115,7 +115,7 @@ byobu new-session -d -s ${WS_NAME} -c ${WORKING_DIR} -n ${WS_NAME} # -d "detache
 # tab 0
 execute_command "cd ${WORKING_DIR}"
 source_mamba_env
-execute_command "source ~/.local/share/ov/pkg/isaac_sim-2023.1.0-hotfix.1/setup_conda_env.sh"
+execute_command "source ~/.local/share/ov/pkg/isaac_sim-2023.1.1/setup_conda_env.sh"
 execute_command "source ~/RL_ws/hhcm/setup.bash"
 increase_file_limits_locally 
 prepare_command "reset && python KyonPlay.py"
