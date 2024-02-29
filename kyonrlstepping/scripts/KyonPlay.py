@@ -13,7 +13,7 @@ from omni_robo_gym.utils.rt_factor import RtFactor
 
 from SharsorIPCpp.PySharsorIPC import VLevel
 
-num_envs = 24
+num_envs = 27
 
 # simulation parameters
 sim_params = {}
@@ -30,7 +30,7 @@ device = sim_params["device"]
 # sim_params["dt"] = 1.0/100.0 # physics_dt?
 sim_params["physics_dt"] = 1.0/400.0 # physics_dt?
 sim_params["rendering_dt"] = sim_params["physics_dt"]
-# sim_params["substeps"] = 1 # number of physics steps to be taken for for each rendering step
+sim_params["substeps"] = 1 # number of physics steps to be taken for for each rendering step
 sim_params["gravity"] = np.array([0.0, 0.0, -9.81])
 sim_params["enable_scene_query_support"] = False
 sim_params["use_fabric"] = True # Enable/disable reading of physics buffers directly. Default is True.
@@ -43,7 +43,7 @@ sim_params["enable_stabilization"] = True
 # sim_params["friction_correlation_distance"] = 0.025
 # sim_params["enable_sleeping"] = True
 # Per-actor settings ( can override in actor_options )
-sim_params["solver_position_iteration_count"] = 2 # defaults to 4
+sim_params["solver_position_iteration_count"] = 4 # defaults to 4
 sim_params["solver_velocity_iteration_count"] = 1 # defaults to 1
 sim_params["sleep_threshold"] = 0.0 # Mass-normalized kinetic energy threshold below which an actor may go to sleep.
 # Allowed range [0, max_float).
@@ -116,7 +116,7 @@ from kyonrlstepping.tasks.kyon_rlstepping_task import KyonLRHcIsaacTask
                             
 task = KyonLRHcIsaacTask(integration_dt = integration_dt,
         num_envs = num_envs, 
-        cloning_offset = np.array([[0.0, 0.0, 0.8]] * num_envs), 
+        cloning_offset = np.array([[0.0, 0.0, 0.65]] * num_envs), 
         env_spacing=6,
         spawning_radius=1.0, 
         use_flat_ground=True, 
@@ -127,8 +127,8 @@ task = KyonLRHcIsaacTask(integration_dt = integration_dt,
         default_jnt_damping=50.0, 
         default_wheel_stiffness = 0.0,
         default_wheel_damping=10.0,
-        startup_jnt_stiffness = 100,
-        startup_jnt_damping = 20,
+        startup_jnt_stiffness = 200,
+        startup_jnt_damping = 50,
         startup_wheel_stiffness = 0.0,
         startup_wheel_damping=10.0,
         contact_prims = contact_prims,
