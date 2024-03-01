@@ -45,7 +45,7 @@ if __name__ == "__main__":
     core_ids_override_list = list(range(9, 35 + 1))
     control_cluster_client = KyonLRhcClusterClient(namespace=robot_name, 
                                         cluster_size=cluster_size,
-                                        open_loop = True,
+                                        open_loop = False,
                                         isolated_cores_only = False, 
                                         use_only_physical_cores = False,
                                         core_ids_override_list = core_ids_override_list,

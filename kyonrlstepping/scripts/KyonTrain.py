@@ -22,7 +22,8 @@ if __name__ == "__main__":
     # Parse command line arguments for CPU affinity
     parser = argparse.ArgumentParser(description="Set CPU affinity for the script.")
     parser.add_argument('--cores', nargs='+', type=int, help='List of CPU cores to set affinity to')
-    
+    parser.add_argument('--run_name', type=str, help='Name of training run', default="LRHCTraining")
+
     args = parser.parse_args()
     
     # Set CPU affinity if cores are provided
@@ -36,7 +37,7 @@ if __name__ == "__main__":
 
     ppo = CleanPPO(env=env)
     run_name = datetime.now().strftime('%Y%m%d%H%M%S')
-    ppo.setup(run_name="MorningTest", verbose=True)
+    ppo.setup(run_name=args.run_name, verbose=True)
     
     while not ppo.is_done():
         
