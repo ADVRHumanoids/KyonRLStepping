@@ -39,10 +39,10 @@ if __name__ == "__main__":
     max_solver_iter = 1
 
     robot_name = "kyon0"
-    cluster_size = 27
+    cluster_size = 24
 
     core_ids_override_list = None
-    core_ids_override_list = list(range(9, 35 + 1))
+    core_ids_override_list = list(range(8, 31 + 1))
     control_cluster_client = KyonLRhcClusterClient(namespace=robot_name, 
                                         cluster_size=cluster_size,
                                         open_loop = False,

@@ -39,6 +39,12 @@ if __name__ == "__main__":
     time_id = datetime.now().strftime('%Y%m%d%H%M%S')
     ppo.setup(run_name=args.run_name + time_id, verbose=True)
     
-    while not ppo.is_done():
+    try:
         
-        ppo.learn()
+        while not ppo.is_done():
+        
+            ppo.learn()
+    
+    except KeyboardInterrupt:
+
+        ppo.done() # dumps model in case it's interrupted by user

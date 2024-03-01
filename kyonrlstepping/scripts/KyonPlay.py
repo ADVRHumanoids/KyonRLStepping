@@ -13,12 +13,12 @@ from omni_robo_gym.utils.rt_factor import RtFactor
 
 from SharsorIPCpp.PySharsorIPC import VLevel
 
-num_envs = 27
+num_envs = 24
 
 # simulation parameters
 sim_params = {}
 # device settings
-sim_params["use_gpu_pipeline"] = False # disabling gpu pipeline is necessary to be able
+sim_params["use_gpu_pipeline"] = True # disabling gpu pipeline is necessary to be able
 # to retrieve some quantities from the simulator which, otherwise, would have random values
 sim_params["use_gpu"] = True # does this actually do anything?
 if sim_params["use_gpu_pipeline"]:
