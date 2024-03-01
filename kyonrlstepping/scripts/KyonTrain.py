@@ -36,8 +36,8 @@ if __name__ == "__main__":
                     vlevel=VLevel.V2)
 
     ppo = CleanPPO(env=env)
-    run_name = datetime.now().strftime('%Y%m%d%H%M%S')
-    ppo.setup(run_name=args.run_name, verbose=True)
+    time_id = datetime.now().strftime('%Y%m%d%H%M%S')
+    ppo.setup(run_name=args.run_name + time_id, verbose=True)
     
     while not ppo.is_done():
         
