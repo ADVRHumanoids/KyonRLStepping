@@ -1,6 +1,6 @@
 from control_cluster_bridge.utilities.debugger_gui.cluster_debugger import RtClusterDebugger
 from control_cluster_bridge.utilities.debugger_gui.gui_exts import JntImpMonitor
-from lrhc_control.utils.gui_exts.training_env import TrainingEnvData, AgentPerformanceWindow
+from lrhc_control.utils.gui_exts.training_env import TrainingEnvData
 
 import os
 import argparse

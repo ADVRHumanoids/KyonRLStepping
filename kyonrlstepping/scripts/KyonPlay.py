@@ -13,7 +13,7 @@ from omni_robo_gym.utils.rt_factor import RtFactor
 
 from SharsorIPCpp.PySharsorIPC import VLevel
 
-num_envs = 24
+num_envs = 26
 
 # simulation parameters
 sim_params = {}
@@ -99,7 +99,7 @@ for i in range(0, len(contact_prims["kyon0"])):
     
     sensor_radii["kyon0"][contact_prims["kyon0"][i]] = 0.124
 
-headless = True
+headless = False
 enable_livestream = False
 enable_viewport = False
 env_debug = True
@@ -144,7 +144,7 @@ task = KyonLRHcIsaacTask(integration_dt = integration_dt,
 env.set_task(task, 
         cluster_dt = [control_clust_dt],
         backend="torch", 
-        is_training = [True],
+        use_remote_stepping = [True],
         n_pre_training_steps = 10, # n of env steps before connecting to training client
         sim_params = sim_params, 
         cluster_client_verbose=True, 
