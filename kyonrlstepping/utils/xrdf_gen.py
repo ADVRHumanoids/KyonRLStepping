@@ -35,11 +35,12 @@ def get_xrdf_cmds_isaac(n_robots: int,
 
         return cmds
 
-def get_xrdf_cmds_horizon(robot_pkg_name: str = None):
+def get_xrdf_cmds_horizon(robot_pkg_name: str = None,
+                with_wheels: bool = False):
 
         cmds = []
         
-        xrdf_cmd_vals = [True, False, False, False, True, False] # horizon needs 
+        xrdf_cmd_vals = [with_wheels, False, False, False, True, False] # horizon needs 
         # the floating base
 
         wheels = "true" if xrdf_cmd_vals[0] else "false"
