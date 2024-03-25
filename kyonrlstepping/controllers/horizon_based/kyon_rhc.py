@@ -106,7 +106,8 @@ class KyonRhc(HybridQuadRhc):
         self._ti = TaskInterface(prb=self._prb, 
                             model=self._model, 
                             max_solver_iter=self.max_solver_iter,
-                            debug = self._verbose, 
+                            debug = self._debug,
+                            verbose = self._verbose, 
                             codegen_workdir = self._codegen_dir)
         
         self._ti.setTaskFromYaml(self.config_path)
@@ -117,7 +118,7 @@ class KyonRhc(HybridQuadRhc):
 
         self._tg = trajectoryGenerator.TrajectoryGenerator()
 
-        self._pm = pymanager.PhaseManager(self._n_intervals) # intervals or nodes?????
+        self._pm = pymanager.PhaseManager(self._n_nodes) # intervals or nodes?????
 
         self._create_whitelist()
         self._init_contact_timelines()
@@ -301,8 +302,8 @@ class KyonRhc(HybridQuadRhc):
         self._prb.getInput().setInitialGuess(uig)
 
         # open loop update:
-        self._prb.setInitialState(x0=xig[:, 1])
-        # self._prb.setInitialState(x0=xig[:, 0])
+        # self._prb.setInitialState(x0=xig[:, 1])
+        self._prb.setInitialState(x0=xig[:, 0])
     
     def _update_closed_loop(self):
 
