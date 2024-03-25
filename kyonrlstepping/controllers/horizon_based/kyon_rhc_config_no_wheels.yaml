@@ -108,7 +108,7 @@ interaction_ball_1:
   frame: ball_1
   fn_min: 10.0
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 1.0
   vertex_frames:
     - ball_1
 
@@ -117,7 +117,7 @@ interaction_ball_2:
   frame: ball_2
   fn_min: 10.0
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 1.0
   vertex_frames:
     - ball_2
 
@@ -126,7 +126,7 @@ interaction_ball_3:
   frame: ball_3
   fn_min: 10.0
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 1.0
   vertex_frames:
     - ball_3
 
@@ -135,7 +135,7 @@ interaction_ball_4:
   frame: ball_4
   fn_min: 10.0
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 1.0
   vertex_frames:
     - ball_4
 
