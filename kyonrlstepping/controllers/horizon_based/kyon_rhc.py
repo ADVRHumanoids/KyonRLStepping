@@ -2,8 +2,6 @@ from lrhc_control.controllers.rhc.horizon_based.horizon_imports import *
 from lrhc_control.controllers.rhc.horizon_based.hybrid_quad_rhc import HybridQuadRhc
 from lrhc_control.controllers.rhc.horizon_based.gait_manager import GaitManager
 
-from control_cluster_bridge.utilities.math_utils import quaternion_multiply
-
 from SharsorIPCpp.PySharsorIPC import VLevel
 from SharsorIPCpp.PySharsorIPC import Journal, LogType
 
@@ -51,6 +49,16 @@ class KyonRhc(HybridQuadRhc):
             verbose=verbose, 
             debug=debug)
     
+    def _quaternion_multiply(self, 
+                    q1, q2):
+        x1, y1, z1, w1 = q1
+        x2, y2, z2, w2 = q2
+        w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
+        x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
+        y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2
+        z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2
+        return np.array([x, y, z, w])
+
     def _init_rhc_task_cmds(self):
         
         rhc_refs = KyonRHCRefs(gait_manager=self._gm,
@@ -275,7 +283,7 @@ class KyonRhc(HybridQuadRhc):
         f = cs.Function('zmp', input_list, [zmp])
         return f
 
-    def _update_open_loop(self):
+    def _set_ig(self):
 
         shift_num = -1 # shift data by one node
 
@@ -301,43 +309,28 @@ class KyonRhc(HybridQuadRhc):
         self._prb.getState().setInitialGuess(xig)
         self._prb.getInput().setInitialGuess(uig)
 
+        return xig, uig
+
+    def _update_open_loop(self):
+
+        xig, _ = self._set_ig()
+
         # open loop update:
-        # self._prb.setInitialState(x0=xig[:, 1])
         self._prb.setInitialState(x0=xig[:, 0])
     
     def _update_closed_loop(self):
 
-        shift_num = -1 # shift data by one node
-        
-        x_opt = self._ti.solution['x_opt']
-        u_opt = self._ti.solution['u_opt']
-
-        # building ig for state
-        xig = np.roll(x_opt, 
-                shift_num, axis=1) # rolling state sol.
-        for i in range(abs(shift_num)):
-            # state on last node is copied to the elements
-            # which are "lost" during the shift operation
-            xig[:, -1 - i] = x_opt[:, -1]
-        # building ig for inputs
-        uig = np.roll(u_opt, 
-                shift_num, axis=1) # rolling state sol.
-        for i in range(abs(shift_num)):
-            # state on last node is copied to the elements
-            # which are "lost" during the shift operation
-            uig[:, -1 - i] = u_opt[:, -1]
-
-        # assigning ig
-        self._prb.getState().setInitialGuess(xig)
-        self._prb.getInput().setInitialGuess(uig)
+        self._set_ig()
 
         # sets state on node 0 from measurements
-        robot_state = self._assemble_meas_robot_state(x_opt)
+        robot_state = self._assemble_meas_robot_state(x_opt=self._ti.solution['x_opt'])
+        # robot_state = self._assemble_meas_robot_state()
+
         self._prb.setInitialState(x0=
                         robot_state)
     
     def _assemble_meas_robot_state(self,
-                            x_opt):
+                            x_opt = None):
 
         # overrides parent
         q_jnts = self.robot_state.jnts_state.get(data_type="q", robot_idxs=self.controller_index).reshape(-1, 1)
@@ -349,16 +342,17 @@ class KyonRhc(HybridQuadRhc):
         
         # we need twist in local base frame, but measured one is global
         
-        # CHECKING q_root for sign consistency!
-        # numerical problem: two quaternions can represent the same rotation
-        # if difference between the base q in the state x on first node and the sensed q_root < 0, change sign
-        state_quat_conjugate = np.copy(x_opt[3:7, 0])
-        state_quat_conjugate[:3] *= -1.0
-        # normalize the quaternion
-        state_quat_conjugate = state_quat_conjugate / np.linalg.norm(x_opt[3:7, 0])
-        diff_quat = quaternion_multiply(q_root, state_quat_conjugate)
-        if diff_quat[3] < 0:
-            q_root[:] = -q_root
+        if x_opt is not None:
+            # CHECKING q_root for sign consistency!
+            # numerical problem: two quaternions can represent the same rotation
+            # if difference between the base q in the state x on first node and the sensed q_root < 0, change sign
+            state_quat_conjugate = np.copy(x_opt[3:7, 0])
+            state_quat_conjugate[:3] *= -1.0
+            # normalize the quaternion
+            state_quat_conjugate = state_quat_conjugate / np.linalg.norm(x_opt[3:7, 0])
+            diff_quat = self._quaternion_multiply(q_root, state_quat_conjugate)
+            if diff_quat[3] < 0:
+                q_root[:] = -q_root
 
         r_base = Rotation.from_quat(q_root.flatten()).as_matrix()
 
