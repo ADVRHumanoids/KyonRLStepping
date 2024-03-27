@@ -5,8 +5,8 @@ def get_xrdf_cmds_isaac(n_robots: int,
         cmds = {}
         cmds_aux = []
         
-        xrdf_cmd_vals = [True, False, False, False, False, False]
-
+        xrdf_cmd_vals = [False, False, False, False, False, False]
+        
         wheels = "true" if xrdf_cmd_vals[0] else "false"
         upper_body = "true" if xrdf_cmd_vals[1] else "false"
         gripper = "true" if xrdf_cmd_vals[2] else "false"
