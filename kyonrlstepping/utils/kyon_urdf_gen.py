@@ -5,12 +5,15 @@ class KyonUrdfGen(UrdfGenerator):
     def __init__(self, 
             robotname: str,
             descr_path: str,
+            wheels: bool = False,
             name: str = "KyonUrdfRHCViz"):
         
         super().__init__(
             robotname = robotname,
             descr_path = descr_path,
             name = name)
+
+        self._wheels = wheels
 
         self.generate_urdf() # actually generated urdf
 
@@ -30,7 +33,10 @@ class KyonUrdfGen(UrdfGenerator):
         cmds = []
         
         cmds.append("kyon_root:=" + root)
-        cmds.append("wheels:=true")
+        if self._wheels:
+            cmds.append("wheels:=true")
+        else:
+            cmds.append("wheels:=false")
         cmds.append("upper_body:=false")
         cmds.append("dagana:=false")
         cmds.append("sensors:=false")
