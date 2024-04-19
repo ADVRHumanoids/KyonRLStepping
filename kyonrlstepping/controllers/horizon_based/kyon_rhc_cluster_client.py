@@ -18,7 +18,8 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
             verbose: bool = False,
             debug: bool = False,
             open_loop: bool = True,
-            with_wheels: bool = False):
+            with_wheels: bool = False,
+            base_dump_dir: str = "/tmp"):
         
         self._with_wheels = with_wheels
 
@@ -31,7 +32,8 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
             core_ids_override_list = core_ids_override_list,
             verbose = verbose,
             debug = debug,
-            open_loop=open_loop)
+            open_loop=open_loop,
+            base_dump_dir=base_dump_dir)
 
     def _xrdf_cmds(self):
         cmds = get_xrdf_cmds_horizon(robot_pkg_name = self.robot_pkg_name,
