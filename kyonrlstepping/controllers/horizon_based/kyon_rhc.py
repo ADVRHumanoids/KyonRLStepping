@@ -140,6 +140,16 @@ class KyonRhc(HybridQuadRhc):
         for _, cforces in self._ti.model.cmap.items():
             for c in cforces:
                 c.setInitialGuess(f0)
+        # setting ref for force reg.
+        force_ref = self._ti.getTask('joint_regularization')
+        force_ref.setRef(index=2, # force
+                    ref=np.atleast_2d(np.array(f0)).T)
+        force_ref.setRef(index=3, # force
+                    ref=np.atleast_2d(np.array(f0)).T)
+        force_ref.setRef(index=4, # force
+                    ref=np.atleast_2d(np.array(f0)).T)
+        force_ref.setRef(index=5, # force
+                    ref=np.atleast_2d(np.array(f0)).T)
 
         vel_lims = self._model.kd.velocityLimits()
         import horizon.utils as utils
