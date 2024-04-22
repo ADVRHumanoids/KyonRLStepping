@@ -59,7 +59,7 @@ costs:
     - &w_postural_ub 10.
     - &w_v 1e-2
     - &w_a 5e-2
-    - &w_f 1e-2
+    - &w_f 2e-2
     - &w_ball_ori 20.
     - &w_ball_xy 10.
     - &w_postural_roll 1.
