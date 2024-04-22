@@ -326,7 +326,8 @@ class KyonRhc(HybridQuadRhc):
         xig, _ = self._set_ig()
 
         # open loop update:
-        self._prb.setInitialState(x0=xig[:, 0])
+        self._prb.setInitialState(x0=xig[:, 0]) # (xig has been shifted, so node 0
+        # is node 1 in the last opt solution)
     
     def _update_closed_loop(self):
 
@@ -351,7 +352,6 @@ class KyonRhc(HybridQuadRhc):
         omega = self.robot_state.root_state.get(data_type="omega", robot_idxs=self.controller_index).reshape(-1, 1)
         
         # we need twist in local base frame, but measured one is global
-        
         if x_opt is not None:
             # CHECKING q_root for sign consistency!
             # numerical problem: two quaternions can represent the same rotation
