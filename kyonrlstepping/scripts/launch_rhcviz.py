@@ -11,7 +11,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description="Multi Robot Visualizer")
     parser.add_argument('--ns', type=str, help='Namespace to be used for cluster shared memory',default="kyon0")
-    parser.add_argument('--dpath', type=str,default="/root/RL_ws/hhcm/src/iit-kyon-ros-pkg/kyon_urdf")
+    parser.add_argument('--dpath', type=str,default="/root/lrhc_ws/src/iit-kyon-ros-pkg/kyon_urdf")
     parser.add_argument('--nodes_perc', type=int, default=30)
     parser.add_argument('--comment', type=str, help='Any useful comment associated with this run',default="")
     parser.add_argument('--wheels', action='store_true', help='add wheels')
