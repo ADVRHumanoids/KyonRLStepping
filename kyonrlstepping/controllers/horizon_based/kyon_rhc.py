@@ -173,29 +173,26 @@ class KyonRhc(HybridQuadRhc):
         # self.horizon_anal = analyzer.ProblemAnalyzer(self._prb)
     
     def _init_contact_timelines(self):
-
-        c_phases = dict()
+        
+        c_timelines = dict()
         for c in self._model.cmap.keys():
-            c_phases[c] = self._pm.addTimeline(f'{c}_timeline')
+            c_timelines[c] = self._pm.createTimeline(f'{c}_timeline')
 
         short_stance_duration = 1
         stance_duration = 8
         flight_duration = 8
         for c in self._model.cmap.keys():
             # stance phase normal
-            stance_phase = pyphase.Phase(stance_duration, f'stance_{c}')
-            stance_phase_short = pyphase.Phase(short_stance_duration, f'stance_{c}_short')
+            stance_phase = c_timelines[c].createPhase(stance_duration, f'stance_{c}')
+            stance_phase_short = c_timelines[c].createPhase(short_stance_duration, f'stance_{c}_short')
             if self._ti.getTask(f'{c}_contact') is not None:
                 stance_phase.addItem(self._ti.getTask(f'{c}_contact'))
                 stance_phase_short.addItem(self._ti.getTask(f'{c}_contact'))
             else:
                 raise Exception('task not found')
 
-            c_phases[c].registerPhase(stance_phase)
-            c_phases[c].registerPhase(stance_phase_short)
-
             # flight phase normal
-            flight_phase = pyphase.Phase(flight_duration, f'flight_{c}')
+            flight_phase = c_timelines[c].createPhase(flight_duration, f'flight_{c}')
             init_z_foot = self._model.kd.fk(c)(q=self._model.q0)['ee_pos'].elements()[2]
             ee_vel = self._model.kd.frameVelocity(c, self._model.kd_frame)(q=self._model.q, qdot=self._model.v)['ee_vel_linear']
             ref_trj = np.zeros(shape=[7, flight_duration])
@@ -206,12 +203,12 @@ class KyonRhc(HybridQuadRhc):
                 raise Exception('task not found')
             cstr = self._prb.createConstraint(f'{c}_vert', ee_vel[0:2], [])
             flight_phase.addConstraint(cstr, nodes=[0, flight_duration-1])
-            c_phases[c].registerPhase(flight_phase)
 
         for c in self._model.cmap.keys():
-            stance = c_phases[c].getRegisteredPhase(f'stance_{c}')
-            while c_phases[c].getEmptyNodes() > 0:
-                c_phases[c].addPhase(stance)
+            # stance = c_timelines[c].getRegisteredPhase(f'stance_{c}_short')
+            stance = c_timelines[c].getRegisteredPhase(f'stance_{c}')
+            while c_timelines[c].getEmptyNodes() > 0:
+                c_timelines[c].addPhase(stance)
 
     def _create_whitelist(self):
 
