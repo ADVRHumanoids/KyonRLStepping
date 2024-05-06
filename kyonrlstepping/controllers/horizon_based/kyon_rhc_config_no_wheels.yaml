@@ -68,8 +68,7 @@ base_lin_vel:
   type: Cartesian
   distal_link: base_link
   indices: [0, 1]
-#  nodes: ${range(N-5, N)}
-  nodes: all
+  nodes: ${range(1, N)}
   cartesian_type: velocity
   weight: *w_base_xy
 
@@ -77,15 +76,14 @@ base_height:
   type: Cartesian
   distal_link: base_link
   indices: [2]
-  nodes: all
+  nodes: ${range(1, N)}
   weight: *w_com
 
 base_omega:
   type: Cartesian
   distal_link: base_link
   indices: [3, 4, 5]
-#  nodes: ${range(N-8, N)}
-  nodes: all
+  nodes: ${range(1, N)}
   cartesian_type: velocity
   weight: *w_base_ori
 
