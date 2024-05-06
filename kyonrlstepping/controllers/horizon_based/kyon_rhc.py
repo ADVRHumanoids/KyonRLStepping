@@ -26,6 +26,7 @@ class KyonRhc(HybridQuadRhc):
             with_wheels: bool = False, 
             n_nodes: float = 31,
             dt: float = 0.05,
+            injection_node: int = 10,
             max_solver_iter = 1, # defaults to rt-iteration
             open_loop: bool = True,
             dtype = np.float32, 
@@ -43,6 +44,7 @@ class KyonRhc(HybridQuadRhc):
             codegen_dir=codegen_dir, 
             n_nodes=n_nodes,
             dt=dt,
+            injection_node=injection_node,
             max_solver_iter=max_solver_iter, # defaults to rt-iteration
             open_loop=open_loop,
             dtype=dtype,
@@ -206,7 +208,7 @@ class KyonRhc(HybridQuadRhc):
 
         for c in self._model.cmap.keys():
             # stance = c_timelines[c].getRegisteredPhase(f'stance_{c}_short')
-            stance = c_timelines[c].getRegisteredPhase(f'stance_{c}')
+            stance = c_timelines[c].getRegisteredPhase(f'stance_{c}_short')
             while c_timelines[c].getEmptyNodes() > 0:
                 c_timelines[c].addPhase(stance)
 
