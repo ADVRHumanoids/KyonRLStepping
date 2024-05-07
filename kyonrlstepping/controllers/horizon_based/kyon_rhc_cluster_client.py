@@ -41,7 +41,7 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
         return cmds
 
     def _generate_controller(self,
-                        idx: int):
+        idx: int):
         
         controller = KyonRhc(
                 urdf_path=self._urdf_path, 
@@ -51,7 +51,7 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
                 with_wheels=self._with_wheels,
                 n_nodes=31, 
                 dt=0.03,
-                injection_node=10,
+                injection_node=5,
                 max_solver_iter = 1,
                 open_loop = self._open_loop,
                 verbose = self._verbose, 

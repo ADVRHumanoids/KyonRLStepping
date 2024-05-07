@@ -128,7 +128,7 @@ class KyonRhc(HybridQuadRhc):
 
         self._tg = trajectoryGenerator.TrajectoryGenerator()
 
-        self._pm = pymanager.PhaseManager(self._n_nodes) # intervals or nodes?????
+        self._pm = pymanager.PhaseManager(self._n_nodes, debug=False) # intervals or nodes?????
 
         self._create_whitelist()
         self._init_contact_timelines()
@@ -165,7 +165,7 @@ class KyonRhc(HybridQuadRhc):
 
         contact_phase_map = {c: f'{c}_timeline' for c in self._model.cmap.keys()}
         
-        self._gm = GaitManager(self._ti, self._pm, contact_phase_map)
+        self._gm = GaitManager(self._ti, self._pm, contact_phase_map, self._injection_node)
 
         self.n_dofs = self._get_ndofs() # after loading the URDF and creating the controller we
         # know n_dofs -> we assign it (by default = None)
