@@ -55,5 +55,6 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
                 max_solver_iter = 1,
                 open_loop = self._open_loop,
                 verbose = self._verbose, 
-                debug = self._debug)
+                debug = self._debug,
+                refs_in_hor_frame=True)
         return controller 
