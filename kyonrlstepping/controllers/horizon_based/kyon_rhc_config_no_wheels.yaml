@@ -48,7 +48,6 @@ costs:
 #     - &w_f 1e-2
 #     - &w_ball_ori 20.
 #     - &w_ball_xy 10.
-#     - &w_postural_roll 1.
 
 .define:
     - &w_com 50.
@@ -62,7 +61,6 @@ costs:
     - &w_f 3e-2
     - &w_ball_ori 20.
     - &w_ball_xy 10.
-    - &w_postural_roll 1.
 
 base_lin_vel:
   type: Cartesian
