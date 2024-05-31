@@ -116,7 +116,7 @@ zero_velocity_ball_4:
 interaction_ball_1:
   type: VertexForce
   frame: ball_1
-  fn_min: 10.0
+  fn_min: 5.0
   enable_fc: false
   friction_coeff: 1.0
   vertex_frames:
@@ -125,7 +125,7 @@ interaction_ball_1:
 interaction_ball_2:
   type: VertexForce
   frame: ball_2
-  fn_min: 10.0
+  fn_min: 5.0
   enable_fc: false
   friction_coeff: 1.0
   vertex_frames:
@@ -134,7 +134,7 @@ interaction_ball_2:
 interaction_ball_3:
   type: VertexForce
   frame: ball_3
-  fn_min: 10.0
+  fn_min: 5.0
   enable_fc: false
   friction_coeff: 1.0
   vertex_frames:
@@ -143,7 +143,7 @@ interaction_ball_3:
 interaction_ball_4:
   type: VertexForce
   frame: ball_4
-  fn_min: 10.0
+  fn_min: 5.0
   enable_fc: false
   friction_coeff: 1.0
   vertex_frames:
