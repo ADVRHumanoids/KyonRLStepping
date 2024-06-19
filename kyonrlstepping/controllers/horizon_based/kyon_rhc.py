@@ -32,7 +32,8 @@ class KyonRhc(HybridQuadRhc):
             dtype = np.float32, 
             verbose = False, 
             debug = False,
-            refs_in_hor_frame = True
+            refs_in_hor_frame = True,
+            timeout_ms: int = 60000
             ):
 
         paths = PathsGetter()
@@ -51,7 +52,8 @@ class KyonRhc(HybridQuadRhc):
             dtype=dtype,
             verbose=verbose, 
             debug=debug,
-            refs_in_hor_frame=refs_in_hor_frame)
+            refs_in_hor_frame=refs_in_hor_frame,
+            timeout_ms=timeout_ms)
     
     def _quaternion_multiply(self, 
                     q1, q2):

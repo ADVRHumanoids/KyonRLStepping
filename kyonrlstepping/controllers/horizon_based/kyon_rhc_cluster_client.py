@@ -19,7 +19,8 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
             debug: bool = False,
             open_loop: bool = True,
             with_wheels: bool = False,
-            base_dump_dir: str = "/tmp"):
+            base_dump_dir: str = "/tmp",
+            timeout_ms: int = 60000):
         
         self._with_wheels = with_wheels
 
@@ -33,7 +34,8 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
             verbose = verbose,
             debug = debug,
             open_loop=open_loop,
-            base_dump_dir=base_dump_dir)
+            base_dump_dir=base_dump_dir,
+            timeout_ms=timeout_ms)
 
     def _xrdf_cmds(self):
         cmds = get_xrdf_cmds_horizon(robot_pkg_name = self.robot_pkg_name,
@@ -56,5 +58,7 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
                 open_loop = self._open_loop,
                 verbose = self._verbose, 
                 debug = self._debug,
-                refs_in_hor_frame=True)
+                refs_in_hor_frame=True,
+                timeout_ms=self._timeout_ms)
+        
         return controller 
