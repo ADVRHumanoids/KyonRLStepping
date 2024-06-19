@@ -187,7 +187,7 @@ class KyonRhc(HybridQuadRhc):
         short_stance_duration = 1
         stance_duration = 8
         flight_duration = 8
-        post_landing_stance = 5
+        post_landing_stance = 3
         for c in self._model.cmap.keys():
             # stance phase normal
             stance_phase = c_timelines[c].createPhase(stance_duration, f'stance_{c}')
