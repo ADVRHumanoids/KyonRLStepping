@@ -21,7 +21,7 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
             with_wheels: bool = False,
             base_dump_dir: str = "/tmp",
             timeout_ms: int = 60000,
-            codegen_override: str = None):
+            codegen_override: str = ""):
         
         self._with_wheels = with_wheels
 
@@ -48,7 +48,7 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
         idx: int):
         
         codegen_dir = self.codegen_dir() + f"/{self._codegen_dir_name}Rhc{idx}"
-        if self.codegen_dir_override() is not None:
+        if not self.codegen_dir_override() == "":
             codegen_dir = f"{self.codegen_dir_override()}{idx}"
 
         controller = KyonRhc(
