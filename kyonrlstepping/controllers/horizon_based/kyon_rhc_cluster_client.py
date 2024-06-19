@@ -20,7 +20,8 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
             open_loop: bool = True,
             with_wheels: bool = False,
             base_dump_dir: str = "/tmp",
-            timeout_ms: int = 60000):
+            timeout_ms: int = 60000,
+            codegen_override: str = None):
         
         self._with_wheels = with_wheels
 
@@ -35,7 +36,8 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
             debug = debug,
             open_loop=open_loop,
             base_dump_dir=base_dump_dir,
-            timeout_ms=timeout_ms)
+            timeout_ms=timeout_ms,
+            codegen_override=codegen_override)
 
     def _xrdf_cmds(self):
         cmds = get_xrdf_cmds_horizon(robot_pkg_name = self.robot_pkg_name,
@@ -45,11 +47,15 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
     def _generate_controller(self,
         idx: int):
         
+        codegen_dir = self.codegen_dir() + f"/{self._codegen_dir_name}Rhc{idx}"
+        if self.codegen_dir_override() is not None:
+            codegen_dir = f"{self.codegen_dir_override()}{idx}"
+
         controller = KyonRhc(
                 urdf_path=self._urdf_path, 
                 srdf_path=self._srdf_path,
                 robot_name=self._namespace,
-                codegen_dir=self.codegen_dir() + f"/{self._codegen_dir_name}Rhc{idx}",
+                codegen_dir=codegen_dir,
                 with_wheels=self._with_wheels,
                 n_nodes=31, 
                 dt=0.03,
