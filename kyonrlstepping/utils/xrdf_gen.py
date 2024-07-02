@@ -1,5 +1,6 @@
 def get_xrdf_cmds_isaac(n_robots: int, 
                 robot_pkg_name: str = None,
+                robot_pkg_pref_path: str = None,
                 basename = "kyon"):
 
         cmds = {}
@@ -24,9 +25,7 @@ def get_xrdf_cmds_isaac(n_robots: int,
         
         if robot_pkg_name is not None:
 
-                import rospkg
-                rospackage = rospkg.RosPack()
-                package_root_path = rospackage.get_path(robot_pkg_name + "_urdf")
+                package_root_path = robot_pkg_pref_path + "/" + f"{robot_pkg_name}_urdf"
                 cmds_aux.append("kyon_root:=" + package_root_path)
 
         for i in range(n_robots):
@@ -36,6 +35,7 @@ def get_xrdf_cmds_isaac(n_robots: int,
         return cmds
 
 def get_xrdf_cmds_horizon(robot_pkg_name: str = None,
+                robot_pkg_pref_path: str = None,
                 with_wheels: bool = False):
 
         cmds = []
@@ -58,10 +58,8 @@ def get_xrdf_cmds_horizon(robot_pkg_name: str = None,
         cmds.append("payload:=" + payload)
         
         if robot_pkg_name is not None:
-
-                import rospkg
-                rospackage = rospkg.RosPack()
-                package_root_path = rospackage.get_path(robot_pkg_name + "_urdf")
+                               
+                package_root_path = robot_pkg_pref_path + "/" + f"{robot_pkg_name}_urdf"
                 cmds.append("kyon_root:=" + package_root_path)
 
         return cmds

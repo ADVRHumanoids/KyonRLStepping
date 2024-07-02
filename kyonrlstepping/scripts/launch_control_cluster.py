@@ -40,6 +40,7 @@ if __name__ == "__main__":
     parser.add_argument('--comment', type=str, help='Any useful comment associated with this run',default="")
     parser.add_argument('--timeout_ms', type=int, help='connection timeout after which the script self-terminates', default=60000)
     parser.add_argument('--codegen_override_dir', type=str, help='Path to base dir where codegen is to be loaded',default="")
+    parser.add_argument('--robot_pkg_pref_path', type=str, help='base path to where each robot decription package is located')
 
     args = parser.parse_args()
     
@@ -71,5 +72,6 @@ if __name__ == "__main__":
                                         debug=args.enable_debug,
                                         base_dump_dir=args.dmpdir,
                                         timeout_ms=args.timeout_ms,
-                                        codegen_override=args.codegen_override_dir) # this blocks until connection with the client is established
+                                        codegen_override=args.codegen_override_dir,
+                                        robot_pkg_pref_path=args.robot_pkg_pref_path) # this blocks until connection with the client is established
     control_cluster_client.run() # spawns the controllers on separate processes

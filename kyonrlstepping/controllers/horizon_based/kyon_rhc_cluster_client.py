@@ -11,6 +11,7 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
     def __init__(self, 
             namespace: str, 
             cluster_size: int,
+            robot_pkg_pref_path: str,
             set_affinity: bool = False,
             use_mp_fork: bool = False,
             isolated_cores_only: bool = False,
@@ -27,6 +28,7 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
 
         super().__init__(namespace = namespace, 
             robot_pkg_name="kyon",
+            robot_pkg_pref_path=robot_pkg_pref_path,
             cluster_size=cluster_size,
             isolated_cores_only = isolated_cores_only,
             set_affinity = set_affinity,
@@ -41,6 +43,7 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
 
     def _xrdf_cmds(self):
         cmds = get_xrdf_cmds_horizon(robot_pkg_name = self.robot_pkg_name,
+                            robot_pkg_pref_path= self.robot_pkg_pref_path,
                             with_wheels = self._with_wheels)
         return cmds
 
