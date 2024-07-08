@@ -203,7 +203,7 @@ class KyonRhc(HybridQuadRhc):
             init_z_foot = self._model.kd.fk(c)(q=self._model.q0)['ee_pos'].elements()[2]
             ee_vel = self._model.kd.frameVelocity(c, self._model.kd_frame)(q=self._model.q, qdot=self._model.v)['ee_vel_linear']
             ref_trj = np.zeros(shape=[7, flight_duration])
-            ref_trj[2, :] = np.atleast_2d(self._tg.from_derivatives(flight_duration, init_z_foot, init_z_foot, 0.15, [None, 0, None]))
+            ref_trj[2, :] = np.atleast_2d(self._tg.from_derivatives(flight_duration, init_z_foot, init_z_foot, 0.2, [None, 0, None]))
             if self._ti.getTask(f'z_{c}') is not None:
                 flight_phase.addItemReference(self._ti.getTask(f'z_{c}'), ref_trj, nodes=list(range(0, flight_duration)))
                 flight_phase.addItem(self._ti.getTask(f'{c}_contact'), nodes=list(range(flight_duration, flight_duration+post_landing_stance)))
