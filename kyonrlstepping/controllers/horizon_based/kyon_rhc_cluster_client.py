@@ -50,7 +50,7 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
     def _generate_controller(self,
         idx: int):
         
-        codegen_dir=self._process_codegen_dir()
+        codegen_dir=self._process_codegen_dir(idx=idx)
 
         controller = KyonRhc(
                 urdf_path=self._urdf_path, 
