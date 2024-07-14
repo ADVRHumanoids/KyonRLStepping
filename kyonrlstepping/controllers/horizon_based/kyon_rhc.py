@@ -54,7 +54,10 @@ class KyonRhc(HybridQuadRhc):
             debug=debug,
             refs_in_hor_frame=refs_in_hor_frame,
             timeout_ms=timeout_ms)
-    
+        
+        # self._fail_idx_thresh = 5e3
+        self._fail_idx_thresh = 5e4
+
     def _quaternion_multiply(self, 
                     q1, q2):
         x1, y1, z1, w1 = q1
