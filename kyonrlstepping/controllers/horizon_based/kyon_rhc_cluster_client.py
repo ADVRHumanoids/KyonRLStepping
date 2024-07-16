@@ -1,8 +1,7 @@
-from lrhc_control.controllers.rhc.lrhc_cluster_client import LRhcClusterClient
 from lrhc_control.controllers.rhc.hybrid_quad_client import HybridQuadrupedClusterClient
 
 from kyonrlstepping.controllers.horizon_based.kyon_rhc import KyonRhc
-from kyonrlstepping.utils.xrdf_gen import get_xrdf_cmds_horizon
+from lrhc_control.utils.hybrid_quad_xrdf_gen import get_xrdf_cmds_horizon
 
 from typing import List
 
