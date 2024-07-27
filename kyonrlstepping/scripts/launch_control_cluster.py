@@ -22,7 +22,7 @@ if __name__ == "__main__":
     parser.add_argument('--ns', type=str, help='Namespace to be used for cluster shared memory')
     parser.add_argument('--size', type=int, help='cluster size')
     parser.add_argument('--dmpdir', type=str, help='directory where data is dumped',default="/root/aux_data")
-    parser.add_argument('--cloop', action=argparse.BooleanOptionalAction, default=False, help='whether use RHC controllers in closed loop mode')
+    parser.add_argument('--cloop', action=argparse.BooleanOptionalAction, default=True, help='whether use RHC controllers in closed loop mode')
     parser.add_argument('--verbose', action='store_true', help='run in verbose mode')
     parser.add_argument('--enable_debug', action='store_true', help='enable debug mode for cluster client and all controllers')
     parser.add_argument('--with_wheels', action='store_true', help='use wheels')

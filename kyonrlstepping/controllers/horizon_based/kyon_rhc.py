@@ -39,6 +39,8 @@ class KyonRhc(HybridQuadRhc):
         paths = PathsGetter()
         config_path = paths.RHCCONFIGPATH_WHEELS if with_wheels else paths.RHCCONFIGPATH_NO_WHEELS
 
+        close_loop_all=True # close the loop on the whole meas state 
+
         super().__init__(srdf_path=srdf_path,
             urdf_path=urdf_path,
             config_path=config_path,
@@ -49,6 +51,7 @@ class KyonRhc(HybridQuadRhc):
             injection_node=injection_node,
             max_solver_iter=max_solver_iter, # defaults to rt-iteration
             open_loop=open_loop,
+            close_loop_all=close_loop_all,
             dtype=dtype,
             verbose=verbose, 
             debug=debug,
