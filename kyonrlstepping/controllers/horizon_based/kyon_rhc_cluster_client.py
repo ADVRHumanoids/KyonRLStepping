@@ -61,6 +61,7 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
                 injection_node=5,
                 max_solver_iter = 1,
                 open_loop = self._open_loop,
+                close_loop_all=False,
                 verbose = self._verbose, 
                 debug = self._debug,
                 refs_in_hor_frame=True,

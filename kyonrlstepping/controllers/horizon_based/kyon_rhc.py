@@ -14,7 +14,6 @@ import time
 
 from kyonrlstepping.controllers.horizon_based.kyon_rhc_task_refs import KyonRHCRefs
 from kyonrlstepping.controllers.horizon_based.utils.sysutils import PathsGetter
-from scipy.spatial.transform import Rotation
 
 class KyonRhc(HybridQuadRhc):
 
@@ -25,10 +24,11 @@ class KyonRhc(HybridQuadRhc):
             codegen_dir: str,
             with_wheels: bool = False, 
             n_nodes: float = 31,
-            dt: float = 0.05,
+            dt: float = 0.03,
             injection_node: int = 10,
             max_solver_iter = 1, # defaults to rt-iteration
             open_loop: bool = True,
+            close_loop_all: bool = False,
             dtype = np.float32, 
             verbose = False, 
             debug = False,
@@ -38,9 +38,7 @@ class KyonRhc(HybridQuadRhc):
 
         paths = PathsGetter()
         config_path = paths.RHCCONFIGPATH_WHEELS if with_wheels else paths.RHCCONFIGPATH_NO_WHEELS
-
-        close_loop_all=True # close the loop on the whole meas state 
-
+        
         super().__init__(srdf_path=srdf_path,
             urdf_path=urdf_path,
             config_path=config_path,
@@ -58,19 +56,13 @@ class KyonRhc(HybridQuadRhc):
             refs_in_hor_frame=refs_in_hor_frame,
             timeout_ms=timeout_ms)
         
-        # self._fail_idx_thresh = 5e3
-        self._fail_idx_thresh=1e3
-        self._fail_idx_scale=1e-4
-
-    def _quaternion_multiply(self, 
-                    q1, q2):
-        x1, y1, z1, w1 = q1
-        x2, y2, z2, w2 = q2
-        w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
-        x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
-        y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2
-        z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2
-        return np.array([x, y, z, w])
+        self._fail_idx_scale=1e-9
+        self._fail_idx_thresh_open_loop=1e-1
+        self._fail_idx_thresh_close_loop=1e-1
+        if open_loop:
+            self._fail_idx_thresh=self._fail_idx_thresh_open_loop
+        else:
+            self._fail_idx_thresh=self._fail_idx_thresh_close_loop
 
     def _init_rhc_task_cmds(self):
         
@@ -94,31 +86,53 @@ class KyonRhc(HybridQuadRhc):
         return rhc_refs
     
     def _init_problem(self):
-
+        
+        vel_bounds_weight=1.0
+        meas_state_attractor_weight=100.0
+        self._phase_force_reg=1e-2
+        self._yaw_vertical_weight=2.0
         # overrides parent
-
-        self.urdf = self.urdf.replace('continuous', 'revolute') # continous joint is parametrized
-        # in So2, so will add 
-
-        self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf)
-
-        self._assign_controller_side_jnt_names(jnt_names=self._get_robot_jnt_names())
-
         self._prb = Problem(self._n_intervals, 
                         receding=True, 
                         casadi_type=cs.SX)
         self._prb.setDt(self._dt)
 
+        # FIXED JOINTS MAP init fixed map to zero -> homing from SRDF will be used
+        # self._wheel_names = [f'j_wheel_{i + 1}' for i in range(4)]
+        # ankle_yaws = [f'ankle_yaw_{i + 1}' for i in range(4)]
+        # arm_joints = [f'j_arm1_{i + 1}' for i in range(6)] + [f'j_arm2_{i + 1}' for i in range(6)]
+        # torso_jnts=["torso_yaw"]
+        # head_jnts= ['d435_head_joint', 'velodyne_joint']
+        # fixed_joints = self._wheel_names+ankle_yaws+arm_joints+torso_jnts+head_jnts
+        # fixed_jnt_vals = len(fixed_joints)*[0.] # default to 0
+        # fixed_joint_map=dict(zip(fixed_joints, fixed_jnt_vals))
+
+        self.urdf = self.urdf.replace('continuous', 'revolute') # continous joint is parametrized
+        # in So2
+
+        self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf) # used for getting joint names in
+        # child class-> will be overritten
+        self._assign_controller_side_jnt_names(jnt_names=self._get_robot_jnt_names())
+
         self._init_robot_homer()
+        
+        # fixed_jnts_homing=self._homer.get_homing_vals(jnt_names=fixed_joints)# ordered as fixed_joints
+        # update fixed joints map from homing:
+        # for i in range(len(fixed_joints)):
+        #     jnt_name=fixed_joints[i]
+        #     fixed_joint_map[jnt_name]=fixed_jnts_homing[i]
+        # self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf,fixed_joints=fixed_joint_map)
+
+        self._f0 = [0, 0, self._kin_dyn.mass() / 4 * 9.8]
 
         init = self._base_init.tolist() + list(self._homer.get_homing())
         FK = self._kin_dyn.fk('ball_1') # just to get robot reference height
-        kyon_wheel_radius = 0.124 # hardcoded!!!!
-        init_pos_foot = FK(q=init)['ee_pos']
-        self._base_init[2] = -init_pos_foot[2]  # override init
-        if 'wheel_joint_1' in self._kin_dyn.joint_names():
-            self._base_init[2] += kyon_wheel_radius
-
+        self._wheel_radius = 0.124 # hardcoded!!!!
+        ground_level = FK(q=init)['ee_pos']
+        self._base_init[2] = -ground_level[2]  # override init     
+        # self._base_init[2] += self._wheel_radius # even if in fixed joints, 
+        # in the real robot the wheel is there. This way the feet z in homing is at height
+        
         self._model = FullModelInverseDynamics(problem=self._prb,
                                 kd=self._kin_dyn,
                                 q_init=self._homer.get_homing_map(),
@@ -135,7 +149,8 @@ class KyonRhc(HybridQuadRhc):
 
         # setting initial base pos ref
         base_pos = self._ti.getTask('base_height')
-        base_pos.setRef(np.atleast_2d(self._base_init).T)
+        if base_pos is not None:
+            base_pos.setRef(np.atleast_2d(self._base_init).T)
 
         self._tg = trajectoryGenerator.TrajectoryGenerator()
 
@@ -143,31 +158,32 @@ class KyonRhc(HybridQuadRhc):
 
         self._create_whitelist()
         self._init_contact_timelines()
-        self._add_zmp()
+        # self._add_zmp()
 
         self._ti.model.q.setBounds(self._ti.model.q0, self._ti.model.q0, nodes=0)
         self._ti.model.v.setBounds(self._ti.model.v0, self._ti.model.v0, nodes=0)
         self._ti.model.q.setInitialGuess(self._ti.model.q0)
         self._ti.model.v.setInitialGuess(self._ti.model.v0)
-        f0 = [0, 0, self._kin_dyn.mass() / 4 * 9.8]
         for _, cforces in self._ti.model.cmap.items():
+            n_contact_f=len(cforces)
             for c in cforces:
-                c.setInitialGuess(f0)
-        # setting ref for force reg.
-        force_ref = self._ti.getTask('joint_regularization')
-        force_ref.setRef(index=2, # force
-                    ref=np.atleast_2d(np.array(f0)).T)
-        force_ref.setRef(index=3, # force
-                    ref=np.atleast_2d(np.array(f0)).T)
-        force_ref.setRef(index=4, # force
-                    ref=np.atleast_2d(np.array(f0)).T)
-        force_ref.setRef(index=5, # force
-                    ref=np.atleast_2d(np.array(f0)).T)
+                c.setInitialGuess(np.array(self._f0)/n_contact_f)        
 
         vel_lims = self._model.kd.velocityLimits()
         import horizon.utils as utils
-        self._prb.createResidual('max_vel', 1e1 * utils.utils.barrier(vel_lims[7:] - self._model.v[7:]))
-        self._prb.createResidual('min_vel', 1e1 * utils.utils.barrier1(-1 * vel_lims[7:] - self._model.v[7:]))
+        self._prb.createResidual('vel_lb_barrier', vel_bounds_weight*utils.utils.barrier(vel_lims[7:] - self._model.v[7:]))
+        self._prb.createResidual('vel_ub_barrier', vel_bounds_weight*utils.utils.barrier1(-1 * vel_lims[7:] - self._model.v[7:]))
+
+        # if not self._open_loop:
+        #     # we create a residual cost to be used as an attractor to the measured state on the first node
+        #     # hard constraints injecting meas. states are pure EVIL!
+        #     prb_state=self._prb.getState()
+        #     full_state=prb_state.getVars()
+        #     state_dim=prb_state.getBounds()[0].shape[0]
+        #     meas_state=self._prb.createParameter(name="measured_state",
+        #         dim=state_dim, nodes=0)     
+        #     self._prb.createResidual('meas_state_attractor', meas_state_attractor_weight * (full_state - meas_state), 
+        #                 nodes=[0])
 
         self._ti.finalize()
         self._ti.bootstrap()
@@ -187,43 +203,110 @@ class KyonRhc(HybridQuadRhc):
     
     def _init_contact_timelines(self):
         
-        c_timelines = dict()
-        for c in self._model.cmap.keys():
-            c_timelines[c] = self._pm.createTimeline(f'{c}_timeline')
-
         short_stance_duration = 1
-        stance_duration = 8
-        flight_duration = 8
-        post_landing_stance = 3
+        flight_duration = 10
+        post_landing_stance = 5
+        if post_landing_stance<2:
+            post_landing_stance=2
+        step_height=0.08
         for c in self._model.cmap.keys():
-            # stance phase normal
-            stance_phase = c_timelines[c].createPhase(stance_duration, f'stance_{c}')
-            stance_phase_short = c_timelines[c].createPhase(short_stance_duration, f'stance_{c}_short')
-            if self._ti.getTask(f'{c}_contact') is not None:
-                stance_phase.addItem(self._ti.getTask(f'{c}_contact'))
-                stance_phase_short.addItem(self._ti.getTask(f'{c}_contact'))
-            else:
-                raise Exception('task not found')
 
-            # flight phase normal
-            flight_phase = c_timelines[c].createPhase(flight_duration+post_landing_stance, f'flight_{c}')
+            # stance phases
+            self._c_timelines[c] = self._pm.createTimeline(f'{c}_timeline')
+            stance_phase_short = self._c_timelines[c].createPhase(short_stance_duration, f'stance_{c}_short')
+            if self._ti.getTask(f'{c}') is not None:
+                stance_phase_short.addItem(self._ti.getTask(f'{c}'))
+            else:
+                Journal.log(self.__class__.__name__,
+                    "_init_contact_timelines",
+                    f"contact task {c} not found",
+                    LogType.EXCEP,
+                    throw_when_excep=True)
+            i=0
+            n_forces=len(self._ti.model.cmap[c])
+            for force in self._ti.model.cmap[c]:
+                f_ref=self._prb.createParameter(name=f"{c}_force_reg_f{i}_ref",
+                    dim=3) 
+                force_reg=self._prb.createResidual(f'{c}_force_reg_f{i}', self._phase_force_reg * (force - f_ref), 
+                    nodes=[])
+                f_ref.assign(np.atleast_2d(np.array(self._f0)).T/n_forces)    
+                stance_phase_short.addCost(force_reg, nodes=list(range(0, short_stance_duration)))
+                i+=1
+
+            # flight phases
+            flight_phase = self._c_timelines[c].createPhase(flight_duration+post_landing_stance, f'flight_{c}')
             init_z_foot = self._model.kd.fk(c)(q=self._model.q0)['ee_pos'].elements()[2]
             ee_vel = self._model.kd.frameVelocity(c, self._model.kd_frame)(q=self._model.q, qdot=self._model.v)['ee_vel_linear']
-            ref_trj = np.zeros(shape=[7, flight_duration])
-            ref_trj[2, :] = np.atleast_2d(self._tg.from_derivatives(flight_duration, init_z_foot, init_z_foot, 0.2, [None, 0, None]))
-            if self._ti.getTask(f'z_{c}') is not None:
-                flight_phase.addItemReference(self._ti.getTask(f'z_{c}'), ref_trj, nodes=list(range(0, flight_duration)))
-                flight_phase.addItem(self._ti.getTask(f'{c}_contact'), nodes=list(range(flight_duration, flight_duration+post_landing_stance)))
+
+            # post landing contact + force reg
+            if self._ti.getTask(f'{c}') is not None:
+                flight_phase.addItem(self._ti.getTask(f'{c}'), nodes=list(range(flight_duration, flight_duration+post_landing_stance)))
+                i=0
+                for force in self._ti.model.cmap[c]:
+                    force_reg=self._prb.getCosts(f'{c}_force_reg_f{i}')
+                    flight_phase.addCost(force_reg, nodes=list(range(flight_duration, flight_duration+post_landing_stance)))
+                    i+=1
             else:
-                raise Exception('task not found')
+                Journal.log(self.__class__.__name__,
+                    "_init_contact_timelines",
+                    f"contact task {c} not found!",
+                    LogType.EXCEP,
+                    throw_when_excep=True)
+            # reference traj
+            der= [None, 0, 0]
+            second_der=[None, 0, 0]
+            # flight pos
+            if self._ti.getTask(f'z_{c}') is not None:
+                ref_trj = np.zeros(shape=[7, flight_duration])
+                ref_trj[2, :] = np.atleast_2d(self._tg.from_derivatives(flight_duration, init_z_foot, init_z_foot, step_height,
+                    derivatives=der,
+                    second_der=second_der))
+                flight_phase.addItemReference(self._ti.getTask(f'z_{c}'), ref_trj, nodes=list(range(0, flight_duration)))
+            else:
+                Journal.log(self.__class__.__name__,
+                    "_init_contact_timelines",
+                    f"contact pos traj tracking task z_{c} not found-> it won't be used",
+                    LogType.WARN,
+                    throw_when_excep=True)
+            # flight vel
+            if self._ti.getTask(f'vz_{c}') is not None:
+                ref_vtrj = np.zeros(shape=[1, flight_duration])
+                ref_vtrj[:, :] = np.atleast_2d(self._tg.derivative_of_trajectory(flight_duration, init_z_foot, init_z_foot, step_height, 
+                    derivatives=der,
+                    second_der=second_der))
+                flight_phase.addItemReference(self._ti.getTask(f'vz_{c}'), ref_vtrj, nodes=list(range(0, flight_duration)))
+            else:
+                Journal.log(self.__class__.__name__,
+                    "_init_contact_timelines",
+                    f"contact vel traj tracking task vz_{c} not found-> it won't be used",
+                    LogType.WARN,
+                    throw_when_excep=True)
+            
             cstr = self._prb.createConstraint(f'{c}_vert', ee_vel[0:2], [])
             flight_phase.addConstraint(cstr, nodes=[0, flight_duration-1])
 
+            # keep ankle vertical
+            c_ori = self._model.kd.fk(c)(q=self._model.q)['ee_rot'][2, :]
+            cost_ori = self._prb.createResidual(f'{c}_ori', self._yaw_vertical_weight * (c_ori.T - np.array([0, 0, 1])))
+            # flight_phase.addCost(cost_ori, nodes=list(range(0, flight_duration+post_landing_stance)))
+
+        self._reset_contact_timelines()
+
+    def _reset_contact_timelines(self):
         for c in self._model.cmap.keys():
-            # stance = c_timelines[c].getRegisteredPhase(f'stance_{c}_short')
-            stance = c_timelines[c].getRegisteredPhase(f'stance_{c}_short')
-            while c_timelines[c].getEmptyNodes() > 0:
-                c_timelines[c].addPhase(stance)
+            # fill timeline with stances
+            contact_timeline=self._c_timelines[c]
+            contact_timeline.clear() # remove phases
+            stance = contact_timeline.getRegisteredPhase(f'stance_{c}_short')
+            while contact_timeline.getEmptyNodes() > 0:
+                contact_timeline.addPhase(stance)
+            # f reg
+            # if self._add_f_reg_timeline:
+            #     freg_tline=self._f_reg_timelines[c]
+            #     freg_tline.clear()
+            #     f_stance = freg_tline.getRegisteredPhase(f'freg_{c}_short')
+            #     for i in range(self._n_nodes-1): # not defined on last node
+            #         freg_tline.addPhase(f_stance)
 
     def _create_whitelist(self):
 
@@ -232,8 +315,8 @@ class KyonRhc(HybridQuadRhc):
         black_list_indices = list()
         white_list = []
 
-        if 'wheel_joint_1' in self._model.kd.joint_names():
-            black_list = ['wheel_joint_1', 'wheel_joint_2', 'wheel_joint_3', 'wheel_joint_4']
+        if self._wheel_names[0] in self._model.kd.joint_names():
+            black_list = self._wheel_names
         else:
             black_list = []
 
@@ -304,79 +387,3 @@ class KyonRhc(HybridQuadRhc):
 
         f = cs.Function('zmp', input_list, [zmp])
         return f
-
-    def _set_ig(self):
-
-        shift_num = -1 # shift data by one node
-
-        x_opt = self._ti.solution['x_opt']
-        u_opt = self._ti.solution['u_opt']
-
-        # building ig for state
-        xig = np.roll(x_opt, 
-                shift_num, axis=1) # rolling state sol.
-        for i in range(abs(shift_num)):
-            # state on last node is copied to the elements
-            # which are "lost" during the shift operation
-            xig[:, -1 - i] = x_opt[:, -1]
-        # building ig for inputs
-        uig = np.roll(u_opt, 
-                shift_num, axis=1) # rolling state sol.
-        for i in range(abs(shift_num)):
-            # state on last node is copied to the elements
-            # which are "lost" during the shift operation
-            uig[:, -1 - i] = u_opt[:, -1]
-
-        # assigning ig
-        self._prb.getState().setInitialGuess(xig)
-        self._prb.getInput().setInitialGuess(uig)
-
-        return xig, uig
-
-    def _update_open_loop(self):
-
-        xig, _ = self._set_ig()
-
-        # open loop update:
-        self._prb.setInitialState(x0=xig[:, 0]) # (xig has been shifted, so node 0
-        # is node 1 in the last opt solution)
-    
-    def _update_closed_loop(self):
-
-        self._set_ig()
-
-        # sets state on node 0 from measurements
-        robot_state = self._assemble_meas_robot_state(x_opt=self._ti.solution['x_opt'])
-        # robot_state = self._assemble_meas_robot_state()
-
-        self._prb.setInitialState(x0=
-                        robot_state)
-    
-    def _assemble_meas_robot_state(self,
-                            x_opt = None):
-
-        # overrides parent
-        q_jnts = self.robot_state.jnts_state.get(data_type="q", robot_idxs=self.controller_index).reshape(-1, 1)
-        v_jnts = self.robot_state.jnts_state.get(data_type="v", robot_idxs=self.controller_index).reshape(-1, 1)
-        q_root = self.robot_state.root_state.get(data_type="q", robot_idxs=self.controller_index).reshape(-1, 1)
-        p = self.robot_state.root_state.get(data_type="p", robot_idxs=self.controller_index).reshape(-1, 1)
-        v_root = self.robot_state.root_state.get(data_type="v", robot_idxs=self.controller_index).reshape(-1, 1)
-        omega = self.robot_state.root_state.get(data_type="omega", robot_idxs=self.controller_index).reshape(-1, 1)
-        
-        # we need twist in local base frame, but measured one is global
-        if x_opt is not None:
-            # CHECKING q_root for sign consistency!
-            # numerical problem: two quaternions can represent the same rotation
-            # if difference between the base q in the state x on first node and the sensed q_root < 0, change sign
-            state_quat_conjugate = np.copy(x_opt[3:7, 0])
-            state_quat_conjugate[:3] *= -1.0
-            # normalize the quaternion
-            state_quat_conjugate = state_quat_conjugate / np.linalg.norm(x_opt[3:7, 0])
-            diff_quat = self._quaternion_multiply(q_root, state_quat_conjugate)
-            if diff_quat[3] < 0:
-                q_root[:] = -q_root
-
-        r_base = Rotation.from_quat(q_root.flatten()).as_matrix()
-
-        return np.concatenate((p, q_root, q_jnts, r_base.T @ v_root, r_base.T @ omega, v_jnts),
-                axis=0)
