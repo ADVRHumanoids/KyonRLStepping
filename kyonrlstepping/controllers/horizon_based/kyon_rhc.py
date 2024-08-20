@@ -121,7 +121,7 @@ class KyonRhc(HybridQuadRhc):
         # for i in range(len(fixed_joints)):
         #     jnt_name=fixed_joints[i]
         #     fixed_joint_map[jnt_name]=fixed_jnts_homing[i]
-        # self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf,fixed_joints=fixed_joint_map)
+        # self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf)
 
         self._f0 = [0, 0, self._kin_dyn.mass() / 4 * 9.8]
 
@@ -156,7 +156,7 @@ class KyonRhc(HybridQuadRhc):
 
         self._pm = pymanager.PhaseManager(self._n_nodes, debug=False) # intervals or nodes?????
 
-        self._create_whitelist()
+        # self._create_whitelist()
         self._init_contact_timelines()
         # self._add_zmp()
 
@@ -286,8 +286,8 @@ class KyonRhc(HybridQuadRhc):
             flight_phase.addConstraint(cstr, nodes=[0, flight_duration-1])
 
             # keep ankle vertical
-            c_ori = self._model.kd.fk(c)(q=self._model.q)['ee_rot'][2, :]
-            cost_ori = self._prb.createResidual(f'{c}_ori', self._yaw_vertical_weight * (c_ori.T - np.array([0, 0, 1])))
+            # c_ori = self._model.kd.fk(c)(q=self._model.q)['ee_rot'][2, :]
+            # cost_ori = self._prb.createResidual(f'{c}_ori', self._yaw_vertical_weight * (c_ori.T - np.array([0, 0, 1])))
             # flight_phase.addCost(cost_ori, nodes=list(range(0, flight_duration+post_landing_stance)))
 
         self._reset_contact_timelines()
