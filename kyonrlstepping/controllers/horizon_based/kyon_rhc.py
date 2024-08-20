@@ -98,7 +98,7 @@ class KyonRhc(HybridQuadRhc):
         self._prb.setDt(self._dt)
 
         # FIXED JOINTS MAP init fixed map to zero -> homing from SRDF will be used
-        # self._wheel_names = [f'j_wheel_{i + 1}' for i in range(4)]
+        self._wheel_names = [f'j_wheel_{i + 1}' for i in range(4)]
         # ankle_yaws = [f'ankle_yaw_{i + 1}' for i in range(4)]
         # arm_joints = [f'j_arm1_{i + 1}' for i in range(6)] + [f'j_arm2_{i + 1}' for i in range(6)]
         # torso_jnts=["torso_yaw"]
