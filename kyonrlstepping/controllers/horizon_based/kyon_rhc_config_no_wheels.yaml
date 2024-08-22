@@ -47,7 +47,7 @@ costs:
   - &w_base_omega 2.
   - &w_base_v 2.
   - &w_contact_z 10.
-  - &w_contact_vz 100.
+  - &w_contact_vz 500.
   - &w_postural 1.
   - &w_postural_ub 1.0
   - &w_v 3e-3
