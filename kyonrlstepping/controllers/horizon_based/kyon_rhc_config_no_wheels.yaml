@@ -46,7 +46,7 @@ costs:
   - &w_com 5.
   - &w_base_omega 2.
   - &w_base_v 2.
-  - &w_contact_z 10.
+  - &w_contact_z 100.
   - &w_contact_vz 500.
   - &w_postural 1.
   - &w_postural_ub 1.0
@@ -190,6 +190,34 @@ force_regularization:
   type: Regularization
   weight:
     force: *w_f # todo <----- how to do? if there are more forces...
+
+z_ball_1:
+  type: Cartesian
+  distal_link: ball_1
+  indices: [2]
+  cartesian_type: position
+  weight: *w_contact_z
+
+z_ball_2:
+  type: Cartesian
+  distal_link: ball_2
+  indices: [2]
+  cartesian_type: position
+  weight: *w_contact_z
+
+z_ball_3:
+  type: Cartesian
+  distal_link: ball_3
+  indices: [2]
+  cartesian_type: position
+  weight: *w_contact_z
+
+z_ball_4:
+  type: Cartesian
+  distal_link: ball_4
+  indices: [2]
+  cartesian_type: position
+  weight: *w_contact_z
 
 vz_ball_1:
   type: Cartesian

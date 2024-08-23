@@ -285,6 +285,14 @@ class KyonRhc(HybridQuadRhc):
             cstr = self._prb.createConstraint(f'{c}_vert', ee_vel[0:2], [])
             flight_phase.addConstraint(cstr, nodes=[0, flight_duration-1])
 
+            # p_ref_landing=self._prb.createParameter(name=f"{c}_p_landing_ref",
+            #     dim=1)
+            # foot_pos=self._model.kd.fk(c)(q=self._model.q)['ee_pos'][2, :]
+
+            # p_ref_constr=self._prb.createResidual(f'{c}_landing_pos', 1e2*(foot_pos - p_ref_landing), 
+            #         nodes=[])
+            # p_ref_landing.assign(np.atleast_2d(np.array([0.0])))    
+            # flight_phase.addCost(p_ref_constr, nodes=[flight_duration-1])
             # keep ankle vertical
             # c_ori = self._model.kd.fk(c)(q=self._model.q)['ee_rot'][2, :]
             # cost_ori = self._prb.createResidual(f'{c}_ori', self._yaw_vertical_weight * (c_ori.T - np.array([0, 0, 1])))
