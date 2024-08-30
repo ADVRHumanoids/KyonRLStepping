@@ -13,7 +13,7 @@ import shutil
 import time
 
 from kyonrlstepping.controllers.horizon_based.kyon_rhc_task_refs import KyonRHCRefs
-from kyonrlstepping.controllers.horizon_based.utils.sysutils import PathsGetter
+from kyonrlstepping.utils.sysutils import PathsGetter
 
 class KyonRhc(HybridQuadRhc):
 
