@@ -1,16 +1,17 @@
 from lrhc_control.controllers.rhc.hybrid_quad_client import HybridQuadrupedClusterClient
 
 from kyonrlstepping.controllers.horizon_based.kyon_rhc import KyonRhc
-from lrhc_control.utils.hybrid_quad_xrdf_gen import get_xrdf_cmds_horizon
+from kyonrlstepping.utils.xrdf_cmd import get_xrdf_cmds_horizon
 
-from typing import List
+from typing import List, Dict
 
 class KyonRHCLusterClient(HybridQuadrupedClusterClient):
     
     def __init__(self, 
             namespace: str, 
             cluster_size: int,
-            robot_pkg_pref_path: str,
+            urdf_xacro_path: str,
+            srdf_xacro_path: str,
             set_affinity: bool = False,
             use_mp_fork: bool = False,
             isolated_cores_only: bool = False,
@@ -18,16 +19,14 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
             verbose: bool = False,
             debug: bool = False,
             open_loop: bool = True,
-            with_wheels: bool = False,
             base_dump_dir: str = "/tmp",
             timeout_ms: int = 60000,
-            codegen_override: str = ""):
-        
-        self._with_wheels = with_wheels
+            codegen_override: str = "",
+            custom_opt: Dict={}):
 
         super().__init__(namespace = namespace, 
-            robot_pkg_name="kyon",
-            robot_pkg_pref_path=robot_pkg_pref_path,
+            urdf_xacro_path=urdf_xacro_path,
+            srdf_xacro_path=srdf_xacro_path,
             cluster_size=cluster_size,
             isolated_cores_only = isolated_cores_only,
             set_affinity = set_affinity,
@@ -38,11 +37,20 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
             open_loop=open_loop,
             base_dump_dir=base_dump_dir,
             timeout_ms=timeout_ms,
-            codegen_override=codegen_override)
+            codegen_override=codegen_override,
+            custom_opt=custom_opt)
+        
+        try:
+            self._with_wheels = self._custom_opt["with_wheels"]
+        except:
+            self._with_wheels = False
+
 
     def _xrdf_cmds(self):
-        cmds = get_xrdf_cmds_horizon(robot_pkg_name = self.robot_pkg_name,
-                            robot_pkg_pref_path= self.robot_pkg_pref_path)
+        parts = self._urdf_xacro_path.split('/')
+        urdf_descr_root_path = '/'.join(parts[:-2])
+   
+        cmds = get_xrdf_cmds_horizon(urdf_descr_root_path=urdf_descr_root_path)
         return cmds
 
     def _generate_controller(self,
