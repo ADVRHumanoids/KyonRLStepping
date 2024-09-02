@@ -26,7 +26,7 @@ def get_xrdf_cmds_isaac(n_robots: int,
         if robot_pkg_name is not None:
 
                 package_root_path = robot_pkg_pref_path + "/" + f"{robot_pkg_name}_urdf"
-                cmds_aux.append("kyon_root:=" + package_root_path)
+                cmds_aux.append("root:=" + package_root_path)
 
         for i in range(n_robots):
                 # we use the same settings for all robots
@@ -60,6 +60,6 @@ def get_xrdf_cmds_horizon(robot_pkg_name: str = None,
         if robot_pkg_name is not None:
                                
                 package_root_path = robot_pkg_pref_path + "/" + f"{robot_pkg_name}_urdf"
-                cmds.append("kyon_root:=" + package_root_path)
+                cmds.append("root:=" + package_root_path)
 
         return cmds

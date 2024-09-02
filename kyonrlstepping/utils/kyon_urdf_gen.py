@@ -32,7 +32,7 @@ class KyonUrdfGen(UrdfGenerator):
         
         cmds = []
         
-        cmds.append("kyon_root:=" + root)
+        cmds.append("root:=" + root)
         if self._wheels:
             cmds.append("wheels:=true")
         else:
