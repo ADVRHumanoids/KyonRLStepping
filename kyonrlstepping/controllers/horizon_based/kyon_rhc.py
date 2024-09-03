@@ -58,11 +58,11 @@ class KyonRhc(HybridQuadRhc):
         
         self._fail_idx_scale=1e-9
         self._fail_idx_thresh_open_loop=1e-1
-        self._fail_idx_thresh_close_loop=1e-1
+        self._fail_idx_thresh_closed_loop=1e2
         if open_loop:
             self._fail_idx_thresh=self._fail_idx_thresh_open_loop
         else:
-            self._fail_idx_thresh=self._fail_idx_thresh_close_loop
+            self._fail_idx_thresh=self._fail_idx_thresh_closed_loop
 
     def _init_rhc_task_cmds(self):
         
@@ -206,9 +206,7 @@ class KyonRhc(HybridQuadRhc):
         short_stance_duration = 1
         flight_duration = 10
         post_landing_stance = 5
-        if post_landing_stance<2:
-            post_landing_stance=2
-        step_height=0.08
+        step_height=0.3
         for c in self._model.cmap.keys():
 
             # stance phases
@@ -239,19 +237,20 @@ class KyonRhc(HybridQuadRhc):
             ee_vel = self._model.kd.frameVelocity(c, self._model.kd_frame)(q=self._model.q, qdot=self._model.v)['ee_vel_linear']
 
             # post landing contact + force reg
-            if self._ti.getTask(f'{c}') is not None:
-                flight_phase.addItem(self._ti.getTask(f'{c}'), nodes=list(range(flight_duration, flight_duration+post_landing_stance)))
-                i=0
-                for force in self._ti.model.cmap[c]:
-                    force_reg=self._prb.getCosts(f'{c}_force_reg_f{i}')
-                    flight_phase.addCost(force_reg, nodes=list(range(flight_duration, flight_duration+post_landing_stance)))
-                    i+=1
-            else:
-                Journal.log(self.__class__.__name__,
-                    "_init_contact_timelines",
-                    f"contact task {c} not found!",
-                    LogType.EXCEP,
-                    throw_when_excep=True)
+            if not post_landing_stance<1:
+                if self._ti.getTask(f'{c}') is not None:
+                    flight_phase.addItem(self._ti.getTask(f'{c}'), nodes=list(range(flight_duration, flight_duration+post_landing_stance)))
+                    i=0
+                    for force in self._ti.model.cmap[c]:
+                        force_reg=self._prb.getCosts(f'{c}_force_reg_f{i}')
+                        flight_phase.addCost(force_reg, nodes=list(range(flight_duration, flight_duration+post_landing_stance)))
+                        i+=1
+                else:
+                    Journal.log(self.__class__.__name__,
+                        "_init_contact_timelines",
+                        f"contact task {c} not found!",
+                        LogType.EXCEP,
+                        throw_when_excep=True)
             # reference traj
             der= [None, 0, 0]
             second_der=[None, 0, 0]
