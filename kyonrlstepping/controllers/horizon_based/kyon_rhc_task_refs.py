@@ -20,7 +20,8 @@ class KyonRHCRefs(HybridQuadRhcRefs):
 
             hor2w_frame(root_twist_ref, q_base, root_twist_ref_h)
 
-            self.base_lin_vel.setRef(root_twist_ref_h[0:3, :])
+            self.base_lin_velxy.setRef(root_twist_ref_h[0:2, :])
+            self.base_lin_velz.setRef(root_twist_ref_h[2:3, :])
             self.base_omega.setRef(root_twist_ref_h[3:, :])
             # self.base_height.setRef(root_pose) # why for cart pos we need the whole 
             # while for cart vel just the active components of the task=????

@@ -23,22 +23,23 @@ constraints:
   - ball_2
   - ball_3
   - ball_4
-  - vz_ball_1
-  - vz_ball_2
-  - vz_ball_3
-  - vz_ball_4
-
-costs:
   # - z_ball_1
   # - z_ball_2
   # - z_ball_3
   # - z_ball_4
-  - base_lin_vel
+
+costs:
+  - vz_ball_1
+  - vz_ball_2
+  - vz_ball_3
+  - vz_ball_4
+  - base_lin_velxy
+  - base_lin_velz
   - base_omega
-  # - base_height
   - joint_posture
   - joint_v_regularization
   - joint_a_regularization
+
   # - force_regularization
 
 #open loop
@@ -58,22 +59,31 @@ costs:
 .define:
   - &w_com 1.
   - &w_base_omega 5
-  - &w_base_v 5
-  - &w_contact_z 1.
-  - &w_contact_vz 1.
-  - &w_postural 1
-  - &w_postural_ub 10.
+  - &w_base_vxy 5
+  - &w_base_vz 5
+  - &w_contact_z 1.0
+  - &w_contact_vz 1.0
+  - &w_postural 1.0
+  - &w_postural_ub 1.
   - &w_v 3e-3
   - &w_a 5e-3
   - &w_f 1e-6
 
-base_lin_vel:
+base_lin_velxy:
   type: Cartesian
   distal_link: base_link
-  indices: [0, 1, 2]
+  indices: [0, 1]
   nodes: ${range(1, N+1)}
   cartesian_type: velocity
-  weight: *w_base_v
+  weight: *w_base_vxy
+
+base_lin_velz:
+  type: Cartesian
+  distal_link: base_link
+  indices: [2]
+  nodes: ${range(1, N+1)}
+  cartesian_type: velocity
+  weight: *w_base_vz
 
 # base_height:
 #   type: Cartesian
@@ -184,7 +194,7 @@ joint_posture_ub:
   weight: *w_postural_ub
   indices:  [12, 13, 14, 15, 16,
              17, 18, 19, 20, 21]
-  nodes: ${range(15, N+1)}
+  nodes: ${range(1, N+1)}
   
 # todo: wrong, as the order COUNTS. If I add the contacts after the joint regularization, they wont get considered.
 joint_v_regularization:
@@ -195,7 +205,7 @@ joint_v_regularization:
 
 joint_a_regularization:
   type: Regularization
-  nodes: ${range(0, N+1)}
+  nodes: ${range(1, N+1)}
   weight:
     acceleration: *w_a # 0.01
 
@@ -237,25 +247,25 @@ vz_ball_1:
   distal_link: ball_1
   indices: [2]
   cartesian_type: velocity
-  # weight: *w_contact_vz
+  weight: *w_contact_vz
 
 vz_ball_2:
   type: Cartesian
   distal_link: ball_2
   indices: [2]
   cartesian_type: velocity
-  # weight: *w_contact_vz
+  weight: *w_contact_vz
 
 vz_ball_3:
   type: Cartesian
   distal_link: ball_3
   indices: [2]
   cartesian_type: velocity
-  # weight: *w_contact_vz
+  weight: *w_contact_vz
 
 vz_ball_4:
   type: Cartesian
   distal_link: ball_4
   indices: [2]
   cartesian_type: velocity
-  # weight: *w_contact_vz
+  weight: *w_contact_vz
