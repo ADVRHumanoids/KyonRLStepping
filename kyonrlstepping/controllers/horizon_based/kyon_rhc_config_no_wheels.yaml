@@ -174,13 +174,13 @@ joint_posture_ub:
 # todo: wrong, as the order COUNTS. If I add the contacts after the joint regularization, they wont get considered.
 joint_v_regularization:
   type: Regularization
-  nodes: ${range(1, N+1)}
+  nodes: ${range(0, N+1)}
   weight:
     velocity: *w_v
 
 joint_a_regularization:
   type: Regularization
-  nodes: ${range(1, N+1)}
+  nodes: ${range(0, N+1)}
   weight:
     acceleration: *w_a # 0.01
 
