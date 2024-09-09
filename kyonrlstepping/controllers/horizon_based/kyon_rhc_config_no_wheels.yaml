@@ -23,10 +23,6 @@ constraints:
   - ball_2
   - ball_3
   - ball_4
-  # - z_ball_1
-  # - z_ball_2
-  # - z_ball_3
-  # - z_ball_4
 
 costs:
   - vz_ball_1
@@ -39,25 +35,10 @@ costs:
   - joint_posture
   - joint_v_regularization
   - joint_a_regularization
-
   # - force_regularization
-
-#open loop
-# .define:
-#   - &w_com 1.
-#   - &w_base_omega 1.
-#   - &w_base_v 1.
-#   - &w_contact_z 1.
-#   - &w_contact_vz 1.
-#   - &w_postural 1.
-#   - &w_postural_ub 1.
-#   - &w_v 3e-3
-#   - &w_a 5e-3
-#   - &w_f 1e-6
 
 #closed loop
 .define:
-  - &w_com 1.
   - &w_base_omega 5
   - &w_base_vxy 5
   - &w_base_vz 5
@@ -85,12 +66,6 @@ base_lin_velz:
   cartesian_type: velocity
   weight: *w_base_vz
 
-# base_height:
-#   type: Cartesian
-#   distal_link: base_link
-#   indices: [2]
-#   nodes: ${range(1, N+1)}
-#   weight: *w_com
 
 base_omega:
   type: Cartesian
