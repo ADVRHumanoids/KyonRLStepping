@@ -22,7 +22,7 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
             base_dump_dir: str = "/tmp",
             timeout_ms: int = 60000,
             codegen_override: str = "",
-            custom_opt: Dict={}):
+            custom_opts: Dict={}):
 
         super().__init__(namespace = namespace, 
             urdf_xacro_path=urdf_xacro_path,
@@ -38,10 +38,10 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
             base_dump_dir=base_dump_dir,
             timeout_ms=timeout_ms,
             codegen_override=codegen_override,
-            custom_opt=custom_opt)
+            custom_opts=custom_opts)
         
         try:
-            self._with_wheels = self._custom_opt["with_wheels"]
+            self._with_wheels = self._custom_opts["with_wheels"]
         except:
             self._with_wheels = False
 
