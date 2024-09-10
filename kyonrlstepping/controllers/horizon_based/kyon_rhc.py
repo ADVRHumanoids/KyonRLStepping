@@ -206,7 +206,7 @@ class KyonRhc(HybridQuadRhc):
         short_stance_duration = 1
         flight_duration = 10
         post_landing_stance = 5
-        step_height=0.2
+        step_height=0.12
         for c in self._model.cmap.keys():
 
             # stance phases

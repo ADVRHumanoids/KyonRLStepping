@@ -21,8 +21,9 @@ class KyonRHCRefs(HybridQuadRhcRefs):
             hor2w_frame(root_twist_ref, q_base, root_twist_ref_h)
 
             self.base_lin_velxy.setRef(root_twist_ref_h[0:2, :])
-            self.base_lin_velz.setRef(root_twist_ref_h[2:3, :])
             self.base_omega.setRef(root_twist_ref_h[3:, :])
+            if self.base_lin_velz is not None:
+                self.base_lin_velz.setRef(root_twist_ref_h[2:3, :])
             if self.base_height is not None:
                 self.base_height.setRef(root_pose) 
         else:
@@ -32,7 +33,8 @@ class KyonRHCRefs(HybridQuadRhcRefs):
                                 robot_idxs=self.robot_index_np).reshape(-1, 1)
 
             self.base_lin_velxy.setRef(root_twist_ref[0:2, :])
-            self.base_lin_velz.setRef(root_twist_ref[2:3, :])
             self.base_omega.setRef(root_twist_ref[3:, :])
+            if self.base_lin_velz is not None:
+                self.base_lin_velz.setRef(root_twist_ref[2:3, :])
             if self.base_height is not None:
                 self.base_height.setRef(root_pose) 
