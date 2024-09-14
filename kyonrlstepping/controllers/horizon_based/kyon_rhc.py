@@ -64,6 +64,8 @@ class KyonRhc(HybridQuadRhc):
         else:
             self._fail_idx_thresh=self._fail_idx_thresh_closed_loop
 
+        self._pred_node_idx=round((self._n_nodes-1)*2/3)
+
     def _init_rhc_task_cmds(self):
         
         rhc_refs = KyonRHCRefs(gait_manager=self._gm,
