@@ -43,14 +43,29 @@ costs:
   - joint_a_regularization
   # - force_regularization
 
+#open loop
+# .define:
+#   - &w_base_omega 5
+#   - &w_base_vxy 5
+#   - &w_base_vz 5
+#   - &w_base_z 10.
+#   - &w_contact_z 300.0
+#   - &w_contact_vz 10.0
+#   - &w_base_capture 10.
+#   - &w_capture_postural 3.0
+#   - &w_capture_postural_ub 1.
+#   - &w_v 3e-3
+#   - &w_a 5e-3
+#   - &w_f 1e-6
+
 #closed loop
 .define:
-  - &w_base_omega 5
-  - &w_base_vxy 5
-  - &w_base_vz 5
-  - &w_base_z 10.
-  - &w_contact_z 300.0
-  - &w_contact_vz 10.0
+  - &w_base_omega 2
+  - &w_base_vxy 2
+  - &w_base_vz 2
+  - &w_base_z 1.
+  - &w_contact_z 10.0
+  - &w_contact_vz 1.0
   - &w_base_capture 10.
   - &w_capture_postural 3.0
   - &w_capture_postural_ub 1.
