@@ -1,6 +1,6 @@
 XBotInterface:
-  urdf_path: $PWD/centauro.urdf
-  srdf_path: $PWD/centauro.srdf
+  urdf_path: $PWD/kyon.urdf
+  srdf_path: $PWD/kyon.srdf
 
 ModelInterface:
   model_type: RBDL
@@ -30,8 +30,8 @@ motor_vel:
   
 # hal
 xbotcore_device_configs:
-    sim: $PWD/hal/centauro_gz.yaml
-    dummy: $PWD/hal/centauro_dummy.yaml
+    sim: $PWD/hal/kyon_gz.yaml
+    dummy: $PWD/hal/kyon_dummy.yaml
 
 
 # threads
