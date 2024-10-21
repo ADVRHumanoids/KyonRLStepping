@@ -45,7 +45,6 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
         except:
             self._with_wheels = False
 
-
     def _xrdf_cmds(self):
         parts = self._urdf_xacro_path.split('/')
         urdf_descr_root_path = '/'.join(parts[:-2])
