@@ -44,5 +44,9 @@
     <joint name="hip_roll_4" value="0.0"/>
     <joint name="hip_pitch_4" value="0.7"/>
     <joint name="knee_pitch_4" value="-1.4"/>
+    <!-- <joint name="wheel_joint_1" value="0"/>
+    <joint name="wheel_joint_2" value="0"/>
+    <joint name="wheel_joint_3" value="0"/>
+    <joint name="wheel_joint_4" value="0"/> -->
   </group_state>
 </robot>

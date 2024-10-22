@@ -25,7 +25,6 @@ xbotcore_device_configs:
     sim: $PWD/hal/kyon_gz.yaml
     dummy: $PWD/hal/kyon_dummy.yaml
 
-
 # threads
 xbotcore_threads:
     rt_main:  {sched: fifo , prio: 60, period: 0.001}
