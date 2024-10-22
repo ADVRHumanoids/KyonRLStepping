@@ -38,7 +38,7 @@ class KyonRhc(HybridQuadRhc):
 
         paths = PathsGetter()
         config_path = paths.RHCCONFIGPATH_WHEELS if with_wheels else paths.RHCCONFIGPATH_NO_WHEELS
-        
+
         super().__init__(srdf_path=srdf_path,
             urdf_path=urdf_path,
             config_path=config_path,
@@ -55,6 +55,8 @@ class KyonRhc(HybridQuadRhc):
             debug=debug,
             refs_in_hor_frame=refs_in_hor_frame,
             timeout_ms=timeout_ms)
+        
+        self._with_wheels=with_wheels
         
         self._fail_idx_scale=1e-9
         self._fail_idx_thresh_open_loop=1e0
