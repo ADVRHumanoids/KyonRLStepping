@@ -145,7 +145,8 @@ class KyonRhc(HybridQuadRhc):
         self._wheel_radius = 0.124 # hardcoded!!!!
         ground_level = FK(q=init)['ee_pos']
         self._base_init[2] = -ground_level[2]  # override init     
-        # self._base_init[2] += self._wheel_radius # even if in fixed joints, 
+        if are_there_wheels:
+            self._base_init[2] += self._wheel_radius # even if in fixed joints, 
         # in the real robot the wheel is there. This way the feet z in homing is at height
         
         self._model = FullModelInverseDynamics(problem=self._prb,

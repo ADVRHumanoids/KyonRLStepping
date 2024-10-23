@@ -43,21 +43,6 @@ costs:
   - joint_a_regularization
   # - force_regularization
 
-#open loop
-# .define:
-#   - &w_base_omega 5
-#   - &w_base_vxy 5
-#   - &w_base_vz 5
-#   - &w_base_z 10.
-#   - &w_contact_z 300.0
-#   - &w_contact_vz 10.0
-#   - &w_base_capture 10.
-#   - &w_capture_postural 3.0
-#   - &w_capture_postural_ub 1.
-#   - &w_v 3e-3
-#   - &w_a 5e-3
-#   - &w_f 1e-6
-
 #closed loop
 .define:
   - &w_base_omega 4
@@ -72,6 +57,7 @@ costs:
   - &w_v 3e-3
   - &w_a 5e-3
   - &w_f 1e-6
+  - &wheel_radius 0.124
 
 base_lin_velxy:
   type: Cartesian
@@ -112,31 +98,26 @@ base_capture:
   cartesian_type: velocity
   weight: *w_base_capture
   
-# ===============================
+# ==================================
+rolling_contact_1:
+  type: Rolling
+  frame: wheel_1
+  radius: *wheel_radius
 
-zero_velocity_ball_1:
-  type: Cartesian
-  distal_link: ball_1
-  indices: [0, 1, 2]
-  cartesian_type: velocity
+rolling_contact_2:
+  type: Rolling
+  frame: wheel_2
+  radius: *wheel_radius
 
-zero_velocity_ball_2:
-  type: Cartesian
-  distal_link: ball_2
-  indices: [0, 1, 2]
-  cartesian_type: velocity
+rolling_contact_3:
+  type: Rolling
+  frame: wheel_3
+  radius: *wheel_radius
 
-zero_velocity_ball_3:
-  type: Cartesian
-  distal_link: ball_3
-  indices: [0, 1, 2]
-  cartesian_type: velocity
-
-zero_velocity_ball_4:
-  type: Cartesian
-  distal_link: ball_4
-  indices: [0, 1, 2]
-  cartesian_type: velocity
+rolling_contact_4:
+  type: Rolling
+  frame: wheel_4
+  radius: *wheel_radius
 
 # ==================================
 
@@ -147,7 +128,7 @@ interaction_ball_1:
   enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
-    - ball_1
+    - wheel_1
 
 interaction_ball_2:
   type: VertexForce
@@ -156,7 +137,7 @@ interaction_ball_2:
   enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
-    - ball_2
+    - wheel_2
 
 interaction_ball_3:
   type: VertexForce
@@ -165,7 +146,7 @@ interaction_ball_3:
   enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
-    - ball_3
+    - wheel_3
 
 interaction_ball_4:
   type: VertexForce
@@ -174,31 +155,31 @@ interaction_ball_4:
   enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
-    - ball_4
+    - wheel_4
 
 ball_1:
   type: Contact
-  subtask: [interaction_ball_1, zero_velocity_ball_1]
+  subtask: [interaction_ball_1, rolling_contact_1]
 
 ball_2:
   type: Contact
-  subtask: [interaction_ball_2, zero_velocity_ball_2]
+  subtask: [interaction_ball_2, rolling_contact_2]
 
 ball_3:
   type: Contact
-  subtask: [interaction_ball_3, zero_velocity_ball_3]
+  subtask: [interaction_ball_3, rolling_contact_3]
 
 ball_4:
   type: Contact
-  subtask: [interaction_ball_4, zero_velocity_ball_4]
+  subtask: [interaction_ball_4, rolling_contact_4]
 
 joint_posture_capture:
   type: Postural
   weight: *w_capture_postural
   indices: [0, 1, 2,
-            3, 4, 5,
-            6, 7, 8,
-            9, 10, 11]
+            4, 5, 6,
+            8, 9, 10,
+            12, 13, 14]
   nodes: ${range(N-5, N+1)}
 
 joint_posture_capture_ub:
