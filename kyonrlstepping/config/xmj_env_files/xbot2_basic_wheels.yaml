@@ -1,6 +1,6 @@
 XBotInterface:
-  urdf_path: $PWD/kyon.urdf
-  srdf_path: $PWD/kyon.srdf
+  urdf_path: $PWD/kyon_wheels.urdf
+  srdf_path: $PWD/kyon_wheels.srdf
 
 ModelInterface:
   model_type: RBDL
