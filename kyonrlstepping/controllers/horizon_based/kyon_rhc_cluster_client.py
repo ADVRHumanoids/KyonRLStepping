@@ -2,7 +2,6 @@ from lrhc_control.controllers.rhc.hybrid_quad_client import HybridQuadrupedClust
 
 from kyonrlstepping.controllers.horizon_based.kyon_rhc import KyonRhc
 from kyonrlstepping.utils.xrdf_cmd import get_xrdf_cmds_horizon
-from lrhc_control.utils.custom_arg_parsing import extract_custom_xacro_args, merge_xacro_cmds
 
 from typing import List, Dict
 

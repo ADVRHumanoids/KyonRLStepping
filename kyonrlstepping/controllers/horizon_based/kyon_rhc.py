@@ -11,6 +11,7 @@ import os
 import shutil
 
 import time
+import re
 
 from kyonrlstepping.controllers.horizon_based.kyon_rhc_task_refs import KyonRHCRefs
 from kyonrlstepping.utils.sysutils import PathsGetter
@@ -38,6 +39,8 @@ class KyonRhc(HybridQuadRhc):
 
         paths = PathsGetter()
         config_path = paths.RHCCONFIGPATH_WHEELS if with_wheels else paths.RHCCONFIGPATH_NO_WHEELS
+        
+        self._with_wheels=with_wheels
 
         super().__init__(srdf_path=srdf_path,
             urdf_path=urdf_path,
@@ -55,8 +58,6 @@ class KyonRhc(HybridQuadRhc):
             debug=debug,
             refs_in_hor_frame=refs_in_hor_frame,
             timeout_ms=timeout_ms)
-        
-        self._with_wheels=with_wheels
         
         self._fail_idx_scale=1e-9
         self._fail_idx_thresh_open_loop=1e0
@@ -102,31 +103,40 @@ class KyonRhc(HybridQuadRhc):
                         casadi_type=cs.SX)
         self._prb.setDt(self._dt)
 
-        # FIXED JOINTS MAP init fixed map to zero -> homing from SRDF will be used
-        self._wheel_names = [f'j_wheel_{i + 1}' for i in range(4)]
-        # ankle_yaws = [f'ankle_yaw_{i + 1}' for i in range(4)]
-        # arm_joints = [f'j_arm1_{i + 1}' for i in range(6)] + [f'j_arm2_{i + 1}' for i in range(6)]
-        # torso_jnts=["torso_yaw"]
-        # head_jnts= ['d435_head_joint', 'velodyne_joint']
-        # fixed_joints = self._wheel_names+ankle_yaws+arm_joints+torso_jnts+head_jnts
-        # fixed_jnt_vals = len(fixed_joints)*[0.] # default to 0
-        # fixed_joint_map=dict(zip(fixed_joints, fixed_jnt_vals))
-
         self.urdf = self.urdf.replace('continuous', 'revolute') # continous joint is parametrized
         # in So2
 
-        self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf) # used for getting joint names in
-        # child class-> will be overritten
+        self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf) # used for getting joint names 
         self._assign_controller_side_jnt_names(jnt_names=self._get_robot_jnt_names())
 
-        self._init_robot_homer()
+        wheel_pattern = r"wheel_joint"
+        are_there_wheels=any(re.search(wheel_pattern, s) for s in self._get_robot_jnt_names())
         
-        # fixed_jnts_homing=self._homer.get_homing_vals(jnt_names=fixed_joints)# ordered as fixed_joints
-        # update fixed joints map from homing:
-        # for i in range(len(fixed_joints)):
-        #     jnt_name=fixed_joints[i]
-        #     fixed_joint_map[jnt_name]=fixed_jnts_homing[i]
-        # self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf)
+        self._init_robot_homer()
+
+        if (not are_there_wheels) and (self._with_wheels):
+            # not allowed
+            Journal.log(self.__class__.__name__,
+                "_init_problem",
+                f"Provided _with_wheels arg was set to True, but wheels not found in URDF!",
+                LogType.EXCEP,
+                throw_when_excep=True)
+        fixed_joint_map={}
+        if are_there_wheels and (not self._with_wheels): # we need to fix some joints
+            fixed_joints = [f'{wheel_pattern}_{i + 1}' for i in range(4)]
+            fixed_jnt_vals = len(fixed_joints)*[0.] # default to 0
+            fixed_joint_map=dict(zip(fixed_joints, fixed_jnt_vals))
+            fixed_jnts_homing=self._homer.get_homing_vals(jnt_names=fixed_joints)# ordered as fixed_joints
+            # update fixed joints map from homing:
+            for i in range(len(fixed_joints)):
+                jnt_name=fixed_joints[i]
+                fixed_joint_map[jnt_name]=fixed_jnts_homing[i]
+
+
+        if not len(fixed_joint_map)==0: # we need to recreate kin dyn and homers
+            self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf,fixed_joints=fixed_joint_map)
+            self._assign_controller_side_jnt_names(jnt_names=self._get_robot_jnt_names())
+            self._init_robot_homer()
 
         self._f0 = [0, 0, self._kin_dyn.mass() / 4 * 9.8]
 
