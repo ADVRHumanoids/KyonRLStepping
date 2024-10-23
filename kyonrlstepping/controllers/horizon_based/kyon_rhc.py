@@ -160,9 +160,8 @@ class KyonRhc(HybridQuadRhc):
                             debug = self._debug,
                             verbose = self._verbose, 
                             codegen_workdir = self._codegen_dir)
-        
         self._ti.setTaskFromYaml(self.config_path)
-
+        
         # setting initial base pos ref
         base_pos = self._ti.getTask('base_height')
         if base_pos is not None:
