@@ -132,7 +132,6 @@ class KyonRhc(HybridQuadRhc):
                 jnt_name=fixed_joints[i]
                 fixed_joint_map[jnt_name]=fixed_jnts_homing[i]
 
-
         if not len(fixed_joint_map)==0: # we need to recreate kin dyn and homers
             self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf,fixed_joints=fixed_joint_map)
             self._assign_controller_side_jnt_names(jnt_names=self._get_robot_jnt_names())
@@ -416,3 +415,39 @@ class KyonRhc(HybridQuadRhc):
 
         f = cs.Function('zmp', input_list, [zmp])
         return f
+    
+    def _assemble_meas_robot_state(self,
+                        x_opt = None,
+                        close_all: bool=False):
+
+        # overrides parent
+        q_jnts = self.robot_state.jnts_state.get(data_type="q", robot_idxs=self.controller_index).reshape(-1, 1)
+        v_jnts = self.robot_state.jnts_state.get(data_type="v", robot_idxs=self.controller_index).reshape(-1, 1)
+        q_root = self.robot_state.root_state.get(data_type="q", robot_idxs=self.controller_index).reshape(-1, 1)
+        p = self.robot_state.root_state.get(data_type="p", robot_idxs=self.controller_index).reshape(-1, 1)
+        v_root = self.robot_state.root_state.get(data_type="v", robot_idxs=self.controller_index).reshape(-1, 1)
+        omega = self.robot_state.root_state.get(data_type="omega", robot_idxs=self.controller_index).reshape(-1, 1)
+
+        # meas twist is assumed to be provided in BASE link!!!
+        if not close_all: # use internal MPC for the base and joints
+            p[0:3,:]=self._get_root_full_q_from_sol(node_idx=1).reshape(-1,1)[0:3, :] # base pos is open loop
+            # v_root[0:3,:]=self._get_root_twist_from_sol(node_idx=1).reshape(-1,1)[0:3, :]
+            q_jnts[:, :]=self._get_jnt_q_from_sol(node_idx=1).reshape(-1,1)
+            v_jnts[:, :]=self._get_jnt_v_from_sol(node_idx=1).reshape(-1,1)
+
+        # r_base = Rotation.from_quat(q_root.flatten()).as_matrix() # from base to world (.T the opposite)
+        
+        if x_opt is not None:
+            # CHECKING q_root for sign consistency!
+            # numerical problem: two quaternions can represent the same rotation
+            # if difference between the base q in the state x on first node and the sensed q_root < 0, change sign
+            state_quat_conjugate = np.copy(x_opt[3:7, 0])
+            state_quat_conjugate[:3] *= -1.0
+            # normalize the quaternion
+            state_quat_conjugate = state_quat_conjugate / np.linalg.norm(x_opt[3:7, 0])
+            diff_quat = self._quaternion_multiply(q_root, state_quat_conjugate)
+            if diff_quat[3] < 0:
+                q_root[:] = -q_root
+        
+        return np.concatenate((p, q_root, q_jnts, v_root, omega, v_jnts),
+                axis=0)
