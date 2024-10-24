@@ -7,11 +7,8 @@ from SharsorIPCpp.PySharsorIPC import Journal, LogType
 
 import numpy as np
 
-import os
-import shutil
-
-import time
 import re
+from typing import Dict 
 
 from kyonrlstepping.controllers.horizon_based.kyon_rhc_task_refs import KyonRHCRefs
 from kyonrlstepping.utils.sysutils import PathsGetter
@@ -34,8 +31,8 @@ class KyonRhc(HybridQuadRhc):
             verbose = False, 
             debug = False,
             refs_in_hor_frame = True,
-            timeout_ms: int = 60000
-            ):
+            timeout_ms: int = 60000,
+            custom_opts: Dict = {}):
 
         paths = PathsGetter()
         config_path = paths.RHCCONFIGPATH_WHEELS if with_wheels else paths.RHCCONFIGPATH_NO_WHEELS
@@ -57,7 +54,8 @@ class KyonRhc(HybridQuadRhc):
             verbose=verbose, 
             debug=debug,
             refs_in_hor_frame=refs_in_hor_frame,
-            timeout_ms=timeout_ms)
+            timeout_ms=timeout_ms,
+            custom_opts=custom_opts)
         
         self._fail_idx_scale=1e-9
         self._fail_idx_thresh_open_loop=1e0
@@ -103,11 +101,13 @@ class KyonRhc(HybridQuadRhc):
                         casadi_type=cs.SX)
         self._prb.setDt(self._dt)
 
-        self.urdf = self.urdf.replace('continuous', 'revolute') # continous joint is parametrized
-        # in So2
-
+        if self._custom_opts["replace_continuous_joints"]:
+            # continous joints are parametrized in So2
+            self.urdf = self.urdf.replace('continuous', 'revolute')
         self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf) # used for getting joint names 
         self._assign_controller_side_jnt_names(jnt_names=self._get_robot_jnt_names())
+        
+        self._continuous_joints=self._get_continuous_jnt_names()
 
         wheel_pattern = r"wheel_joint"
         are_there_wheels=any(re.search(wheel_pattern, s) for s in self._get_robot_jnt_names())
@@ -136,10 +136,26 @@ class KyonRhc(HybridQuadRhc):
             self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf,fixed_joints=fixed_joint_map)
             self._assign_controller_side_jnt_names(jnt_names=self._get_robot_jnt_names())
             self._init_robot_homer()
-
+        
+        jnt_homing=[""]*(len(self._homer.get_homing())+len(self._continuous_joints))
+        jnt_names=self._get_robot_jnt_names()
+        for jnt in jnt_names:
+            index=self._get_jnt_id(jnt)-7# accounting for floating joint
+            homing_value=self._homer.get_homing_val(jnt)
+            if jnt in self._continuous_joints:
+                jnt_homing[index]=np.cos(homing_value).item()
+                jnt_homing[index+1]=np.sin(homing_value).item()
+                jnt_homing[index]=1234
+                jnt_homing[index+1]=4321
+            else:
+                jnt_homing[index]=homing_value
+        
+        print(jnt_homing)
+        exit()
         self._f0 = [0, 0, self._kin_dyn.mass() / 4 * 9.8]
 
-        init = self._base_init.tolist() + list(self._homer.get_homing())
+        init = self._base_init.tolist() + jnt_homing
+
         FK = self._kin_dyn.fk('ball_1') # just to get robot reference height
         self._wheel_radius = 0.124 # hardcoded!!!!
         ground_level = FK(q=init)['ee_pos']
@@ -149,10 +165,10 @@ class KyonRhc(HybridQuadRhc):
         # in the real robot the wheel is there. This way the feet z in homing is at height
         
         self._model = FullModelInverseDynamics(problem=self._prb,
-                                kd=self._kin_dyn,
-                                q_init=self._homer.get_homing_map(),
-                                base_init=self._base_init)
-        
+            kd=self._kin_dyn,
+            q_init=self._homer.get_homing_map(),
+            base_init=self._base_init)
+
         self._ti = TaskInterface(prb=self._prb, 
                             model=self._model, 
                             max_solver_iter=self.max_solver_iter,
@@ -201,6 +217,10 @@ class KyonRhc(HybridQuadRhc):
 
         self._ti.finalize()
         self._ti.bootstrap()
+
+        print("AAAAAAAAAAa")
+        print(self._ti.solver_bs.getSolutionDict())
+        exit()
         self._ti.init_inv_dyn_for_res() # we initialize some objects for sol. postprocessing purposes
         self._ti.load_initial_guess()
 
