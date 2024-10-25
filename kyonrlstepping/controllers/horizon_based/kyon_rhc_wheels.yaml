@@ -173,13 +173,23 @@ ball_4:
   type: Contact
   subtask: [interaction_ball_4, rolling_contact_4]
 
+# joint_posture_capture:
+#   type: Postural
+#   weight: *w_capture_postural
+#   indices: [0, 1, 2,
+#             4, 5, 6,
+#             8, 9, 10,
+#             12, 13, 14]
+#   nodes: ${range(N-5, N+1)}
+
+# when using continuous joints
 joint_posture_capture:
   type: Postural
   weight: *w_capture_postural
   indices: [0, 1, 2,
-            4, 5, 6,
-            8, 9, 10,
-            12, 13, 14]
+            5, 6, 7,
+            10, 11, 12,
+            15, 16, 17]
   nodes: ${range(N-5, N+1)}
 
 joint_posture_capture_ub:

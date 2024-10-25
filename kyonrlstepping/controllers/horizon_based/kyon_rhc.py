@@ -108,7 +108,20 @@ class KyonRhc(HybridQuadRhc):
         self._assign_controller_side_jnt_names(jnt_names=self._get_robot_jnt_names())
         
         self._continuous_joints=self._get_continuous_jnt_names()
-
+        # reduced
+        self._continuous_joints_idxs=[]
+        self._continuous_joints_idxs_cos=[]
+        self._continuous_joints_idxs_sin=[]
+        self._continuous_joints_idxs_red=[]
+        self._rev_joints_idxs=[]
+        self._rev_joints_idxs_red=[]
+        # qfull
+        self._continuous_joints_idxs_qfull=[]
+        self._continuous_joints_idxs_cos_qfull=[]
+        self._continuous_joints_idxs_sin_qfull=[]
+        self._continuous_joints_idxs_red_qfull=[]
+        self._rev_joints_idxs_qfull=[]
+        self._rev_joints_idxs_red_qfull=[]
         wheel_pattern = r"wheel_joint"
         are_there_wheels=any(re.search(wheel_pattern, s) for s in self._get_robot_jnt_names())
         
@@ -140,19 +153,46 @@ class KyonRhc(HybridQuadRhc):
             self._assign_controller_side_jnt_names(jnt_names=self._get_robot_jnt_names())
             self._init_robot_homer()
         
+        self._wheel_jnts_idxs=[]
         jnt_homing=[""]*(len(self._homer.get_homing())+len(self._continuous_joints))
         jnt_names=self._get_robot_jnt_names()
-        for jnt in jnt_names:
-            index=self._get_jnt_id(jnt)-7# accounting for floating joint
+        for i in range(len(jnt_names)):
+            jnt=jnt_names[i]
+            index=self._get_jnt_id(jnt)# accounting for floating joint
+            homing_idx=index-7 # homing is only for actuated joints
+            if re.search(wheel_pattern, jnt): # found wheel joint
+                self._wheel_jnts_idxs.append(index)
             homing_value=self._homer.get_homing_val(jnt)
             if jnt in self._continuous_joints:
-                jnt_homing[index]=np.cos(homing_value).item()
-                jnt_homing[index+1]=np.sin(homing_value).item()
-                jnt_homing[index]=1234
-                jnt_homing[index+1]=4321
+                jnt_homing[homing_idx]=np.cos(homing_value).item()
+                jnt_homing[homing_idx+1]=np.sin(homing_value).item()
+                # just actuated joints
+                self._continuous_joints_idxs.append(homing_idx) # cos
+                self._continuous_joints_idxs.append(homing_idx+1) # sin
+                self._continuous_joints_idxs_cos.append(homing_idx)
+                self._continuous_joints_idxs_sin.append(homing_idx+1)
+                self._continuous_joints_idxs_red.append(i)
+                # q full
+                self._continuous_joints_idxs_qfull.append(index) # cos
+                self._continuous_joints_idxs_qfull.append(index+1) # sin
+                self._continuous_joints_idxs_cos_qfull.append(index)
+                self._continuous_joints_idxs_sin_qfull.append(index+1)
+                self._continuous_joints_idxs_red_qfull.append(i+7)
             else:
-                jnt_homing[index]=homing_value
-        
+                jnt_homing[homing_idx]=homing_value
+                # just actuated joints
+                self._rev_joints_idxs.append(homing_idx) 
+                self._rev_joints_idxs_red.append(i) 
+                # q full
+                self._rev_joints_idxs_qfull.append(index) 
+                self._rev_joints_idxs_red_qfull.append(i+7) 
+
+        self._jnts_q_reduced=None
+        if not len(self._continuous_joints)==0:
+            self._jnts_q_reduced=np.zeros((1,self.nv()-6),dtype=self._dtype)
+            self._jnts_q_expanded=np.zeros((1,self.nq()-7),dtype=self._dtype)
+            self._full_q_reduced=np.zeros((7+len(jnt_names), self._n_nodes),dtype=self._dtype)
+
         self._f0 = [0, 0, self._kin_dyn.mass() / 4 * 9.8]
 
         init = self._base_init.tolist() + jnt_homing
@@ -439,24 +479,30 @@ class KyonRhc(HybridQuadRhc):
                         close_all: bool=False):
 
         # overrides parent
-        q_jnts = self.robot_state.jnts_state.get(data_type="q", robot_idxs=self.controller_index).reshape(-1, 1)
-        v_jnts = self.robot_state.jnts_state.get(data_type="v", robot_idxs=self.controller_index).reshape(-1, 1)
-        q_root = self.robot_state.root_state.get(data_type="q", robot_idxs=self.controller_index).reshape(-1, 1)
-        p = self.robot_state.root_state.get(data_type="p", robot_idxs=self.controller_index).reshape(-1, 1)
-        v_root = self.robot_state.root_state.get(data_type="v", robot_idxs=self.controller_index).reshape(-1, 1)
-        omega = self.robot_state.root_state.get(data_type="omega", robot_idxs=self.controller_index).reshape(-1, 1)
+        q_jnts = self.robot_state.jnts_state.get(data_type="q", robot_idxs=self.controller_index).reshape(1, -1)
+        v_jnts = self.robot_state.jnts_state.get(data_type="v", robot_idxs=self.controller_index).reshape(1, -1)
+        q_root = self.robot_state.root_state.get(data_type="q", robot_idxs=self.controller_index).reshape(1, -1)
+        p = self.robot_state.root_state.get(data_type="p", robot_idxs=self.controller_index).reshape(1, -1)
+        v_root = self.robot_state.root_state.get(data_type="v", robot_idxs=self.controller_index).reshape(1, -1)
+        omega = self.robot_state.root_state.get(data_type="omega", robot_idxs=self.controller_index).reshape(1, -1)
 
+        if (not len(self._continuous_joints)==0): # we need do expand some meas. rev jnts to So2
+            # copy rev joints
+            self._jnts_q_expanded[:, self._rev_joints_idxs]=q_jnts[:, self._rev_joints_idxs_red]
+            self._jnts_q_expanded[:, self._continuous_joints_idxs_cos]=np.cos(q_jnts[:, self._continuous_joints_idxs_red]) # cos
+            self._jnts_q_expanded[:, self._continuous_joints_idxs_sin]=np.sin(q_jnts[:, self._continuous_joints_idxs_red]) # sin
+            q_jnts=self._jnts_q_expanded
         # meas twist is assumed to be provided in BASE link!!!
         if not close_all and not self._using_wheels: # use internal MPC for the base and joints
-            p[0:3,:]=self._get_root_full_q_from_sol(node_idx=1).reshape(-1,1)[0:3, :] # base pos is open loop
-            # v_root[0:3,:]=self._get_root_twist_from_sol(node_idx=1).reshape(-1,1)[0:3, :]
-            # q_jnts[:, :]=self._get_jnt_q_from_sol(node_idx=1).reshape(-1,1)            
-            v_jnts[:, :]=self._get_jnt_v_from_sol(node_idx=1).reshape(-1,1)
+            p[:, 0:3]=self._get_root_full_q_from_sol(node_idx=1)[:, 0:3] # base pos is open loop
+            # v_root[0:3,:]=self._get_root_twist_from_sol(node_idx=1)[0:3, :]
+            # q_jnts[:, :]=self._get_jnt_q_from_sol(node_idx=1,reduce=False)           
+            v_jnts[:, :]=self._get_jnt_v_from_sol(node_idx=1)
         if not close_all and self._using_wheels: 
-            p[0:3,:]=self._get_root_full_q_from_sol(node_idx=1).reshape(-1,1)[0:3, :] # base pos is open loop
-            # v_root[0:3,:]=self._get_root_twist_from_sol(node_idx=1).reshape(-1,1)[0:3, :]
-            q_jnts[:, :]=self._get_jnt_q_from_sol(node_idx=1).reshape(-1,1)            
-            v_jnts[:, :]=self._get_jnt_v_from_sol(node_idx=1).reshape(-1,1)
+            p[:, 0:3]=self._get_root_full_q_from_sol(node_idx=1)[:, 0:3] # base pos is open loop
+            # v_root[0:3,:]=self._get_root_twist_from_sol(node_idx=1)[0:3, :]
+            q_jnts[:, :]=self._get_jnt_q_from_sol(node_idx=1,reduce=False,clamp=False)       
+            v_jnts[:, :]=self._get_jnt_v_from_sol(node_idx=1)
         # r_base = Rotation.from_quat(q_root.flatten()).as_matrix() # from base to world (.T the opposite)
         
         if x_opt is not None:
@@ -467,9 +513,47 @@ class KyonRhc(HybridQuadRhc):
             state_quat_conjugate[:3] *= -1.0
             # normalize the quaternion
             state_quat_conjugate = state_quat_conjugate / np.linalg.norm(x_opt[3:7, 0])
-            diff_quat = self._quaternion_multiply(q_root, state_quat_conjugate)
+            diff_quat = self._quaternion_multiply(q_root.flatten(), state_quat_conjugate)
             if diff_quat[3] < 0:
-                q_root[:] = -q_root
+                q_root[:, :] = -q_root[:, :]
         
         return np.concatenate((p, q_root, q_jnts, v_root, omega, v_jnts),
-                axis=0)
+                axis=1).reshape(-1,1)
+    
+    def _get_q_from_sol(self):
+        full_q=super()._get_q_from_sol()
+        if self._custom_opts["replace_continuous_joints"]:
+            return full_q
+        else:
+            cont_jnts=full_q[self._continuous_joints_idxs_qfull, :]
+            cos=cont_jnts[::2, :]
+            sin=cont_jnts[1::2, :]
+            # copy root
+            self._full_q_reduced[0:7, :]=full_q[0:7, :]
+            # copy rev joint vals
+            self._full_q_reduced[self._rev_joints_idxs_red_qfull, :]=full_q[self._rev_joints_idxs_qfull, :]
+            # and continuous
+            angle=np.arctan2(sin, cos)
+            self._full_q_reduced[self._continuous_joints_idxs_red_qfull, :]=angle
+            return self._full_q_reduced
+            
+    def _get_jnt_q_from_sol(self, node_idx=1, 
+            reduce: bool = True,
+            clamp: bool = True):
+        
+        full_jnts_q=self._ti.solution['q'][7:, node_idx:node_idx+1].reshape(1,-1)
+
+        if self._custom_opts["replace_continuous_joints"] or (not reduce):
+            if clamp:
+                return np.fmod(full_jnts_q, 2*np.pi)
+            else:
+                return full_jnts_q
+        else:
+            cos_sin=full_jnts_q[:,self._continuous_joints_idxs].reshape(-1,2)
+            # copy rev joint vals
+            self._jnts_q_reduced[:, self._rev_joints_idxs_red]=np.fmod(full_jnts_q[:, self._rev_joints_idxs], 2*np.pi).reshape(1, -1)
+            # and continuous
+            self._jnts_q_reduced[:, self._continuous_joints_idxs_red]=np.arctan2(cos_sin[:, 1], cos_sin[:, 0]).reshape(1,-1)
+            return self._jnts_q_reduced
+
+
