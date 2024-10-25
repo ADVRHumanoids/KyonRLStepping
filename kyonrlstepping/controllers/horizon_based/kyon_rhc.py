@@ -150,8 +150,6 @@ class KyonRhc(HybridQuadRhc):
             else:
                 jnt_homing[index]=homing_value
         
-        print(jnt_homing)
-        exit()
         self._f0 = [0, 0, self._kin_dyn.mass() / 4 * 9.8]
 
         init = self._base_init.tolist() + jnt_homing
@@ -218,9 +216,6 @@ class KyonRhc(HybridQuadRhc):
         self._ti.finalize()
         self._ti.bootstrap()
 
-        print("AAAAAAAAAAa")
-        print(self._ti.solver_bs.getSolutionDict())
-        exit()
         self._ti.init_inv_dyn_for_res() # we initialize some objects for sol. postprocessing purposes
         self._ti.load_initial_guess()
 

@@ -167,7 +167,7 @@
     <child link="wheel_1"/>
     <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.05"/>
     <axis xyz="0 0 -1"/>
-    <limit effort="132" velocity="15.5"/>
+    <limit effort="132" velocity="60.0"/>
     <!-- 23 Nm, 1
             rad/s-->
   </joint>
@@ -358,7 +358,7 @@
     <child link="wheel_2"/>
     <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.05"/>
     <axis xyz="0 0 1"/>
-    <limit effort="132" velocity="15.5"/>
+    <limit effort="132" velocity="60.0"/>
     <!-- 23 Nm, 1
             rad/s-->
   </joint>
@@ -549,7 +549,7 @@
     <child link="wheel_3"/>
     <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.05"/>
     <axis xyz="0 0 -1"/>
-    <limit effort="132" velocity="15.5"/>
+    <limit effort="132" velocity="60.0"/>
     <!-- 23 Nm, 1
             rad/s-->
   </joint>
@@ -740,7 +740,7 @@
     <child link="wheel_4"/>
     <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 -0.05"/>
     <axis xyz="0 0 1"/>
-    <limit effort="132" velocity="15.5"/>
+    <limit effort="132" velocity="60.0"/>
     <!-- 23 Nm, 1
             rad/s-->
   </joint>
