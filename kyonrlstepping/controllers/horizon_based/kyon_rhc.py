@@ -132,6 +132,9 @@ class KyonRhc(HybridQuadRhc):
                 jnt_name=fixed_joints[i]
                 fixed_joint_map[jnt_name]=fixed_jnts_homing[i]
 
+        self._using_wheels=False
+        if are_there_wheels and self._with_wheels:
+            self._using_wheels=True
         if not len(fixed_joint_map)==0: # we need to recreate kin dyn and homers
             self._kin_dyn = casadi_kin_dyn.CasadiKinDyn(self.urdf,fixed_joints=fixed_joint_map)
             self._assign_controller_side_jnt_names(jnt_names=self._get_robot_jnt_names())
@@ -444,12 +447,16 @@ class KyonRhc(HybridQuadRhc):
         omega = self.robot_state.root_state.get(data_type="omega", robot_idxs=self.controller_index).reshape(-1, 1)
 
         # meas twist is assumed to be provided in BASE link!!!
-        if not close_all: # use internal MPC for the base and joints
+        if not close_all and not self._using_wheels: # use internal MPC for the base and joints
             p[0:3,:]=self._get_root_full_q_from_sol(node_idx=1).reshape(-1,1)[0:3, :] # base pos is open loop
             # v_root[0:3,:]=self._get_root_twist_from_sol(node_idx=1).reshape(-1,1)[0:3, :]
             # q_jnts[:, :]=self._get_jnt_q_from_sol(node_idx=1).reshape(-1,1)            
             v_jnts[:, :]=self._get_jnt_v_from_sol(node_idx=1).reshape(-1,1)
-
+        if not close_all and self._using_wheels: 
+            p[0:3,:]=self._get_root_full_q_from_sol(node_idx=1).reshape(-1,1)[0:3, :] # base pos is open loop
+            # v_root[0:3,:]=self._get_root_twist_from_sol(node_idx=1).reshape(-1,1)[0:3, :]
+            q_jnts[:, :]=self._get_jnt_q_from_sol(node_idx=1).reshape(-1,1)            
+            v_jnts[:, :]=self._get_jnt_v_from_sol(node_idx=1).reshape(-1,1)
         # r_base = Rotation.from_quat(q_root.flatten()).as_matrix() # from base to world (.T the opposite)
         
         if x_opt is not None:
