@@ -69,7 +69,10 @@ class KyonRhc(HybridQuadRhc):
             self._fail_idx_thresh=self._fail_idx_thresh_open_loop
         else:
             self._fail_idx_thresh=self._fail_idx_thresh_closed_loop
-
+        
+        if not len(self._wheel_jnts_idxs)==0 and (not open_loop):
+            self._fail_idx_thresh=2*self._fail_idx_thresh_closed_loop
+            
     def _set_rhc_pred_idx(self):
         self._pred_node_idx=round((self._n_nodes-1)*2/3)
         
@@ -206,8 +209,8 @@ class KyonRhc(HybridQuadRhc):
         self._wheel_radius = 0.124 # hardcoded!!!!
         ground_level = FK(q=init)['ee_pos']
         self._base_init[2] = -ground_level[2]  # override init     
-        if are_there_wheels:
-            self._base_init[2] += self._wheel_radius # even if in fixed joints, 
+        # if are_there_wheels:
+        #     self._base_init[2] += self._wheel_radius # even if in fixed joints, 
         # in the real robot the wheel is there. This way the feet z in homing is at height
         
         self._model = FullModelInverseDynamics(problem=self._prb,
