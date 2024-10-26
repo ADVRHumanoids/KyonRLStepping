@@ -35,7 +35,12 @@ class KyonRhc(HybridQuadRhc):
             custom_opts: Dict = {}):
 
         paths = PathsGetter()
-        config_path = paths.RHCCONFIGPATH_WHEELS if with_wheels else paths.RHCCONFIGPATH_NO_WHEELS
+        config_path=paths.RHCCONFIGPATH_NO_WHEELS
+        if with_wheels:
+            config_path = paths.RHCCONFIGPATH_WHEELS
+        if ("replace_continuous_joints" in custom_opts) and \
+            (not custom_opts["replace_continuous_joints"]):
+            config_path = paths.RHCCONFIGPATH_WHEELS_CONTINUOUS
         
         self._with_wheels=with_wheels
 

@@ -16,6 +16,9 @@ class PathsGetter:
         self.RHCCONFIGPATH_WHEELS = os.path.join(self.CONTROLLER_ROOT_DIR, 
                                         'kyon_rhc_wheels.yaml')
         
+        self.RHCCONFIGPATH_WHEELS_CONTINUOUS = os.path.join(self.CONTROLLER_ROOT_DIR, 
+                                        'kyon_rhc_wheels_continuous.yaml')
+
         self.JNT_IMP_CONFIG = os.path.join(self.ROOT_DIR, 
                                         'config',
                                         'jnt_imp_config.yaml')
