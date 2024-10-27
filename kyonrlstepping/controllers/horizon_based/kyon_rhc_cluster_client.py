@@ -39,11 +39,6 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
             timeout_ms=timeout_ms,
             codegen_override=codegen_override,
             custom_opts=custom_opts)
-        
-        try:
-            self._with_wheels = self._custom_opts["with_wheels"]
-        except:
-            self._with_wheels = False
 
     def _xrdf_cmds(self):
         parts = self._urdf_xacro_path.split('/')
@@ -61,7 +56,6 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
                 srdf_path=self._srdf_path,
                 robot_name=self._namespace,
                 codegen_dir=codegen_dir,
-                with_wheels=self._with_wheels,
                 n_nodes=31, 
                 dt=0.03,
                 injection_node=5,
