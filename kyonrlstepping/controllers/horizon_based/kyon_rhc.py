@@ -67,14 +67,22 @@ class KyonRhc(HybridQuadRhc):
     def _set_rhc_pred_idx(self):
         self._pred_node_idx=round((self._n_nodes-1)*2/3)
     
+    def _set_rhc_cmds_idx(self):
+        self._rhc_cmds_node_idx=2
+
     def _init_problem(self):
         
+        flight_duration_sec=0.45 # [s]
+        post_landing_duration=0.15
+        flight_duration=int(flight_duration_sec/self._dt)
+        post_landing_stance=int(post_landing_duration/self._dt)
+
         super()._init_problem(fixed_jnt_patterns=None,
             foot_linkname="ball_1",
-            flight_duration=15,
-            post_landing_stance=5,
-            step_height=0.1,
+            flight_duration=flight_duration,
+            post_landing_stance=post_landing_stance,
+            step_height=0.10,
             keep_yaw_vert=False,
-            yaw_vertical_weight=2.0,
+            yaw_vertical_weight=1.0,
             phase_force_reg=1e-2,
             vel_bounds_weight=1.0)

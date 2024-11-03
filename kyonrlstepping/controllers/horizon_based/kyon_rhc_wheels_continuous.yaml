@@ -35,13 +35,13 @@ costs:
   # - vz_ball_4
   - base_lin_velxy
   - base_lin_velz
-  # - base_height
   - base_omega
   - base_capture
   - joint_posture_capture
-  - joint_v_regularization
-  - joint_a_regularization
-  # - force_regularization
+  - v_regularization
+  - a_regularization
+  - joint_v_reg_wheels
+  - joint_a_reg_wheels
 
 #closed loop
 .define:
@@ -56,7 +56,8 @@ costs:
   - &w_capture_postural_ub 1.
   - &w_v 3e-3
   - &w_a 5e-3
-  - &w_f 1e-6
+  - &w_v_wheels 3e-2
+  - &w_a_wheels 5e-2
   - &wheel_radius 0.124
 
 base_lin_velxy:
@@ -74,13 +75,6 @@ base_lin_velz:
   nodes: ${range(1, N-5)}
   cartesian_type: velocity
   weight: *w_base_vz
-
-base_height:
-  type: Cartesian
-  distal_link: base_link
-  indices: [2]
-  nodes: ${range(1, N+1)}
-  weight: *w_base_z
 
 base_omega:
   type: Cartesian
@@ -125,7 +119,7 @@ interaction_ball_1:
   type: VertexForce
   frame: ball_1
   fn_min: 20.0
-  enable_fc: false
+  enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
     - wheel_1
@@ -134,7 +128,7 @@ interaction_ball_2:
   type: VertexForce
   frame: ball_2
   fn_min: 20.0
-  enable_fc: false
+  enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
     - wheel_2
@@ -143,7 +137,7 @@ interaction_ball_3:
   type: VertexForce
   frame: ball_3
   fn_min: 20.0
-  enable_fc: false
+  enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
     - wheel_3
@@ -152,7 +146,7 @@ interaction_ball_4:
   type: VertexForce
   frame: ball_4
   fn_min: 20.0
-  enable_fc: false
+  enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
     - wheel_4
@@ -173,15 +167,6 @@ ball_4:
   type: Contact
   subtask: [interaction_ball_4, rolling_contact_4]
 
-# joint_posture_capture:
-#   type: Postural
-#   weight: *w_capture_postural
-#   indices: [0, 1, 2,
-#             4, 5, 6,
-#             8, 9, 10,
-#             12, 13, 14]
-#   nodes: ${range(N-5, N+1)}
-
 # when using continuous joints
 joint_posture_capture:
   type: Postural
@@ -198,24 +183,42 @@ joint_posture_capture_ub:
   indices:  [12, 13, 14, 15, 16,
              17, 18, 19, 20, 21]
   nodes: ${range(1, N+1)}
-  
-# todo: wrong, as the order COUNTS. If I add the contacts after the joint regularization, they wont get considered.
-joint_v_regularization:
+
+v_regularization:
   type: Regularization
   nodes: ${range(0, N+1)}
+  indices: [0, 1, 2, 3, 4, 5,
+    6, 7, 8, 
+    10, 11, 12,
+    14, 15, 16, 
+    18, 19, 20 ]
   weight:
     velocity: *w_v
 
-joint_a_regularization:
+a_regularization:
   type: Regularization
   nodes: ${range(0, N+1)}
+  indices: [0, 1, 2, 3, 4, 5,
+    6, 7, 8, 
+    10, 11, 12,
+    14, 15, 16, 
+    18, 19, 20 ]
   weight:
     acceleration: *w_a # 0.01
 
-force_regularization:
+joint_v_reg_wheels:
   type: Regularization
+  nodes: ${range(0, N+1)}
+  indices: [9, 13, 17, 21]
   weight:
-    force: *w_f # todo <----- how to do? if there are more forces...
+    velocity: *w_v_wheels
+
+joint_a_reg_wheels:
+  type: Regularization
+  nodes: ${range(0, N+1)}
+  indices: [9, 13, 17, 21]
+  weight:
+    acceleration: *w_a_wheels # 0.01
 
 z_ball_1:
   type: Cartesian
