@@ -29,14 +29,6 @@ class KyonRhc(HybridQuadRhc):
 
         paths = PathsGetter()
         config_path=paths.RHCCONFIGPATH_NO_WHEELS
-        if ("wheels" in custom_opts) and \
-            ("true" in custom_opts["wheels"] or \
-            "True" in custom_opts["wheels"]):
-            config_path = paths.RHCCONFIGPATH_WHEELS
-            if ("replace_continuous_joints" in custom_opts) and \
-                (not custom_opts["replace_continuous_joints"]):
-                # use continuous joints -> different config
-                config_path = paths.RHCCONFIGPATH_WHEELS_CONTINUOUS
         
         super().__init__(srdf_path=srdf_path,
             urdf_path=urdf_path,
@@ -69,6 +61,17 @@ class KyonRhc(HybridQuadRhc):
     
     def _set_rhc_cmds_idx(self):
         self._rhc_cmds_node_idx=2
+
+    def _config_override(self):
+        paths = PathsGetter()
+        if ("wheels" in self._custom_opts) and \
+            ("true" in self._custom_opts["wheels"] or \
+            "True" in self._custom_opts["wheels"]):
+            self.config_path = paths.RHCCONFIGPATH_WHEELS
+            if ("replace_continuous_joints" in self._custom_opts) and \
+                (not self._custom_opts["replace_continuous_joints"]):
+                # use continuous joints -> different config
+                self.config_path = paths.RHCCONFIGPATH_WHEELS_CONTINUOUS
 
     def _init_problem(self):
         

@@ -76,13 +76,6 @@ base_lin_velz:
   cartesian_type: velocity
   weight: *w_base_vz
 
-base_height:
-  type: Cartesian
-  distal_link: base_link
-  indices: [2]
-  nodes: ${range(1, N+1)}
-  weight: *w_base_z
-
 base_omega:
   type: Cartesian
   distal_link: base_link
@@ -182,13 +175,6 @@ joint_posture_capture:
             8, 9, 10,
             12, 13, 14]
   nodes: ${range(N-5, N+1)}
-
-joint_posture_capture_ub:
-  type: Postural
-  weight: *w_capture_postural_ub
-  indices:  [12, 13, 14, 15, 16,
-             17, 18, 19, 20, 21]
-  nodes: ${range(1, N+1)}
   
 v_regularization:
   type: Regularization
