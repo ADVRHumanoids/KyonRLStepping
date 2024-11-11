@@ -52,7 +52,7 @@ costs:
   - &w_base_capture 10.
   - &w_capture_postural 3.0
   - &w_capture_postural_ub 1.
-  - &w_v 3e-3
+  - &w_v 3e-2
   - &w_a 5e-3
 
 base_lin_velxy:
