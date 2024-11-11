@@ -40,6 +40,12 @@
       </geometry>
     </collision>
   </link>
+  <link name="imu_link"/>
+  <joint name="imu_joint" type="fixed">
+    <parent link="pelvis"/>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+    <child link="imu_link"/>
+  </joint>
   <!-- /macro legs -->
   <!-- links -->
   <link name="hip_roll_motor_1">

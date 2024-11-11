@@ -12,6 +12,9 @@
   <group name="base">
     <link name="pelvis"/>
   </group>
+  <group name="imu_sensors">
+    <link name="imu_link"/>
+  </group>
   <group name="front_left_leg">
     <chain base_link="pelvis" tip_link="wheel_1"/>
   </group>
