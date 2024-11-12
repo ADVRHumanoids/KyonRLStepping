@@ -38,10 +38,10 @@ costs:
   - base_omega
   # - base_capture
   - joint_posture_capture
-  - v_root_regularization
-  - a_root_regularization
-  - v_jnts_regularization
-  - a_jnts_regularization
+  # - v_root_reg
+  - a_root_reg
+  - v_jnts_reg
+  - a_jnts_reg
 
 #closed loop
 .define:
@@ -180,23 +180,23 @@ joint_posture_capture:
             9, 10, 11]
   nodes: ${range(N-5, N+1)}
   
-v_root_regularization:
+v_root_reg:
   type: Regularization
-  nodes: ${range(1, N+1)}
+  nodes: ${range(0, N+1)}
   indices: [0, 1, 2, 3, 4, 5]
   weight:
     velocity: *w_v_root
 
-a_root_regularization:
+a_root_reg:
   type: Regularization
-  nodes: ${range(1, N+1)}
+  nodes: ${range(0, N+1)}
   indices: [0, 1, 2, 3, 4, 5]
   weight:
     acceleration: *w_a_root # 0.01
 
-v_jnts_regularization:
+v_jnts_reg:
   type: Regularization
-  nodes: ${range(1, N+1)}
+  nodes: ${range(0, N+1)}
   indices: [6, 7, 8,
     9, 10, 11, 
     12, 13, 14,
@@ -204,9 +204,9 @@ v_jnts_regularization:
   weight:
     velocity: *w_v_jnts
 
-a_jnts_regularization:
+a_jnts_reg:
   type: Regularization
-  nodes: ${range(1, N+1)}
+  nodes: ${range(0, N+1)}
   indices: [6, 7, 8,
     9, 10, 11, 
     12, 13, 14,

@@ -50,7 +50,7 @@ class KyonRhc(HybridQuadRhc):
         
         self._fail_idx_scale=1e-9
         self._fail_idx_thresh_open_loop=1e0
-        self._fail_idx_thresh_closed_loop=10
+        self._fail_idx_thresh_closed_loop=5
         if open_loop:
             self._fail_idx_thresh=self._fail_idx_thresh_open_loop
         else:

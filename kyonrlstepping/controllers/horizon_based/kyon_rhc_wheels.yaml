@@ -36,12 +36,14 @@ costs:
   - base_lin_velxy
   - base_lin_velz
   - base_omega
-  - base_capture
+  # - base_capture
   - joint_posture_capture
-  - v_regularization
-  - a_regularization
-  - joint_v_reg_wheels
-  - joint_a_reg_wheels
+  # - v_root_reg
+  - a_root_reg
+  - v_jnts_reg
+  - a_jnts_reg
+  - v_wheel_jnts_reg
+  - a_wheels_jnts_reg
 
 #closed loop
 .define:
@@ -54,8 +56,10 @@ costs:
   - &w_base_capture 10.
   - &w_capture_postural 3.0
   - &w_capture_postural_ub 1.
-  - &w_v 3e-3
-  - &w_a 5e-3
+  - &w_v_root 3e-3
+  - &w_a_root 5e-3
+  - &w_v_jnts 1e-3
+  - &w_a_jnts 3e-3
   - &w_v_wheels 3e-2
   - &w_a_wheels 5e-2
   - &wheel_radius 0.124
@@ -64,7 +68,7 @@ base_lin_velxy:
   type: Cartesian
   distal_link: base_link
   indices: [0, 1]
-  nodes: ${range(1, N-5)}
+  nodes: ${range(1, N+1)}
   cartesian_type: velocity
   weight: *w_base_vxy
 
@@ -72,7 +76,7 @@ base_lin_velz:
   type: Cartesian
   distal_link: base_link
   indices: [2]
-  nodes: ${range(1, N-5)}
+  nodes: ${range(1, N+1)}
   cartesian_type: velocity
   weight: *w_base_vz
 
@@ -80,7 +84,7 @@ base_omega:
   type: Cartesian
   distal_link: base_link
   indices: [3, 4, 5]
-  nodes: ${range(1, N-5)}
+  nodes: ${range(1, N+1)}
   cartesian_type: velocity
   weight: *w_base_omega
 
@@ -167,6 +171,7 @@ ball_4:
   type: Contact
   subtask: [interaction_ball_4, rolling_contact_4]
 
+# when using continuous joints
 joint_posture_capture:
   type: Postural
   weight: *w_capture_postural
@@ -175,37 +180,49 @@ joint_posture_capture:
             8, 9, 10,
             12, 13, 14]
   nodes: ${range(N-5, N+1)}
-  
-v_regularization:
+
+v_root_reg:
   type: Regularization
   nodes: ${range(0, N+1)}
-  indices: [0, 1, 2, 3, 4, 5,
-    6, 7, 8, 
+  indices: [0, 1, 2, 3, 4, 5]
+  weight:
+    velocity: *w_v_root
+
+a_root_reg:
+  type: Regularization
+  nodes: ${range(0, N+1)}
+  indices: [0, 1, 2, 3, 4, 5]
+  weight:
+    acceleration: *w_a_root # 0.01
+
+v_jnts_reg:
+  type: Regularization
+  nodes: ${range(0, N+1)}
+  indices: [6, 7, 8, 
     10, 11, 12,
     14, 15, 16, 
     18, 19, 20 ]
   weight:
-    velocity: *w_v
+    velocity: *w_v_jnts
 
-a_regularization:
+a_jnts_reg:
   type: Regularization
   nodes: ${range(0, N+1)}
-  indices: [0, 1, 2, 3, 4, 5,
-    6, 7, 8, 
+  indices: [6, 7, 8, 
     10, 11, 12,
     14, 15, 16, 
     18, 19, 20 ]
   weight:
-    acceleration: *w_a # 0.01
+    acceleration: *w_a_jnts # 0.01
 
-joint_v_reg_wheels:
+v_wheel_jnts_reg:
   type: Regularization
   nodes: ${range(0, N+1)}
   indices: [9, 13, 17, 21]
   weight:
     velocity: *w_v_wheels
 
-joint_a_reg_wheels:
+a_wheels_jnts_reg:
   type: Regularization
   nodes: ${range(0, N+1)}
   indices: [9, 13, 17, 21]
