@@ -58,7 +58,7 @@ class KyonRHCLusterClient(HybridQuadrupedClusterClient):
                 codegen_dir=codegen_dir,
                 n_nodes=31, 
                 dt=0.03,
-                injection_node=5,
+                injection_node=8,
                 max_solver_iter=1,
                 open_loop = self._open_loop,
                 close_loop_all=False,
