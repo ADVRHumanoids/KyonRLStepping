@@ -77,10 +77,12 @@ class KyonRhc(HybridQuadRhc):
         
         flight_duration_sec=0.45 # [s]
         flight_duration=int(flight_duration_sec/self._dt)
-
+        post_flight_duration_sec=0.15 # [s]
+        post_flight_duration=int(post_flight_duration_sec/self._dt)
         super()._init_problem(fixed_jnt_patterns=None,
             foot_linkname="ball_1",
             flight_duration=flight_duration,
+            post_flight_stance=post_flight_duration,
             step_height=0.10,
             keep_yaw_vert=False,
             yaw_vertical_weight=1.0,
