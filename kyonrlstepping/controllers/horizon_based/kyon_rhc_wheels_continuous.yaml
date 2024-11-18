@@ -25,20 +25,20 @@ constraints:
   - ball_4
 
 costs:
-  - z_ball_1
-  - z_ball_2
-  - z_ball_3
-  - z_ball_4
-  # - vz_ball_1
-  # - vz_ball_2
-  # - vz_ball_3
-  # - vz_ball_4
+  # - z_ball_1
+  # - z_ball_2
+  # - z_ball_3
+  # - z_ball_4
+  - vz_ball_1
+  - vz_ball_2
+  - vz_ball_3
+  - vz_ball_4
   - base_lin_velxy
   - base_lin_velz
   - base_omega
   # - base_capture
   - joint_posture_capture
-  # - v_root_reg
+  - v_root_reg
   - a_root_reg
   - v_jnts_reg
   - a_jnts_reg
@@ -52,7 +52,7 @@ costs:
   - &w_base_vz 4
   - &w_base_z 4.
   - &w_contact_z 5.0
-  - &w_contact_vz 1.0
+  - &w_contact_vz 100.0
   - &w_base_capture 10.
   - &w_capture_postural 3.0
   - &w_capture_postural_ub 1.
@@ -122,7 +122,7 @@ rolling_contact_4:
 interaction_ball_1:
   type: VertexForce
   frame: ball_1
-  fn_min: 20.0
+  fn_min: -10
   enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
@@ -131,7 +131,7 @@ interaction_ball_1:
 interaction_ball_2:
   type: VertexForce
   frame: ball_2
-  fn_min: 20.0
+  fn_min: -10
   enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
@@ -140,7 +140,7 @@ interaction_ball_2:
 interaction_ball_3:
   type: VertexForce
   frame: ball_3
-  fn_min: 20.0
+  fn_min: -10
   enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
@@ -149,7 +149,7 @@ interaction_ball_3:
 interaction_ball_4:
   type: VertexForce
   frame: ball_4
-  fn_min: 20.0
+  fn_min: -10
   enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
@@ -183,7 +183,7 @@ joint_posture_capture:
 
 v_root_reg:
   type: Regularization
-  nodes: ${range(0, N+1)}
+  nodes: ${range(0, 1)}
   indices: [0, 1, 2, 3, 4, 5]
   weight:
     velocity: *w_v_root
