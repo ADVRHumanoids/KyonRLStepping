@@ -186,14 +186,14 @@ v_root_reg:
   nodes: ${range(0, 1)}
   indices: [0, 1, 2, 3, 4, 5]
   weight:
-    velocity: *w_v_root
+    v: *w_v_root
 
 a_root_reg:
   type: Regularization
   nodes: ${range(0, N+1)}
   indices: [0, 1, 2, 3, 4, 5]
   weight:
-    acceleration: *w_a_root # 0.01
+    a: *w_a_root # 0.01
 
 v_jnts_reg:
   type: Regularization
@@ -203,7 +203,7 @@ v_jnts_reg:
     14, 15, 16, 
     18, 19, 20 ]
   weight:
-    velocity: *w_v_jnts
+    v: *w_v_jnts
 
 a_jnts_reg:
   type: Regularization
@@ -213,21 +213,21 @@ a_jnts_reg:
     14, 15, 16, 
     18, 19, 20 ]
   weight:
-    acceleration: *w_a_jnts # 0.01
+    a: *w_a_jnts # 0.01
 
 v_wheel_jnts_reg:
   type: Regularization
   nodes: ${range(0, N+1)}
   indices: [9, 13, 17, 21]
   weight:
-    velocity: *w_v_wheels
+    v: *w_v_wheels
 
 a_wheels_jnts_reg:
   type: Regularization
   nodes: ${range(0, N+1)}
   indices: [9, 13, 17, 21]
   weight:
-    acceleration: *w_a_wheels # 0.01
+    a: *w_a_wheels # 0.01
 
 z_ball_1:
   type: Cartesian
