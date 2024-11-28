@@ -22,6 +22,11 @@ class PathsGetter:
         self.JNT_IMP_CONFIG = os.path.join(self.ROOT_DIR, 
                                         'config',
                                         'jnt_imp_config.yaml')
+        
+        self.JNT_IMP_CONFIG_XBOT = os.path.join(self.ROOT_DIR, 
+                                        'config',
+                                        'xmj_env_files',
+                                        'xbot2_basic.yaml')
 
 if __name__ == "__main__":  
 
