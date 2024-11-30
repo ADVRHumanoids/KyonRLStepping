@@ -1,6 +1,6 @@
 from typing import List
-from SharsorIPCpp.PySharsorIPC import VLevel
-from SharsorIPCpp.PySharsorIPC import Journal, LogType
+from EigenIPC.PyEigenIPC import VLevel
+from EigenIPC.PyEigenIPC import Journal, LogType
            
 def get_xrdf_cmds_horizon(urdf_descr_root_path : str = None):
         return get_xrdf_cmds_horizon_kyon(urdf_descr_root_path=urdf_descr_root_path)
