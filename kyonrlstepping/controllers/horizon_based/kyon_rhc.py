@@ -79,16 +79,17 @@ class KyonRhc(HybridQuadRhc):
 
     def _init_problem(self):
         
-        flight_duration_sec=0.45 # [s]
+        flight_duration_sec=0.6 # [s]
         flight_duration=int(flight_duration_sec/self._dt)
-        post_flight_duration_sec=0.15 # [s]
+        post_flight_duration_sec=0.2 # [s]
         post_flight_duration=int(post_flight_duration_sec/self._dt)
         super()._init_problem(fixed_jnt_patterns=None,
+            wheels_patterns=["wheel_"],
             foot_linkname="ball_1",
             flight_duration=flight_duration,
             post_flight_stance=post_flight_duration,
-            step_height=0.10,
+            step_height=0.1,
             keep_yaw_vert=False,
             yaw_vertical_weight=1.0,
-            phase_force_reg=1e-2,
+            phase_force_reg=2e-2,
             vel_bounds_weight=1.0)

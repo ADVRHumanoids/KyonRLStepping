@@ -50,14 +50,14 @@ costs:
   - &w_base_vz 4
   - &w_base_z 4.
   - &w_contact_z 10.0
-  - &w_contact_vz 100.0
+  - &w_contact_vz 50.0
   - &w_base_capture 10.
-  - &w_capture_postural 3.0
+  - &w_capture_postural 5.0
   - &w_capture_postural_ub 1.
-  - &w_v_root 3e-2
-  - &w_a_root 5e-3
-  - &w_v_jnts 3e-2
-  - &w_a_jnts 5e-3
+  - &w_v_root 3e-1
+  - &w_a_root 5e-1
+  - &w_v_jnts 1e-1
+  - &w_a_jnts 2e-2
 
 base_lin_velxy:
   type: Cartesian
@@ -126,7 +126,7 @@ zero_velocity_ball_4:
 interaction_ball_1:
   type: VertexForce
   frame: ball_1
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
@@ -135,7 +135,7 @@ interaction_ball_1:
 interaction_ball_2:
   type: VertexForce
   frame: ball_2
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
@@ -144,7 +144,7 @@ interaction_ball_2:
 interaction_ball_3:
   type: VertexForce
   frame: ball_3
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
@@ -153,7 +153,7 @@ interaction_ball_3:
 interaction_ball_4:
   type: VertexForce
   frame: ball_4
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
   friction_coeff: 0.5
   vertex_frames:
