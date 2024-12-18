@@ -1,0 +1,290 @@
+solver:
+  type: ilqr
+  ipopt.linear_solver: ma57
+  ipopt.tol: 0.1
+#  ilqr.merit_der_threshold: 1e-3
+#  ilqr.defect_norm_threshold: 1e-3
+  ipopt.constr_viol_tol: 0.01
+  ilqr.constraint_violation_threshold: 1e-2
+#  ipopt.hessian_approximation: exact
+  ipopt.print_level: 5
+  ipopt.suppress_all_output: 'yes'
+  ipopt.sb: 'yes'
+  ilqr.suppress_all_output: 'yes'
+  ilqr.codegen_enabled: true
+  ilqr.codegen_workdir: /tmp/tyhio
+  ilqr.enable_gn: true
+  ilqr.hxx_reg_base: 0.0
+  ilqr.n_threads: 0
+  print_time: 0
+
+constraints:
+  - ball_1
+  - ball_2
+  - ball_3
+  - ball_4
+
+costs:
+  # - z_ball_1
+  # - z_ball_2
+  # - z_ball_3
+  # - z_ball_4
+  - vz_ball_1
+  - vz_ball_2
+  - vz_ball_3
+  - vz_ball_4
+  - base_lin_velxy
+  - base_lin_velz
+  - base_omega
+  # - base_capture
+  - joint_posture_capture
+  - v_root_reg
+  - a_root_reg
+  - v_jnts_reg
+  - a_jnts_reg
+  - v_wheel_jnts_reg
+  - a_wheels_jnts_reg
+
+#closed loop
+.define:
+  - &w_base_omega 4
+  - &w_base_vxy 4
+  - &w_base_vz 4
+  - &w_base_z 4.
+  - &w_contact_z 5.0
+  - &w_contact_vz 100.0
+  - &w_base_capture 10.
+  - &w_capture_postural 3.0
+  - &w_capture_postural_ub 1.
+  - &w_v_root 3e-3
+  - &w_a_root 5e-3
+  - &w_v_jnts 1e-3
+  - &w_a_jnts 3e-3
+  - &w_v_wheels 3e-2
+  - &w_a_wheels 5e-2
+  - &wheel_radius 0.124
+
+base_lin_velxy:
+  type: Cartesian
+  distal_link: base_link
+  indices: [0, 1]
+  nodes: ${range(1, N+1)}
+  cartesian_type: velocity
+  weight: *w_base_vxy
+
+base_lin_velz:
+  type: Cartesian
+  distal_link: base_link
+  indices: [2]
+  nodes: ${range(1, N+1)}
+  cartesian_type: velocity
+  weight: *w_base_vz
+
+base_omega:
+  type: Cartesian
+  distal_link: base_link
+  indices: [3, 4, 5]
+  nodes: ${range(1, N+1)}
+  cartesian_type: velocity
+  weight: *w_base_omega
+
+base_capture:
+  type: Cartesian
+  distal_link: base_link
+  indices: [0, 1, 2, 3, 4, 5]
+  nodes: ${range(N-5, N+1)}
+  cartesian_type: velocity
+  weight: *w_base_capture
+  
+# ==================================
+rolling_contact_1:
+  type: Rolling
+  frame: wheel_1
+  radius: *wheel_radius
+
+rolling_contact_2:
+  type: Rolling
+  frame: wheel_2
+  radius: *wheel_radius
+
+rolling_contact_3:
+  type: Rolling
+  frame: wheel_3
+  radius: *wheel_radius
+
+rolling_contact_4:
+  type: Rolling
+  frame: wheel_4
+  radius: *wheel_radius
+
+# ==================================
+
+interaction_ball_1:
+  type: VertexForce
+  frame: ball_1
+  fn_min: -10
+  enable_fc: true
+  friction_coeff: 0.5
+  vertex_frames:
+    - wheel_1
+
+interaction_ball_2:
+  type: VertexForce
+  frame: ball_2
+  fn_min: -10
+  enable_fc: true
+  friction_coeff: 0.5
+  vertex_frames:
+    - wheel_2
+
+interaction_ball_3:
+  type: VertexForce
+  frame: ball_3
+  fn_min: -10
+  enable_fc: true
+  friction_coeff: 0.5
+  vertex_frames:
+    - wheel_3
+
+interaction_ball_4:
+  type: VertexForce
+  frame: ball_4
+  fn_min: -10
+  enable_fc: true
+  friction_coeff: 0.5
+  vertex_frames:
+    - wheel_4
+
+ball_1:
+  type: Contact
+  subtask: [interaction_ball_1, rolling_contact_1]
+
+ball_2:
+  type: Contact
+  subtask: [interaction_ball_2, rolling_contact_2]
+
+ball_3:
+  type: Contact
+  subtask: [interaction_ball_3, rolling_contact_3]
+
+ball_4:
+  type: Contact
+  subtask: [interaction_ball_4, rolling_contact_4]
+
+# when using continuous joints
+joint_posture_capture:
+  type: Postural
+  weight: *w_capture_postural
+  indices: [0, 1, 2,
+            4, 5, 6,
+            8, 9, 10,
+            12, 13, 14]
+  nodes: ${range(N-5, N+1)}
+
+v_root_reg:
+  type: Regularization
+  nodes: ${range(0, 1)}
+  indices: [0, 1, 2, 3, 4, 5]
+  weight:
+    velocity: *w_v_root
+
+a_root_reg:
+  type: Regularization
+  nodes: ${range(0, N+1)}
+  indices: [0, 1, 2, 3, 4, 5]
+  weight:
+    acceleration: *w_a_root # 0.01
+
+v_jnts_reg:
+  type: Regularization
+  nodes: ${range(0, N+1)}
+  indices: [6, 7, 8, 
+    10, 11, 12,
+    14, 15, 16, 
+    18, 19, 20 ]
+  weight:
+    velocity: *w_v_jnts
+
+a_jnts_reg:
+  type: Regularization
+  nodes: ${range(0, N+1)}
+  indices: [6, 7, 8, 
+    10, 11, 12,
+    14, 15, 16, 
+    18, 19, 20 ]
+  weight:
+    acceleration: *w_a_jnts # 0.01
+
+v_wheel_jnts_reg:
+  type: Regularization
+  nodes: ${range(0, N+1)}
+  indices: [9, 13, 17, 21]
+  weight:
+    velocity: *w_v_wheels
+
+a_wheels_jnts_reg:
+  type: Regularization
+  nodes: ${range(0, N+1)}
+  indices: [9, 13, 17, 21]
+  weight:
+    acceleration: *w_a_wheels # 0.01
+
+z_ball_1:
+  type: Cartesian
+  distal_link: ball_1
+  indices: [2]
+  cartesian_type: position
+  weight: *w_contact_z
+
+z_ball_2:
+  type: Cartesian
+  distal_link: ball_2
+  indices: [2]
+  cartesian_type: position
+  weight: *w_contact_z
+
+z_ball_3:
+  type: Cartesian
+  distal_link: ball_3
+  indices: [2]
+  cartesian_type: position
+  weight: *w_contact_z
+
+z_ball_4:
+  type: Cartesian
+  distal_link: ball_4
+  indices: [2]
+  cartesian_type: position
+  weight: *w_contact_z
+
+vz_ball_1:
+  type: Cartesian
+  base_link: "world"
+  distal_link: ball_1
+  indices: [2]
+  cartesian_type: velocity
+  weight: *w_contact_vz
+
+vz_ball_2:
+  type: Cartesian
+  base_link: "world"
+  distal_link: ball_2
+  indices: [2]
+  cartesian_type: velocity
+  weight: *w_contact_vz
+
+vz_ball_3:
+  type: Cartesian
+  base_link: "world"
+  distal_link: ball_3
+  indices: [2]
+  cartesian_type: velocity
+  weight: *w_contact_vz
+
+vz_ball_4:
+  type: Cartesian
+  base_link: "world"
+  distal_link: ball_4
+  indices: [2]
+  cartesian_type: velocity
+  weight: *w_contact_vz

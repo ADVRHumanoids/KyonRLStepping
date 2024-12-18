@@ -28,7 +28,10 @@ class KyonRhc(HybridQuadRhc):
             custom_opts: Dict = {}):
 
         paths = PathsGetter()
-        config_path=paths.RHCCONFIGPATH_NO_WHEELS
+        self._files_suffix=""
+        if open_loop:
+            self._files_suffix="_open"
+        config_path=paths.RHCCONFIGPATH_NO_WHEELS+self._files_suffix+".yaml"
         
         super().__init__(srdf_path=srdf_path,
             urdf_path=urdf_path,
@@ -51,14 +54,15 @@ class KyonRhc(HybridQuadRhc):
         self._fail_idx_scale=1e-9
         self._fail_idx_thresh_open_loop=1e0
         self._fail_idx_thresh_closed_loop=10
+
         if open_loop:
             self._fail_idx_thresh=self._fail_idx_thresh_open_loop
         else:
             self._fail_idx_thresh=self._fail_idx_thresh_closed_loop
 
         # adding some additional config files for jnt imp control
-        self._rhc_fpaths.append(paths.JNT_IMP_CONFIG_XBOT)
-        self._rhc_fpaths.append(paths.JNT_IMP_CONFIG)
+        self._rhc_fpaths.append(paths.JNT_IMP_CONFIG_XBOT+".yaml")
+        self._rhc_fpaths.append(paths.JNT_IMP_CONFIG+".yaml")
             
     def _set_rhc_pred_idx(self):
         self._pred_node_idx=round((self._n_nodes-1)*2/3)
@@ -71,11 +75,11 @@ class KyonRhc(HybridQuadRhc):
         if ("wheels" in self._custom_opts) and \
             ("true" in self._custom_opts["wheels"] or \
             "True" in self._custom_opts["wheels"]):
-            self.config_path = paths.RHCCONFIGPATH_WHEELS
+            self.config_path = paths.RHCCONFIGPATH_WHEELS+self._files_suffix+".yaml"
             if ("replace_continuous_joints" in self._custom_opts) and \
                 (not self._custom_opts["replace_continuous_joints"]):
                 # use continuous joints -> different config
-                self.config_path = paths.RHCCONFIGPATH_WHEELS_CONTINUOUS
+                self.config_path = paths.RHCCONFIGPATH_WHEELS_CONTINUOUS+self._files_suffix+".yaml"
 
     def _init_problem(self):
         
