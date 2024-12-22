@@ -1,4 +1,3 @@
-from lrhc_control.controllers.rhc.horizon_based.horizon_imports import * 
 from lrhc_control.controllers.rhc.horizon_based.hybrid_quad_rhc import HybridQuadRhc
 
 import numpy as np
