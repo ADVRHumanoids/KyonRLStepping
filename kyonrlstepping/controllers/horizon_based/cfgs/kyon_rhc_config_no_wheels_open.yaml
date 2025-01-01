@@ -49,7 +49,7 @@ costs:
   - &w_base_vxy 6
   - &w_base_vz 6
   - &w_base_z 6
-  - &w_contact_z 50.0
+  - &w_contact_z 10.0
   - &w_contact_vz 50.0
   - &w_base_capture 10.
   - &w_capture_postural 10.0
