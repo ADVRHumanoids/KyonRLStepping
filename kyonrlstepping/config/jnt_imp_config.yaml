@@ -1,8 +1,8 @@
 # defaults
 motor_pd:
-  hip_roll*: [500, 60]
-  hip_pitch*: [500, 60]
-  knee_pitch*: [500, 60]
+  hip_roll*: [200, 60]
+  hip_pitch*: [200, 60]
+  knee_pitch*: [200, 60]
   wheel_joint*: [0, 30]
 
 # startup pd config

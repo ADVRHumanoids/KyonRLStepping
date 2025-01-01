@@ -10,13 +10,16 @@ class PathsGetter:
                                         'controllers',
                                         'horizon_based')
 
-        self.RHCCONFIGPATH_NO_WHEELS = os.path.join(self.CONTROLLER_ROOT_DIR, 
+        self.CONTROLLER_CFGS_DIR = os.path.join(self.CONTROLLER_ROOT_DIR, 
+                                        'cfgs')
+        
+        self.RHCCONFIGPATH_NO_WHEELS = os.path.join(self.CONTROLLER_CFGS_DIR, 
                                         'kyon_rhc_config_no_wheels')
         
-        self.RHCCONFIGPATH_WHEELS = os.path.join(self.CONTROLLER_ROOT_DIR, 
+        self.RHCCONFIGPATH_WHEELS = os.path.join(self.CONTROLLER_CFGS_DIR, 
                                         'kyon_rhc_wheels')
         
-        self.RHCCONFIGPATH_WHEELS_CONTINUOUS = os.path.join(self.CONTROLLER_ROOT_DIR, 
+        self.RHCCONFIGPATH_WHEELS_CONTINUOUS = os.path.join(self.CONTROLLER_CFGS_DIR, 
                                         'kyon_rhc_wheels_continuous')
 
         self.JNT_IMP_CONFIG = os.path.join(self.ROOT_DIR, 
