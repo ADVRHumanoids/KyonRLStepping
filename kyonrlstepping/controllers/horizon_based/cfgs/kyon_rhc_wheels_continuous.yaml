@@ -47,19 +47,19 @@ costs:
 
 #closed loop
 .define:
-  - &w_base_omega 4
-  - &w_base_vxy 4
-  - &w_base_vz 4
-  - &w_base_z 4.
-  - &w_contact_z 5.0
-  - &w_contact_vz 100.0
+  - &w_base_omega 6
+  - &w_base_vxy 6
+  - &w_base_vz 6
+  - &w_base_z 6
+  - &w_contact_z 10.0
+  - &w_contact_vz 50.0
   - &w_base_capture 10.
-  - &w_capture_postural 3.0
+  - &w_capture_postural 10.0
   - &w_capture_postural_ub 1.
-  - &w_v_root 3e-3
-  - &w_a_root 5e-3
-  - &w_v_jnts 1e-3
-  - &w_a_jnts 3e-3
+  - &w_v_root 3e-1
+  - &w_a_root 5e-1
+  - &w_v_jnts 4e-1
+  - &w_a_jnts 5e-2
   - &w_v_wheels 3e-2
   - &w_a_wheels 5e-2
   - &wheel_radius 0.124
@@ -122,36 +122,36 @@ rolling_contact_4:
 interaction_ball_1:
   type: VertexForce
   frame: ball_1
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - wheel_1
 
 interaction_ball_2:
   type: VertexForce
   frame: ball_2
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - wheel_2
 
 interaction_ball_3:
   type: VertexForce
   frame: ball_3
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - wheel_3
 
 interaction_ball_4:
   type: VertexForce
   frame: ball_4
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - wheel_4
 

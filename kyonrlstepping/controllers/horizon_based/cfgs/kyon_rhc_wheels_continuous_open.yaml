@@ -25,14 +25,14 @@ constraints:
   - ball_4
 
 costs:
-  # - z_ball_1
-  # - z_ball_2
-  # - z_ball_3
-  # - z_ball_4
-  - vz_ball_1
-  - vz_ball_2
-  - vz_ball_3
-  - vz_ball_4
+  - z_ball_1
+  - z_ball_2
+  - z_ball_3
+  - z_ball_4
+  # - vz_ball_1
+  # - vz_ball_2
+  # - vz_ball_3
+  # - vz_ball_4
   - base_lin_velxy
   - base_lin_velz
   - base_omega

@@ -45,19 +45,19 @@ costs:
 
 #closed loop
 .define:
-  - &w_base_omega 4
-  - &w_base_vxy 4
-  - &w_base_vz 4
-  - &w_base_z 4.
+  - &w_base_omega 6
+  - &w_base_vxy 6
+  - &w_base_vz 6
+  - &w_base_z 6
   - &w_contact_z 10.0
   - &w_contact_vz 50.0
   - &w_base_capture 10.
-  - &w_capture_postural 5.0
+  - &w_capture_postural 10.0
   - &w_capture_postural_ub 1.
   - &w_v_root 3e-1
   - &w_a_root 5e-1
-  - &w_v_jnts 1e-1
-  - &w_a_jnts 2e-2
+  - &w_v_jnts 4e-1
+  - &w_a_jnts 5e-2
 
 base_lin_velxy:
   type: Cartesian
