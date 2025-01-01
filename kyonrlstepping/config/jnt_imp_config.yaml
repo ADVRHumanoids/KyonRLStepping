@@ -7,7 +7,7 @@ motor_pd:
 
 # startup pd config
 startup_motor_pd:
-  hip_roll*: [100, 30]
-  hip_pitch*: [100, 30]
-  knee_pitch*: [100, 30]
+  hip_roll*: [100, 10]
+  hip_pitch*: [100, 10]
+  knee_pitch*: [100, 10]
   wheel_joint*: [0, 30]
