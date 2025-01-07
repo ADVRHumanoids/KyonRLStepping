@@ -1,0 +1,13 @@
+# defaults
+motor_pd:
+  hip_joint*: [200, 60]
+  thigh_joint*: [200, 60]
+  calf_joint*: [200, 60]
+  foot_joint*: [0, 30]
+
+# startup pd config
+startup_motor_pd:
+  hip_joint*: [200, 30]
+  thigh_joint*: [200, 30]
+  calf_joint*: [200, 30]
+  foot_joint*: [0, 30]
