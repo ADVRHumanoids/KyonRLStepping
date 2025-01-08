@@ -17,10 +17,19 @@ if __name__ == '__main__':
     parser.add_argument('--comment', type=str, help='Any useful comment associated with this run',default="")
     parser.add_argument('--wheels', action='store_true', help='add wheels')
     parser.add_argument('--b2w', action='store_true', help='use unitree b2s')
+    parser.add_argument('--blink_name', type=str,default=None)
 
     args = parser.parse_args()
 
     syspaths = PathsGetter()
+
+    blink_name=args.blink_name
+    if blink_name is None:
+        if not args.b2w:
+            blink_name="base_link"
+        else:
+            blink_name="base"
+
     dpath=args.dpath
     if dpath is None:
         if not args.b2w:
@@ -46,7 +55,8 @@ if __name__ == '__main__':
         basename="RHCViz", 
         rate = 100,
         use_only_collisions=False,
-        nodes_perc = args.nodes_perc       
+        nodes_perc = args.nodes_perc,
+        base_link_name=blink_name,
         )
     
     rhcviz.run()
