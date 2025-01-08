@@ -51,7 +51,7 @@ costs:
   - &w_base_vxy 6
   - &w_base_vz 6
   - &w_base_z 6
-  - &w_contact_z 10.0
+  - &w_contact_z 50.0
   - &w_contact_vz 50.0
   - &w_base_capture 10.
   - &w_capture_postural 10.0
@@ -62,7 +62,7 @@ costs:
   - &w_a_jnts 5e-2
   - &w_v_wheels 3e-2
   - &w_a_wheels 5e-2
-  - &wheel_radius 0.124
+  - &wheel_radius 0.1125
 
 base_lin_velxy:
   type: Cartesian
