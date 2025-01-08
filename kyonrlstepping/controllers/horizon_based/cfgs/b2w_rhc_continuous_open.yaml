@@ -19,20 +19,20 @@ solver:
   print_time: 0
 
 constraints:
-  - ball_1
-  - ball_2
-  - ball_3
-  - ball_4
+  - FL_foot
+  - FR_foot
+  - RR_foot
+  - RL_foot
 
 costs:
-  - z_ball_1
-  - z_ball_2
-  - z_ball_3
-  - z_ball_4
-  # - vz_ball_1
-  # - vz_ball_2
-  # - vz_ball_3
-  # - vz_ball_4
+  - z_FL_foot
+  - z_FR_foot
+  - z_RR_foot
+  - z_RL_foot
+  # - vz_FL_foot
+  # - vz_FR_foot
+  # - vz_RR_foot
+  # - vz_RL_foot
   - base_lin_velxy
   - base_lin_velz
   - base_omega
@@ -47,19 +47,19 @@ costs:
 
 #closed loop
 .define:
-  - &w_base_omega 4
-  - &w_base_vxy 4
-  - &w_base_vz 4
-  - &w_base_z 4.
-  - &w_contact_z 1.0
-  - &w_contact_vz 100.0
+  - &w_base_omega 6
+  - &w_base_vxy 6
+  - &w_base_vz 6
+  - &w_base_z 6
+  - &w_contact_z 10.0
+  - &w_contact_vz 50.0
   - &w_base_capture 10.
-  - &w_capture_postural 3.0
+  - &w_capture_postural 10.0
   - &w_capture_postural_ub 1.
-  - &w_v_root 3e-3
-  - &w_a_root 5e-3
-  - &w_v_jnts 1e-3
-  - &w_a_jnts 3e-3
+  - &w_v_root 3e-1
+  - &w_a_root 5e-1
+  - &w_v_jnts 4e-1
+  - &w_a_jnts 5e-2
   - &w_v_wheels 3e-2
   - &w_a_wheels 5e-2
   - &wheel_radius 0.124
@@ -97,79 +97,79 @@ base_capture:
   weight: *w_base_capture
   
 # ==================================
-rolling_contact_1:
+rolling_contact_FL_foot:
   type: Rolling
   frame: FL_foot
   radius: *wheel_radius
 
-rolling_contact_2:
+rolling_contact_FR_foot:
   type: Rolling
   frame: FR_foot
   radius: *wheel_radius
 
-rolling_contact_3:
+rolling_contact_RR_foot:
   type: Rolling
   frame: RR_foot
   radius: *wheel_radius
 
-rolling_contact_4:
+rolling_contact_RL_foot:
   type: Rolling
   frame: RL_foot
   radius: *wheel_radius
 
 # ==================================
 
-interaction_ball_1:
+interaction_FL_foot:
   type: VertexForce
   frame: FL_foot
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - FL_foot
 
-interaction_ball_2:
+interaction_FR_foot:
   type: VertexForce
   frame: FR_foot
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - FR_foot
 
-interaction_ball_3:
+interaction_RR_foot:
   type: VertexForce
   frame: RR_foot
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - RR_foot
 
-interaction_ball_4:
+interaction_RL_foot:
   type: VertexForce
   frame: RL_foot
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - RL_foot
 
-ball_1:
+FL_foot:
   type: Contact
-  subtask: [interaction_ball_1, rolling_contact_1]
+  subtask: [interaction_FL_foot, rolling_contact_FL_foot]
 
-ball_2:
+FR_foot:
   type: Contact
-  subtask: [interaction_ball_2, rolling_contact_2]
+  subtask: [interaction_FR_foot, rolling_contact_FR_foot]
 
-ball_3:
+RR_foot:
   type: Contact
-  subtask: [interaction_ball_3, rolling_contact_3]
+  subtask: [interaction_RR_foot, rolling_contact_RR_foot]
 
-ball_4:
+RL_foot:
   type: Contact
-  subtask: [interaction_ball_4, rolling_contact_4]
+  subtask: [interaction_RL_foot, rolling_contact_RL_foot]
 
 # when using continuous joints
 joint_posture_capture:
@@ -229,58 +229,58 @@ a_wheels_jnts_reg:
   weight:
     a: *w_a_wheels # 0.01
 
-z_ball_1:
+z_FL_foot:
   type: Cartesian
-  distal_link: ball_1
+  distal_link: FL_foot
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
-z_ball_2:
+z_FR_foot:
   type: Cartesian
-  distal_link: ball_2
+  distal_link: FR_foot
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
-z_ball_3:
+z_RR_foot:
   type: Cartesian
-  distal_link: ball_3
+  distal_link: RR_foot
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
-z_ball_4:
+z_RL_foot:
   type: Cartesian
-  distal_link: ball_4
+  distal_link: RL_foot
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
-vz_ball_1:
+vz_FL_foot:
   type: Cartesian
-  distal_link: ball_1
+  distal_link: FL_foot
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
 
-vz_ball_2:
+vz_FR_foot:
   type: Cartesian
-  distal_link: ball_2
+  distal_link: FR_foot
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
 
-vz_ball_3:
+vz_RR_foot:
   type: Cartesian
-  distal_link: ball_3
+  distal_link: RR_foot
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
 
-vz_ball_4:
+vz_RL_foot:
   type: Cartesian
-  distal_link: ball_4
+  distal_link: RL_foot
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
