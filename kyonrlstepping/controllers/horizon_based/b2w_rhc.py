@@ -30,8 +30,10 @@ class B2WRhc(HybridQuadRhc):
         self._files_suffix=""
         if open_loop:
             self._files_suffix="_open"
-        config_path=paths.RHCCONFIGPATH_B2W+self._files_suffix+".yaml"
+        config_path=paths.RHCCONFIGPATH_B2W_CONTINUOUS+self._files_suffix+".yaml"
         
+        self._fix_wheels=False
+
         super().__init__(srdf_path=srdf_path,
             urdf_path=urdf_path,
             config_path=config_path,
@@ -70,16 +72,31 @@ class B2WRhc(HybridQuadRhc):
         self._rhc_cmds_node_idx=2
 
     def _config_override(self):
-        pass
-
+        paths = PathsGetter()
+        # if ("control_wheels" in self._custom_opts) and \
+        #     ("false" in self._custom_opts["control_wheels"] or \
+        #     "False" in self._custom_opts["control_wheels"]):
+        #     self.config_path = paths.RHCCONFIGPATH_B2W_NO_WHEELS+self._files_suffix+".yaml"
+        #     self._fix_wheels=True            
+            
     def _init_problem(self):
         
+        fixed_jnts_patterns=None
+        wheels_patterns=["foot_joint"]
+        if self._fix_wheels:
+            fixed_jnts_patterns=[]
+            fixed_jnts_patterns.append("foot_joint")
+            wheels_patterns=None
+
+        print(self._fix_wheels)
+        print(fixed_jnts_patterns)
+        print(wheels_patterns)
         flight_duration_sec=0.6 # [s]
         flight_duration=int(flight_duration_sec/self._dt)
         post_flight_duration_sec=0.2 # [s]
         post_flight_duration=int(post_flight_duration_sec/self._dt)
-        super()._init_problem(fixed_jnt_patterns=None,
-            wheels_patterns=["_foot_joint"],
+        super()._init_problem(fixed_jnt_patterns=fixed_jnts_patterns,
+            wheels_patterns=wheels_patterns,
             foot_linkname="FL_foot",
             flight_duration=flight_duration,
             post_flight_stance=post_flight_duration,

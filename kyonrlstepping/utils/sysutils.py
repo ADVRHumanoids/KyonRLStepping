@@ -19,7 +19,10 @@ class PathsGetter:
         self.RHCCONFIGPATH_WHEELS = os.path.join(self.CONTROLLER_CFGS_DIR, 
                                         'kyon_rhc_wheels')
         
-        self.RHCCONFIGPATH_B2W = os.path.join(self.CONTROLLER_CFGS_DIR, 
+        self.RHCCONFIGPATH_B2W_NO_WHEELS = os.path.join(self.CONTROLLER_CFGS_DIR, 
+                                        'b2w_rhc_no_wheels')
+        
+        self.RHCCONFIGPATH_B2W_CONTINUOUS = os.path.join(self.CONTROLLER_CFGS_DIR, 
                                         'b2w_rhc_continuous')
         
         self.RHCCONFIGPATH_WHEELS_CONTINUOUS = os.path.join(self.CONTROLLER_CFGS_DIR, 
