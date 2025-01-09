@@ -19,20 +19,20 @@ solver:
   print_time: 0
 
 constraints:
-  - FL_foot
-  - FR_foot
-  - RR_foot
-  - RL_foot
+  - FL_foot_ball
+  - FR_foot_ball
+  - RR_foot_ball
+  - RL_foot_ball
 
 costs:
-  - z_FL_foot
-  - z_FR_foot
-  - z_RR_foot
-  - z_RL_foot
-  # - vz_FL_foot
-  # - vz_FR_foot
-  # - vz_RR_foot
-  # - vz_RL_foot
+  - z_FL_foot_ball
+  - z_FR_foot_ball
+  - z_RR_foot_ball
+  - z_RL_foot_ball
+  # - vz_FL_foot_ball
+  # - vz_FR_foot_ball
+  # - vz_RR_foot_ball
+  # - vz_RL_foot_ball
   - base_lin_velxy
   - base_lin_velz
   - base_omega
@@ -121,7 +121,7 @@ rolling_contact_RL_foot:
 
 interaction_FL_foot:
   type: VertexForce
-  frame: FL_foot
+  frame: FL_foot_ball
   fn_min: 50
   enable_fc: true
   friction_coeff: 0.2
@@ -130,7 +130,7 @@ interaction_FL_foot:
 
 interaction_FR_foot:
   type: VertexForce
-  frame: FR_foot
+  frame: FR_foot_ball
   fn_min: 50
   enable_fc: true
   friction_coeff: 0.2
@@ -139,7 +139,7 @@ interaction_FR_foot:
 
 interaction_RR_foot:
   type: VertexForce
-  frame: RR_foot
+  frame: RR_foot_ball
   fn_min: 50
   enable_fc: true
   friction_coeff: 0.2
@@ -148,26 +148,26 @@ interaction_RR_foot:
 
 interaction_RL_foot:
   type: VertexForce
-  frame: RL_foot
+  frame: RL_foot_ball
   fn_min: 50
   enable_fc: true
   friction_coeff: 0.2
   vertex_frames:
     - RL_foot
 
-FL_foot:
+FL_foot_ball:
   type: Contact
   subtask: [interaction_FL_foot, rolling_contact_FL_foot]
 
-FR_foot:
+FR_foot_ball:
   type: Contact
   subtask: [interaction_FR_foot, rolling_contact_FR_foot]
 
-RR_foot:
+RR_foot_ball:
   type: Contact
   subtask: [interaction_RR_foot, rolling_contact_RR_foot]
 
-RL_foot:
+RL_foot_ball:
   type: Contact
   subtask: [interaction_RL_foot, rolling_contact_RL_foot]
 
@@ -229,56 +229,56 @@ a_wheels_jnts_reg:
   weight:
     a: *w_a_wheels # 0.01
 
-z_FL_foot:
+z_FL_foot_ball:
   type: Cartesian
   distal_link: FL_foot
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
-z_FR_foot:
+z_FR_foot_ball:
   type: Cartesian
   distal_link: FR_foot
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
-z_RR_foot:
+z_RR_foot_ball:
   type: Cartesian
   distal_link: RR_foot
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
-z_RL_foot:
+z_RL_foot_ball:
   type: Cartesian
   distal_link: RL_foot
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
-vz_FL_foot:
+vz_FL_foot_ball:
   type: Cartesian
   distal_link: FL_foot
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
 
-vz_FR_foot:
+vz_FR_foot_ball:
   type: Cartesian
   distal_link: FR_foot
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
 
-vz_RR_foot:
+vz_RR_foot_ball:
   type: Cartesian
   distal_link: RR_foot
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
 
-vz_RL_foot:
+vz_RL_foot_ball:
   type: Cartesian
   distal_link: RL_foot
   indices: [2]
