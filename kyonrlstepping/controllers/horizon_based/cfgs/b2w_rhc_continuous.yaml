@@ -54,7 +54,7 @@ costs:
   - &w_contact_z 50.0
   - &w_contact_vz 100.0
   - &w_base_capture 10.
-  - &w_capture_postural 5.0
+  - &w_capture_postural 10.0
   - &w_capture_postural_ub 1.
   - &w_v_root 3e-1
   - &w_a_root 5e-1
