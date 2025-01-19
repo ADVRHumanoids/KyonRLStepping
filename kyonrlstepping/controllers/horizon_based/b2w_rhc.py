@@ -88,9 +88,6 @@ class B2WRhc(HybridQuadRhc):
             fixed_jnts_patterns.append("foot_joint")
             wheels_patterns=None
 
-        print(self._fix_wheels)
-        print(fixed_jnts_patterns)
-        print(wheels_patterns)
         flight_duration_sec=0.6 # [s]
         flight_duration=int(flight_duration_sec/self._dt)
         post_flight_duration_sec=0.2 # [s]
