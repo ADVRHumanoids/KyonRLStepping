@@ -1,3 +1,7 @@
+XBotInterface:
+  urdf_path: $PWD/xmj_env_files/kyon.urdf
+  srdf_path: $PWD/xmj_env_files/kyon.srdf
+
 # defaults
 motor_pd:
   "hip_roll*": [200, 60]
