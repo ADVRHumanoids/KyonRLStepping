@@ -56,7 +56,7 @@ if __name__ == '__main__':
         rate = 100,
         use_only_collisions=False,
         nodes_perc = args.nodes_perc,
-        # base_link_name=blink_name,
+        base_link_name=blink_name,
         )
     
     rhcviz.run()
