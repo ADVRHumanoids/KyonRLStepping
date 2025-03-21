@@ -16,16 +16,16 @@
     <link name="imu_link"/>
   </group>
   <group name="front_left_leg">
-    <chain base="base" tip_link="FL_foot"/>
+    <chain base_link="base" tip_link="FL_foot"/>
   </group>
   <group name="front_right_leg">
-    <chain base="base" tip_link="FR_foot"/>
+    <chain base_link="base" tip_link="FR_foot"/>
   </group>
   <group name="rear_right_leg">
-    <chain base="base" tip_link="RR_foot"/>
+    <chain base_link="base" tip_link="RR_foot"/>
   </group>
   <group name="rear_left_leg">
-    <chain base="base" tip_link="RL_foot"/>
+    <chain base_link="base" tip_link="RL_foot"/>
   </group>
   <group name="chains">
       <group name="front_left_leg"/>
