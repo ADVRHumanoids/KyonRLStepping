@@ -1,3 +1,7 @@
+XBotInterface:
+  urdf_path: $PWD/xmj_env_files/b2w/unitree_b2w.urdf
+  srdf_path: $PWD/xmj_env_files/b2w/unitree_b2w.srdf
+
 # defaults
 motor_pd:
   "*hip_joint": [500, 60]

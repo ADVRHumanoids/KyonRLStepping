@@ -301,7 +301,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/trunk.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/trunk.dae" scale="1 1 1"/>
       </geometry>
       <!-- <material name="orange"/> -->
     </visual>
@@ -374,8 +374,8 @@
   <link name="lidar_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0 0 0"/>
-      <mass value="6.55E-08"/>
-      <inertia ixx="1.64E-15" ixy="0" ixz="-1.09E-47" iyy="1.64E-15" iyz="-1.32E-47" izz="1.64E-15"/>
+      <mass value="1E-03"/>
+      <inertia ixx="1.0E-03" ixy="0" ixz="0" iyy="1.0E-03" iyz="0" izz="1.0E-03"/>
     </inertial>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 -0.02"/>
@@ -419,7 +419,7 @@
     <visual>
       <origin rpy="3.141592653589793 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/hip.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/hip.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -466,7 +466,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/thigh_mirror.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh_mirror.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -513,14 +513,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/thigh_mirror.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh_mirror.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/calf_mirror.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/calf_mirror.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -611,7 +611,7 @@
     <visual>
       <origin rpy="1.5707963267948966 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/FR_foot.dae"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/FR_foot.dae"/>
       </geometry>
       <material name="">
         <color rgba="1 1 1 1"/>
@@ -675,7 +675,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/hip.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/hip.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -722,7 +722,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/thigh.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -769,14 +769,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/thigh.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/calf.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/calf.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -867,7 +867,7 @@
     <visual>
       <origin rpy="1.5707963267948966 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/FL_foot.dae"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/FL_foot.dae"/>
       </geometry>
       <material name="">
         <color rgba="1 1 1 1"/>
@@ -931,7 +931,7 @@
     <visual>
       <origin rpy="3.141592653589793 3.141592653589793 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/hip.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/hip.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -978,7 +978,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/thigh_mirror.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh_mirror.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -1025,14 +1025,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/thigh_mirror.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh_mirror.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/calf_mirror.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/calf_mirror.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -1123,7 +1123,7 @@
     <visual>
       <origin rpy="1.5707963267948966 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/RR_foot.dae"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/RR_foot.dae"/>
       </geometry>
       <material name="">
         <color rgba="1 1 1 1"/>
@@ -1187,7 +1187,7 @@
     <visual>
       <origin rpy="0 3.141592653589793 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/hip.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/hip.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -1234,7 +1234,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/thigh.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -1281,14 +1281,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/thigh.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/calf.dae" scale="1 1 1"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/calf.dae" scale="1 1 1"/>
       </geometry>
       <material name="orange"/>
     </visual>
@@ -1379,7 +1379,7 @@
     <visual>
       <origin rpy="1.5707963267948966 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://b2w_description/meshes/RL_foot.dae"/>
+        <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/RL_foot.dae"/>
       </geometry>
       <material name="">
         <color rgba="1 1 1 1"/>
