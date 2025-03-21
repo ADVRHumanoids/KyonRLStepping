@@ -9,7 +9,6 @@
         <accelerometer name="imu_link_acc" site="imu_link"/>
         <gyro name="imu_link_gyro" site="imu_link"/>
     </sensor>
-     -->
     <visual>
         <quality shadowsize="2048" />
     </visual>
