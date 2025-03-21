@@ -8,17 +8,17 @@ ModelInterface:
 
 # defaults
 motor_pd:
-  hip_roll*: [500, 10]
-  hip_pitch*: [500, 10]
-  knee_pitch*: [500, 10]
-  wheel_joint*: [0, 30]
+  "*hip_joint": [200, 60]
+  "*thigh_joint": [200, 60]
+  "*calf_joint": [200, 60]
+  "*foot_joint": [0, 30]
 
 # startup pd config
 startup_motor_pd:
-  hip_roll*: [200, 30]
-  hip_pitch*: [200, 30]
-  knee_pitch*: [200, 30]
-  wheel_joint*: [0, 30]
+  "*hip_joint": [200, 60]
+  "*thigh_joint": [200, 60]
+  "*calf_joint": [200, 60]
+  "*foot_joint": [0, 30]
   
 # hal
 xbotcore_device_configs:

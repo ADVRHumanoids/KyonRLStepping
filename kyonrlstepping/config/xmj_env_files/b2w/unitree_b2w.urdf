@@ -284,11 +284,6 @@
   </gazebo>
   <!-- Rotor related joint and link is only for demonstrate location. -->
   <!-- Actually, the rotor will rotate and the joint is not fixed. Reduction ratio should be considered. -->
-  <link name="world"/>
-  <joint name="reference" type="floating">
-    <parent link="world"/>
-    <child link="base"/>
-  </joint>
   <link name="base">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>

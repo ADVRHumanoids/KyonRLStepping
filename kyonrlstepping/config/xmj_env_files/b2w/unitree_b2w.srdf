@@ -11,8 +11,6 @@
   <!-- ************ MODEL CONFIGURATION ************ -->
   <group name="base">
     <link name="base"/>
-    base_link
-    
   </group>
   <group name="imu_sensors">
     <link name="imu_link"/>
@@ -28,6 +26,12 @@
   </group>
   <group name="rear_left_leg">
     <chain base="base" tip_link="RL_foot"/>
+  </group>
+  <group name="chains">
+      <group name="front_left_leg"/>
+      <group name="front_right_leg"/>
+      <group name="rear_right_leg"/>
+      <group name="rear_left_leg"/>
   </group>
   <!-- Homing posture -->
   <group_state group="chains" name="home">
