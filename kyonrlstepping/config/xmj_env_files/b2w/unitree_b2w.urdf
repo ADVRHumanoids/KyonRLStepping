@@ -604,7 +604,7 @@
   </joint>
   <link name="FR_foot">
     <inertial>
-      <origin rpy="1.5707963267948966 0 0" xyz="-0.000991 -0.051053 -0.00113"/>
+      <origin rpy="0.0 0 0" xyz="-0.000991 -0.051053 -0.00113"/>
       <mass value="1.083"/>
       <inertia ixx="0.004121" ixy="-6E-06" ixz="-4.8E-05" iyy="0.007776" iyz="-7E-06" izz="0.004108"/>
     </inertial>
@@ -860,7 +860,7 @@
   </joint>
   <link name="FL_foot">
     <inertial>
-      <origin rpy="1.5707963267948966 0 0" xyz="-0.000991 -0.051053 -0.00113"/>
+      <origin rpy="0.0 0 0" xyz="-0.000991 -0.051053 -0.00113"/>
       <mass value="1.083"/>
       <inertia ixx="0.004121" ixy="-6E-06" ixz="-4.8E-05" iyy="0.007776" iyz="-7E-06" izz="0.004108"/>
     </inertial>
@@ -1116,7 +1116,7 @@
   </joint>
   <link name="RR_foot">
     <inertial>
-      <origin rpy="1.5707963267948966 0 0" xyz="-0.000991 -0.051053 -0.00113"/>
+      <origin rpy="0.0 0 0" xyz="-0.000991 -0.051053 -0.00113"/>
       <mass value="1.083"/>
       <inertia ixx="0.004121" ixy="-6E-06" ixz="-4.8E-05" iyy="0.007776" iyz="-7E-06" izz="0.004108"/>
     </inertial>
@@ -1372,7 +1372,7 @@
   </joint>
   <link name="RL_foot">
     <inertial>
-      <origin rpy="1.5707963267948966 0 0" xyz="-0.000991 -0.051053 -0.00113"/>
+      <origin rpy="0 0 0" xyz="-0.000991 -0.051053 -0.00113"/>
       <mass value="1.083"/>
       <inertia ixx="0.004121" ixy="-6E-06" ixz="-4.8E-05" iyy="0.007776" iyz="-7E-06" izz="0.004108"/>
     </inertial>
