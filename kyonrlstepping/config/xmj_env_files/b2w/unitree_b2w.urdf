@@ -4,36 +4,6 @@
 <!-- |    EDITING THIS FILE BY HAND IS NOT RECOMMENDED                                 | -->
 <!-- =================================================================================== -->
 <robot name="unitree_b2w">
-  <!-- <xacro:property name="stick_mass" value="0.00001"/> -->
-  <!-- <xacro:property name="stick_radius" value="0.01"/>
-    <xacro:property name="stick_length" value="0.2"/> -->
-  <material name="black">
-    <color rgba="0.0 0.0 0.0 1.0"/>
-  </material>
-  <material name="blue">
-    <color rgba="0.0 0.0 0.8 1.0"/>
-  </material>
-  <material name="green">
-    <color rgba="0.0 0.8 0.0 1.0"/>
-  </material>
-  <material name="grey">
-    <color rgba="0.2 0.2 0.2 1.0"/>
-  </material>
-  <material name="silver">
-    <color rgba="0.9137254901960784 0.9137254901960784 0.8470588235294118 1.0"/>
-  </material>
-  <material name="orange">
-    <color rgba="1.0 0.4235294117647059 0.0392156862745098 1.0"/>
-  </material>
-  <material name="brown">
-    <color rgba="0.8705882352941177 0.8117647058823529 0.7647058823529411 1.0"/>
-  </material>
-  <material name="red">
-    <color rgba="0.8 0.0 0.0 1.0"/>
-  </material>
-  <material name="white">
-    <color rgba="1.0 1.0 1.0 1.0"/>
-  </material>
   <!-- ros_control plugin -->
   <gazebo>
     <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
@@ -48,7 +18,6 @@
       <plot>
         <link>base</link>
         <pose>0 0 0 0 0 0</pose>
-        <material>Gazebo/Yellow</material>
       </plot>
     </plugin>
   </gazebo>
@@ -59,7 +28,6 @@
             <plot>
                 <link>FL_foot</link>
                 <pose>0 0 0 0 0 0</pose>
-                <material>Gazebo/Green</material>
             </plot>
         </plugin>
     </gazebo> -->
@@ -155,7 +123,6 @@
         </visual>
     </gazebo> -->
   <gazebo reference="base">
-    <material>Gazebo/Green</material>
     <turnGravityOff>false</turnGravityOff>
   </gazebo>
   <gazebo reference="trunk">
@@ -167,24 +134,20 @@
   <gazebo reference="stick_link">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
-    <material>Gazebo/White</material>
   </gazebo>
   <gazebo reference="imu_link">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
-    <material>Gazebo/Red</material>
   </gazebo>
   <!-- FL leg -->
   <gazebo reference="FL_hip">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
-    <!-- <material>Gazebo/DarkGrey</material> -->
   </gazebo>
   <gazebo reference="FL_thigh">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
     <self_collide>1</self_collide>
-    <!-- <material>Gazebo/DarkGrey</material> -->
     <kp value="1000000.0"/>
     <kd value="1.0"/>
   </gazebo>
@@ -197,7 +160,6 @@
     <mu1>0.6</mu1>
     <mu2>0.6</mu2>
     <self_collide>1</self_collide>
-    <!-- <material>Gazebo/DarkGrey</material> -->
     <kp value="1000000.0"/>
     <kd value="1.0"/>
   </gazebo>
@@ -205,13 +167,11 @@
   <gazebo reference="FR_hip">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
-    <!-- <material>Gazebo/DarkGrey</material> -->
   </gazebo>
   <gazebo reference="FR_thigh">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
     <self_collide>1</self_collide>
-    <!-- <material>Gazebo/DarkGrey</material> -->
     <kp value="1000000.0"/>
     <kd value="1.0"/>
   </gazebo>
@@ -224,7 +184,6 @@
     <mu1>0.6</mu1>
     <mu2>0.6</mu2>
     <self_collide>1</self_collide>
-    <!-- <material>Gazebo/DarkGrey</material> -->
     <kp value="1000000.0"/>
     <kd value="1.0"/>
   </gazebo>
@@ -232,13 +191,11 @@
   <gazebo reference="RL_hip">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
-    <!-- <material>Gazebo/DarkGrey</material> -->
   </gazebo>
   <gazebo reference="RL_thigh">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
     <self_collide>1</self_collide>
-    <!-- <material>Gazebo/DarkGrey</material> -->
     <kp value="1000000.0"/>
     <kd value="1.0"/>
   </gazebo>
@@ -251,21 +208,17 @@
     <mu1>0.6</mu1>
     <mu2>0.6</mu2>
     <self_collide>1</self_collide>
-    <!-- <material>Gazebo/DarkGrey</material> -->
     <kp value="1000000.0"/>
     <kd value="1.0"/>
   </gazebo>
   <!-- RR leg -->
   <gazebo reference="RR_hip">
     <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
-    <!-- <material>Gazebo/DarkGrey</material> -->
-  </gazebo>
+    <mu2>0.2</mu2>  </gazebo>
   <gazebo reference="RR_thigh">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
     <self_collide>1</self_collide>
-    <!-- <material>Gazebo/DarkGrey</material> -->
     <kp value="1000000.0"/>
     <kd value="1.0"/>
   </gazebo>
@@ -278,7 +231,6 @@
     <mu1>0.6</mu1>
     <mu2>0.6</mu2>
     <self_collide>1</self_collide>
-    <!-- <material>Gazebo/DarkGrey</material> -->
     <kp value="1000000.0"/>
     <kd value="1.0"/>
   </gazebo>
@@ -303,7 +255,6 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/trunk.dae" scale="1 1 1"/>
       </geometry>
-      <!-- <material name="orange"/> -->
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -339,7 +290,6 @@
       <geometry>
         <box size="0.001 0.001 0.001"/>
       </geometry>
-      <!-- <material name="red"/> -->
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -421,7 +371,6 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/hip.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <collision>
       <origin rpy="1.5707963267948966 0 0" xyz="0 -0.11973 0"/>
@@ -441,7 +390,6 @@
       <geometry>
         <cylinder length="0.02" radius="0.05"/>
       </geometry>
-      <material name="green"/>
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -468,7 +416,6 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh_mirror.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <collision>
       <origin rpy="0 1.5707963267948966 0" xyz="-0.025 0 -0.16"/>
@@ -488,7 +435,6 @@
       <geometry>
         <cylinder length="0.02" radius="0.05"/>
       </geometry>
-      <material name="green"/>
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -515,14 +461,12 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh_mirror.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/calf_mirror.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <collision>
       <origin rpy="0 1.2 0" xyz="-0.002 0 -0.03"/>
@@ -560,7 +504,6 @@
       <geometry>
         <cylinder length="0.02" radius="0.05"/>
       </geometry>
-      <material name="green"/>
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -584,9 +527,6 @@
       <geometry>
         <sphere radius="0.05"/>
       </geometry>
-      <material name="">
-        <color rgba="1 1 1 1"/>
-      </material>
     </visual>
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
@@ -613,9 +553,6 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/FR_foot.dae"/>
       </geometry>
-      <material name="">
-        <color rgba="1 1 1 1"/>
-      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -677,7 +614,6 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/hip.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <collision>
       <origin rpy="1.5707963267948966 0 0" xyz="0 0.11973 0"/>
@@ -697,7 +633,6 @@
       <geometry>
         <cylinder length="0.02" radius="0.05"/>
       </geometry>
-      <material name="green"/>
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -724,7 +659,6 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <collision>
       <origin rpy="0 1.5707963267948966 0" xyz="-0.025 0 -0.16"/>
@@ -744,7 +678,6 @@
       <geometry>
         <cylinder length="0.02" radius="0.05"/>
       </geometry>
-      <material name="green"/>
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -771,14 +704,12 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/calf.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <collision>
       <origin rpy="0 1.2 0" xyz="-0.002 0 -0.03"/>
@@ -816,7 +747,6 @@
       <geometry>
         <cylinder length="0.02" radius="0.05"/>
       </geometry>
-      <material name="green"/>
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -840,9 +770,6 @@
       <geometry>
         <sphere radius="0.05"/>
       </geometry>
-      <material name="">
-        <color rgba="1 1 1 1"/>
-      </material>
     </visual>
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
@@ -869,9 +796,6 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/FL_foot.dae"/>
       </geometry>
-      <material name="">
-        <color rgba="1 1 1 1"/>
-      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -933,7 +857,6 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/hip.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <collision>
       <origin rpy="1.5707963267948966 0 0" xyz="0 -0.11973 0"/>
@@ -953,7 +876,6 @@
       <geometry>
         <cylinder length="0.02" radius="0.05"/>
       </geometry>
-      <material name="green"/>
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -980,7 +902,6 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh_mirror.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <collision>
       <origin rpy="0 1.5707963267948966 0" xyz="-0.025 0 -0.16"/>
@@ -1000,7 +921,6 @@
       <geometry>
         <cylinder length="0.02" radius="0.05"/>
       </geometry>
-      <material name="green"/>
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -1027,14 +947,12 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh_mirror.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/calf_mirror.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <collision>
       <origin rpy="0 1.2 0" xyz="-0.002 0 -0.03"/>
@@ -1072,7 +990,6 @@
       <geometry>
         <cylinder length="0.02" radius="0.05"/>
       </geometry>
-      <material name="green"/>
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -1096,9 +1013,6 @@
       <geometry>
         <sphere radius="0.05"/>
       </geometry>
-      <material name="">
-        <color rgba="1 1 1 1"/>
-      </material>
     </visual>
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
@@ -1125,9 +1039,6 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/RR_foot.dae"/>
       </geometry>
-      <material name="">
-        <color rgba="1 1 1 1"/>
-      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -1189,7 +1100,6 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/hip.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <collision>
       <origin rpy="1.5707963267948966 0 0" xyz="0 0.11973 0"/>
@@ -1209,7 +1119,6 @@
       <geometry>
         <cylinder length="0.02" radius="0.05"/>
       </geometry>
-      <material name="green"/>
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -1236,7 +1145,6 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <collision>
       <origin rpy="0 1.5707963267948966 0" xyz="-0.025 0 -0.16"/>
@@ -1256,7 +1164,6 @@
       <geometry>
         <cylinder length="0.02" radius="0.05"/>
       </geometry>
-      <material name="green"/>
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -1283,14 +1190,12 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/thigh.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/calf.dae" scale="1 1 1"/>
       </geometry>
-      <material name="orange"/>
     </visual>
     <collision>
       <origin rpy="0 1.2 0" xyz="-0.002 0 -0.03"/>
@@ -1328,7 +1233,6 @@
       <geometry>
         <cylinder length="0.02" radius="0.05"/>
       </geometry>
-      <material name="green"/>
     </visual>
     <inertial>
       <origin rpy="0 0 0" xyz="0.0 0.0 0.0"/>
@@ -1352,9 +1256,6 @@
       <geometry>
         <sphere radius="0.05"/>
       </geometry>
-      <material name="">
-        <color rgba="1 1 1 1"/>
-      </material>
     </visual>
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
@@ -1381,9 +1282,6 @@
       <geometry>
         <mesh filename="/root/ibrido_ws/src/unitree_ros/robots/b2w_description/meshes/RL_foot.dae"/>
       </geometry>
-      <material name="">
-        <color rgba="1 1 1 1"/>
-      </material>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
