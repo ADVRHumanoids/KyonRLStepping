@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from rhcviz.RHCViz import RHCViz
+from mpcviz.MPCViz import MPCViz
 from kyonrlstepping.utils.kyon_urdf_gen import KyonUrdfGen
 
 import argparse

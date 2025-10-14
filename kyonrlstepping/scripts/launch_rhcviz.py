@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-from rhcviz.RHCViz import RHCViz
-from rhcviz.utils.sys_utils import PathsGetter
+from mpcviz.MPCViz import MPCViz
+from mpcviz.utils.sys_utils import PathsGetter
 
 from kyonrlstepping.utils.kyon_urdf_gen import KyonUrdfGen
 from kyonrlstepping.utils.b2w_urdf_gen import B2WUrdfGen
@@ -49,14 +49,14 @@ if __name__ == '__main__':
                     descr_path=dpath,
                     name="B2WUrdf")
         
-    rhcviz = RHCViz(urdf_file_path=urdf_generator.urdf_path, 
+    mpcviz = MPCViz(urdf_file_path=urdf_generator.urdf_path, 
         rviz_config_path=syspaths.DEFAULT_RVIZ_CONFIG_PATH,
         namespace=args.ns, 
-        basename="RHCViz", 
+        basename="MPCViz", 
         rate = 100,
         use_only_collisions=False,
         nodes_perc = args.nodes_perc,
         base_link_name=blink_name,
         )
     
-    rhcviz.run()
+    mpcviz.run()

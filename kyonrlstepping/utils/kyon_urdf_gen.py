@@ -1,4 +1,4 @@
-from rhcviz.utils.xrdf_gen import UrdfGenerator
+from mpcviz.utils.xrdf_gen import UrdfGenerator
 
 class KyonUrdfGen(UrdfGenerator):
 
@@ -6,7 +6,7 @@ class KyonUrdfGen(UrdfGenerator):
             robotname: str,
             descr_path: str,
             wheels: bool = False,
-            name: str = "KyonUrdfRHCViz"):
+            name: str = "KyonUrdfMPCViz"):
         
         super().__init__(
             robotname = robotname,

@@ -1,4 +1,4 @@
-from lrhc_control.controllers.rhc.hybrid_quad_client import HybridQuadrupedClusterClient
+from aug_mpc.controllers.rhc.hybrid_quad_client import HybridQuadrupedClusterClient
 
 from kyonrlstepping.controllers.horizon_based.b2w_rhc import B2WRhc
 from kyonrlstepping.utils.xrdf_cmd import get_xrdf_cmds_horizon
