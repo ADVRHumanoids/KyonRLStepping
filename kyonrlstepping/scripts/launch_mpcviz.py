@@ -3,6 +3,8 @@ from mpc_viz.MPCViz import MPCViz
 from mpc_viz.utils.sys_utils import PathsGetter
 
 from kyonrlstepping.utils.kyon_urdf_gen import KyonUrdfGen
+from kyonrlstepping.utils.kyon_real_urdf_gen import KyonRealUrdfGen
+
 from kyonrlstepping.utils.b2w_urdf_gen import B2WUrdfGen
 
 import os
@@ -17,6 +19,7 @@ if __name__ == '__main__':
     parser.add_argument('--comment', type=str, help='Any useful comment associated with this run',default="")
     parser.add_argument('--wheels', action='store_true', help='add wheels')
     parser.add_argument('--b2w', action='store_true', help='use unitree b2s')
+    parser.add_argument('--kyon_real', action='store_true', help='use real Kyon prototype')
     parser.add_argument('--blink_name', type=str,default=None)
 
     args = parser.parse_args()
@@ -27,6 +30,8 @@ if __name__ == '__main__':
     if blink_name is None:
         if not args.b2w:
             blink_name="base_link"
+            if args.kyon_real:
+                blink_name="pelvis"
         else:
             blink_name="base"
 
@@ -34,15 +39,23 @@ if __name__ == '__main__':
     if dpath is None:
         if not args.b2w:
             dpath="/root/ibrido_ws/src/iit-kyon-ros-pkg/kyon_urdf" 
+            if args.kyon_real:
+                dpath="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf" 
         else:
             dpath="/root/ibrido_ws/src/unitree_ros/robots/b2w_description" 
 
     urdf_generator=None
     if not args.b2w:
-        urdf_generator = KyonUrdfGen(robotname="kyon", 
-                    wheels=args.wheels,
-                    descr_path=dpath,
-                    name="kyonUrdf")
+        if args.kyon_real:
+            urdf_generator = KyonUrdfGen(robotname="kyon", 
+                        wheels=args.wheels,
+                        descr_path=dpath,
+                        name="kyonUrdf")
+        else:
+            urdf_generator = KyonRealUrdfGen(robotname="kyon", 
+                        wheels=args.wheels,
+                        descr_path=dpath,
+                        name="kyonUrdf")
     else:
         urdf_generator = B2WUrdfGen(robotname="robot", 
                     wheels=True,
