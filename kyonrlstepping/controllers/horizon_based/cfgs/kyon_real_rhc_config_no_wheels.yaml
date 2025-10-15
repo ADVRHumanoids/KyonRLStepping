@@ -34,9 +34,10 @@ costs:
   - vz_contact_3
   - vz_contact_4
   - base_lin_velxy
-  - base_lin_velz
+  - base_lin_velz13397
   - base_omega
   # - base_capture
+  - joint_posture_capture_roll
   - joint_posture_capture
   - v_root_reg
   - a_root_reg
@@ -45,19 +46,20 @@ costs:
 
 #closed loop
 .define:
-  - &w_base_omega 6
-  - &w_base_vxy 6
-  - &w_base_vz 6
-  - &w_base_z 6
+  - &w_base_omega 12
+  - &w_base_vxy 12
+  - &w_base_vz 12
+  - &w_base_z 12
   - &w_contact_z 10.0
-  - &w_contact_vz 50.0
+  - &w_contact_vz 100.0
   - &w_base_capture 10.
   - &w_capture_postural 10.0
+  - &w_capture_postural_roll 30.0
   - &w_capture_postural_ub 1.
   - &w_v_root 3e-1
   - &w_a_root 5e-1
-  - &w_v_jnts 4e-1
-  - &w_a_jnts 5e-2
+  - &w_v_jnts 6e-1
+  - &w_a_jnts 8e-2
 
 base_lin_velxy:
   type: Cartesian
@@ -175,15 +177,24 @@ contact_4:
   type: Contact
   subtask: [interaction_contact_4, zero_velocity_contact_4]
 
+joint_posture_capture_roll:
+  type: Postural
+  weight: *w_capture_postural_roll
+  indices: [0,
+            3,
+            6,
+            9]
+  nodes: ${range(N-5, N+1)}
+
 joint_posture_capture:
   type: Postural
   weight: *w_capture_postural
-  indices: [0, 1, 2,
-            3, 4, 5,
-            6, 7, 8,
-            9, 10, 11]
+  indices: [1, 2,
+            4, 5,
+            7, 8,
+            10, 11]
   nodes: ${range(N-5, N+1)}
-  
+
 v_root_reg:
   type: Regularization
   nodes: ${range(0, 1)}

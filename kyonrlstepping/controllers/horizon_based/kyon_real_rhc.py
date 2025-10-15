@@ -82,7 +82,7 @@ class KyonRhc(HybridQuadRhc):
 
     def _init_problem(self):
         
-        flight_duration_sec=0.6 # [s]
+        flight_duration_sec=0.5 # [s]
         flight_duration=int(flight_duration_sec/self._dt)
         post_flight_duration_sec=0.2 # [s]
         post_flight_duration=int(post_flight_duration_sec/self._dt)
@@ -91,7 +91,7 @@ class KyonRhc(HybridQuadRhc):
             foot_linkname="contact_1",
             flight_duration=flight_duration,
             post_flight_stance=post_flight_duration,
-            step_height=0.1,
+            step_height=0.12,
             keep_yaw_vert=False,
             yaw_vertical_weight=1e-6,
             phase_force_reg=2e-2,
