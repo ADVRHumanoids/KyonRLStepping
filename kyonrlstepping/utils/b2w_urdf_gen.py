@@ -1,4 +1,4 @@
-from mpcviz.utils.xrdf_gen import UrdfGenerator
+from mpc_viz.utils.xrdf_gen import UrdfGenerator
 
 class B2WUrdfGen(UrdfGenerator):
 
