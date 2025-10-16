@@ -34,7 +34,7 @@ costs:
   - vz_contact_3
   - vz_contact_4
   - base_lin_velxy
-  - base_lin_velz13397
+  - base_lin_velz
   - base_omega
   # - base_capture
   - joint_posture_capture_roll
