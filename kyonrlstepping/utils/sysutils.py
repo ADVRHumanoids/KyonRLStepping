@@ -13,8 +13,9 @@ class PathsGetter:
         self.CONTROLLER_CFGS_DIR = os.path.join(self.CONTROLLER_ROOT_DIR, 
                                         'cfgs')
         
+        # Kyon simple
         self.RHCCONFIGPATH_NO_WHEELS = os.path.join(self.CONTROLLER_CFGS_DIR, 
-                                        'kyon_rhc_config_no_wheels')
+                                        'kyon_rhc_no_wheels')
         
         self.RHCCONFIGPATH_WHEELS = os.path.join(self.CONTROLLER_CFGS_DIR, 
                                         'kyon_rhc_wheels')
@@ -22,15 +23,23 @@ class PathsGetter:
         self.RHCCONFIGPATH_WHEELS_CONTINUOUS = os.path.join(self.CONTROLLER_CFGS_DIR, 
                                         'kyon_rhc_wheels_continuous')
         
+        # Kyon real
         self.RHCCONFIGPATH_REAL_NO_WHEELS = os.path.join(self.CONTROLLER_CFGS_DIR, 
-                                        'kyon_real_rhc_config_no_wheels')
+                                        'kyon_real_rhc_no_wheels')
         
         self.RHCCONFIGPATH_REAL_WHEELS = os.path.join(self.CONTROLLER_CFGS_DIR, 
                                         'kyon_real_rhc_wheels')
         
+        self.RHCCONFIGPATH_REAL_WHEELS_NO_YAW = os.path.join(self.CONTROLLER_CFGS_DIR, 
+                                        'kyon_real_rhc_wheels_no_yaw')
+        
         self.RHCCONFIGPATH_REAL_WHEELS_CONTINUOUS = os.path.join(self.CONTROLLER_CFGS_DIR, 
                                         'kyon_real_rhc_wheels_continuous')
         
+        self.RHCCONFIGPATH_REAL_WHEELS_CONTINUOUS_NO_YAW = os.path.join(self.CONTROLLER_CFGS_DIR, 
+                                        'kyon_real_rhc_wheels_no_yaw_continuous')
+        
+        # Unitree B2W
         self.RHCCONFIGPATH_B2W_NO_WHEELS = os.path.join(self.CONTROLLER_CFGS_DIR, 
                                         'b2w_rhc_no_wheels')
         

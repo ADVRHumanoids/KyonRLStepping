@@ -19,25 +19,25 @@ solver:
   print_time: 0
 
 constraints:
-  - ball_1
-  - ball_2
-  - ball_3
-  - ball_4
+  - contact_1
+  - contact_2
+  - contact_3
+  - contact_4
 
 costs:
-  # - z_ball_1
-  # - z_ball_2
-  # - z_ball_3
-  # - z_ball_4
-  - vz_ball_1
-  - vz_ball_2
-  - vz_ball_3
-  - vz_ball_4
+  - z_contact_1
+  - z_contact_2
+  - z_contact_3
+  - z_contact_4
+  # - vz_contact_1
+  # - vz_contact_2
+  # - vz_contact_3
+  # - vz_contact_4
   - base_lin_velxy
   - base_lin_velz
   - base_omega
   # - base_capture
-  - joint_posture_capture
+  - joint_posture_capture 
   - v_root_reg
   - a_root_reg
   - v_jnts_reg
@@ -47,22 +47,22 @@ costs:
 
 #closed loop
 .define:
-  - &w_base_omega 4
-  - &w_base_vxy 4
-  - &w_base_vz 4
-  - &w_base_z 4.
-  - &w_contact_z 5.0
-  - &w_contact_vz 100.0
-  - &w_base_capture 10.
-  - &w_capture_postural 3.0
+  - &w_base_omega 10
+  - &w_base_vxy 10
+  - &w_base_vz 10
+  - &w_base_z 10
+  - &w_contact_z 50.0
+  - &w_contact_vz 130.0
+  - &w_base_capture 30.
+  - &w_capture_postural 10.0
   - &w_capture_postural_ub 1.
-  - &w_v_root 3e-3
-  - &w_a_root 5e-3
-  - &w_v_jnts 1e-3
-  - &w_a_jnts 3e-3
-  - &w_v_wheels 3e-2
-  - &w_a_wheels 5e-2
-  - &wheel_radius 0.124
+  - &w_v_root 3e-1
+  - &w_a_root 5e-1
+  - &w_v_jnts 6e-1
+  - &w_a_jnts 8e-2
+  - &w_v_wheels 5e-2
+  - &w_a_wheels 8e-2
+  - &wheel_radius 0.1066
 
 base_lin_velxy:
   type: Cartesian
@@ -119,66 +119,66 @@ rolling_contact_4:
 
 # ==================================
 
-interaction_ball_1:
+interaction_contact_1:
   type: VertexForce
-  frame: ball_1
-  fn_min: -10
+  frame: contact_1
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - wheel_1
 
-interaction_ball_2:
+interaction_contact_2:
   type: VertexForce
-  frame: ball_2
-  fn_min: -10
+  frame: contact_2
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - wheel_2
 
-interaction_ball_3:
+interaction_contact_3:
   type: VertexForce
-  frame: ball_3
-  fn_min: -10
+  frame: contact_3
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - wheel_3
 
-interaction_ball_4:
+interaction_contact_4:
   type: VertexForce
-  frame: ball_4
-  fn_min: -10
+  frame: contact_4
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - wheel_4
 
-ball_1:
+contact_1:
   type: Contact
-  subtask: [interaction_ball_1, rolling_contact_1]
+  subtask: [interaction_contact_1, rolling_contact_1]
 
-ball_2:
+contact_2:
   type: Contact
-  subtask: [interaction_ball_2, rolling_contact_2]
+  subtask: [interaction_contact_2, rolling_contact_2]
 
-ball_3:
+contact_3:
   type: Contact
-  subtask: [interaction_ball_3, rolling_contact_3]
+  subtask: [interaction_contact_3, rolling_contact_3]
 
-ball_4:
+contact_4:
   type: Contact
-  subtask: [interaction_ball_4, rolling_contact_4]
+  subtask: [interaction_contact_4, rolling_contact_4]
 
 # when using continuous joints
 joint_posture_capture:
   type: Postural
   weight: *w_capture_postural
   indices: [0, 1, 2,
-            4, 5, 6,
-            8, 9, 10,
-            12, 13, 14]
+            5, 6, 7,
+            10, 11, 12,
+            15, 16, 17]
   nodes: ${range(N-5, N+1)}
 
 v_root_reg:
@@ -186,14 +186,14 @@ v_root_reg:
   nodes: ${range(0, 1)}
   indices: [0, 1, 2, 3, 4, 5]
   weight:
-    velocity: *w_v_root
+    v: *w_v_root
 
 a_root_reg:
   type: Regularization
   nodes: ${range(0, N+1)}
   indices: [0, 1, 2, 3, 4, 5]
   weight:
-    acceleration: *w_a_root # 0.01
+    a: *w_a_root # 0.01
 
 v_jnts_reg:
   type: Regularization
@@ -203,7 +203,7 @@ v_jnts_reg:
     14, 15, 16, 
     18, 19, 20 ]
   weight:
-    velocity: *w_v_jnts
+    v: *w_v_jnts
 
 a_jnts_reg:
   type: Regularization
@@ -213,77 +213,73 @@ a_jnts_reg:
     14, 15, 16, 
     18, 19, 20 ]
   weight:
-    acceleration: *w_a_jnts # 0.01
+    a: *w_a_jnts # 0.01
 
 v_wheel_jnts_reg:
   type: Regularization
   nodes: ${range(0, N+1)}
   indices: [9, 13, 17, 21]
   weight:
-    velocity: *w_v_wheels
+    v: *w_v_wheels
 
 a_wheels_jnts_reg:
   type: Regularization
   nodes: ${range(0, N+1)}
   indices: [9, 13, 17, 21]
   weight:
-    acceleration: *w_a_wheels # 0.01
+    a: *w_a_wheels # 0.01
 
-z_ball_1:
+z_contact_1:
   type: Cartesian
   distal_link: ball_1
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
-z_ball_2:
+z_contact_2:
   type: Cartesian
   distal_link: ball_2
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
-z_ball_3:
+z_contact_3:
   type: Cartesian
   distal_link: ball_3
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
-z_ball_4:
+z_contact_4:
   type: Cartesian
   distal_link: ball_4
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
-vz_ball_1:
+vz_contact_1:
   type: Cartesian
-  base_link: "world"
   distal_link: ball_1
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
 
-vz_ball_2:
+vz_contact_2:
   type: Cartesian
-  base_link: "world"
   distal_link: ball_2
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
 
-vz_ball_3:
+vz_contact_3:
   type: Cartesian
-  base_link: "world"
   distal_link: ball_3
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
 
-vz_ball_4:
+vz_contact_4:
   type: Cartesian
-  base_link: "world"
   distal_link: ball_4
   indices: [2]
   cartesian_type: velocity

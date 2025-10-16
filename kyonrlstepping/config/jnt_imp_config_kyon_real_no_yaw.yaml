@@ -1,6 +1,7 @@
 XBotInterface:
   urdf_path: $PWD/xmj_env_files/kyon.urdf
   srdf_path: $PWD/xmj_env_files/kyon.srdf
+
 # defaults
 motor_pd:
   "hip_roll*": [1000, 10]
@@ -11,8 +12,8 @@ motor_pd:
 
 # startup pd config
 startup_motor_pd:
-  "hip_roll*": [400, 30]
-  "hip_pitch*": [400, 30]
-  "knee_pitch*": [400, 30]
-  "ankle_yaw*": [400, 10]
+  "hip_roll*": [100, 40]
+  "hip_pitch*": [100, 40]
+  "knee_pitch*": [100, 40]
+  "ankle_yaw*": [800, 10]
   "wheel_joint*": [0, 30]

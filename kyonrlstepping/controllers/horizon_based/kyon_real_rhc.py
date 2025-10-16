@@ -75,24 +75,56 @@ class KyonRhc(HybridQuadRhc):
             ("true" in self._custom_opts["wheels"] or \
             "True" in self._custom_opts["wheels"]):
             self.config_path = paths.RHCCONFIGPATH_REAL_WHEELS+self._files_suffix+".yaml"
+            
+            if ("fix_yaw" in self._custom_opts) and \
+                (self._custom_opts["fix_yaw"]):
+                self.config_path = paths.RHCCONFIGPATH_REAL_WHEELS_NO_YAW+self._files_suffix+".yaml"
+
             if ("replace_continuous_joints" in self._custom_opts) and \
                 (not self._custom_opts["replace_continuous_joints"]):
                 # use continuous joints -> different config
                 self.config_path = paths.RHCCONFIGPATH_REAL_WHEELS_CONTINUOUS+self._files_suffix+".yaml"
 
+                if ("fix_yaw" in self._custom_opts) and \
+                    (self._custom_opts["fix_yaw"]):
+                    self.config_path = paths.RHCCONFIGPATH_REAL_WHEELS_CONTINUOUS_NO_YAW+self._files_suffix+".yaml"
+
     def _init_problem(self):
         
+        yaw_vertical_weight=50.0
+
+        keep_yaw_vert=False
+        # if ("wheels" in self._custom_opts) and \
+        #     ("true" in self._custom_opts["wheels"] or \
+        #     "True" in self._custom_opts["wheels"]): # use wheels
+        #     keep_yaw_vert=True
+
+        fixed_jnts_patterns=[
+            "d435_head",
+            "velodyne_joint"]
+        
+        if ("fix_yaw" in self._custom_opts) and \
+            (self._custom_opts["fix_yaw"]):
+            fixed_jnts_patterns.append("ankle_yaw")
+
         flight_duration_sec=0.5 # [s]
         flight_duration=int(flight_duration_sec/self._dt)
         post_flight_duration_sec=0.2 # [s]
         post_flight_duration=int(post_flight_duration_sec/self._dt)
-        super()._init_problem(fixed_jnt_patterns=None,
+        
+        foot_linkname="contact_1"
+        # if ("wheels" in self._custom_opts) and \
+        #     ("true" in self._custom_opts["wheels"] or \
+        #     "True" in self._custom_opts["wheels"]): # use wheels
+        #     foot_linkname="ball_1"
+
+        super()._init_problem(fixed_jnt_patterns=fixed_jnts_patterns,
             wheels_patterns=["wheel_"],
-            foot_linkname="contact_1",
+            foot_linkname=foot_linkname,
             flight_duration=flight_duration,
             post_flight_stance=post_flight_duration,
             step_height=0.12,
-            keep_yaw_vert=False,
-            yaw_vertical_weight=1e-6,
+            keep_yaw_vert=keep_yaw_vert,
+            yaw_vertical_weight=yaw_vertical_weight,
             phase_force_reg=2e-2,
             vel_bounds_weight=1.0)
