@@ -5,6 +5,7 @@
     <option cone="elliptic" impratio="100" timestep="0.0005"/>
     <!-- Simulation settings -->
     <size njmax="1000" nconmax="200"/>
+
     <sensor>
         <accelerometer name="imu_link_acc" site="imu_link"/>
         <gyro name="imu_link_gyro" site="imu_link"/>
