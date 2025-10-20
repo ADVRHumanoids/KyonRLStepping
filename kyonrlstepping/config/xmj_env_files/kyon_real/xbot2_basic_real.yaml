@@ -50,4 +50,4 @@ xbotcore_param:
   /xbot/hal/joint_safety/filter_safe_cutoff_hz: {value: 5.0, type: double}
   /xbot/hal/joint_safety/filter_medium_cutoff_hz: {value: 10.0, type: double}
   /xbot/hal/joint_safety/filter_fast_cutoff_hz: {value: 15.0, type: double}
-  /xbot/hal/enable_safety: {value: false, type: bool}
+  /xbot/hal/enable_safety: {value: true, type: bool}

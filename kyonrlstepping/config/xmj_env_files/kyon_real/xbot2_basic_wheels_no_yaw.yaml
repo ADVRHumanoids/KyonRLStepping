@@ -46,5 +46,8 @@ xbotcore_plugins:
 # global parameters
 xbotcore_param:
   /xbot/hal/joint_safety/filter_autostart: {value: true, type: bool}
-  /xbot/hal/joint_safety/filter_cutoff_hz: {value: 2.0, type: double}
+  # /xbot/hal/joint_safety/filter_cutoff_hz: {value: 1.0, type: double}
+  /xbot/hal/joint_safety/filter_safe_cutoff_hz: {value: 5.0, type: double}
+  /xbot/hal/joint_safety/filter_medium_cutoff_hz: {value: 10.0, type: double}
+  /xbot/hal/joint_safety/filter_fast_cutoff_hz: {value: 15.0, type: double}
   /xbot/hal/enable_safety: {value: false, type: bool}

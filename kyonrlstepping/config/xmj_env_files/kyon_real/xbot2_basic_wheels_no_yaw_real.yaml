@@ -1,6 +1,6 @@
 XBotInterface:
-  urdf_path: $PWD/kyon_real_no_wheels.urdf
-  srdf_path: $PWD/kyon_real_no_wheels.srdf
+  urdf_path: $PWD/kyon_real_wheels_no_yaw.urdf
+  srdf_path: $PWD/kyon_real_wheels_no_yaw.srdf
 
 ModelInterface:
   model_type: RBDL
@@ -19,7 +19,7 @@ startup_motor_pd:
   "hip_roll*": [100, 40]
   "hip_pitch*": [100, 40]
   "knee_pitch*": [100, 40]
-  "ankle_yaw*": [400, 10]
+  "ankle_yaw*": [800, 10]
   "wheel_joint*": [0, 30]
   
 # hal
@@ -50,4 +50,4 @@ xbotcore_param:
   /xbot/hal/joint_safety/filter_safe_cutoff_hz: {value: 5.0, type: double}
   /xbot/hal/joint_safety/filter_medium_cutoff_hz: {value: 10.0, type: double}
   /xbot/hal/joint_safety/filter_fast_cutoff_hz: {value: 15.0, type: double}
-  /xbot/hal/enable_safety: {value: false, type: bool}
+  /xbot/hal/enable_safety: {value: true, type: bool}
