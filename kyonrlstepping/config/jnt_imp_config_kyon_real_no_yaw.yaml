@@ -1,6 +1,6 @@
 XBotInterface:
-  urdf_path: $PWD/xmj_env_files/kyon.urdf
-  srdf_path: $PWD/xmj_env_files/kyon.srdf
+  urdf_path: $PWD/xmj_env_files/kyon_real/kyon_real_wheels_no_yaw.urdf
+  srdf_path: $PWD/xmj_env_files/kyon_real/kyon_real_wheels_no_yaw.srdf
 
 # defaults
 motor_pd:
