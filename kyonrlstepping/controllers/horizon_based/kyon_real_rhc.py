@@ -123,7 +123,7 @@ class KyonRhc(HybridQuadRhc):
             foot_linkname=foot_linkname,
             flight_duration=flight_duration,
             post_flight_stance=post_flight_duration,
-            step_height=0.12,
+            step_height=0.18,
             keep_yaw_vert=keep_yaw_vert,
             yaw_vertical_weight=yaw_vertical_weight,
             phase_force_reg=2e-2,
