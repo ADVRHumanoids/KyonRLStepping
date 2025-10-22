@@ -50,11 +50,11 @@ costs:
   - &w_base_vxy 12
   - &w_base_vz 12
   - &w_base_z 12
-  - &w_contact_z 20.0
-  - &w_contact_vz 100.0
+  - &w_contact_z 10.0
+  - &w_contact_vz 400.0
   - &w_base_capture 10.
-  - &w_capture_postural 8.0
-  - &w_capture_postural_roll 30.0
+  - &w_capture_postural 4.0
+  - &w_capture_postural_roll 10.0
   - &w_capture_postural_ub 1.
   - &w_v_root 3e-1
   - &w_a_root 5e-1
