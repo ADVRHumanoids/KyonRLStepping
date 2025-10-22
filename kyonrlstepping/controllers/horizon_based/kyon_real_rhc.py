@@ -118,12 +118,16 @@ class KyonRhc(HybridQuadRhc):
         #     "True" in self._custom_opts["wheels"]): # use wheels
         #     foot_linkname="ball_1"
 
+        step_height=0.18
+        if ("step_height" in self._custom_opts):
+            step_height=self._custom_opts["step_height"]
+            
         super()._init_problem(fixed_jnt_patterns=fixed_jnts_patterns,
             wheels_patterns=["wheel_"],
             foot_linkname=foot_linkname,
             flight_duration=flight_duration,
             post_flight_stance=post_flight_duration,
-            step_height=0.18,
+            step_height=step_height,
             keep_yaw_vert=keep_yaw_vert,
             yaw_vertical_weight=yaw_vertical_weight,
             phase_force_reg=2e-2,
