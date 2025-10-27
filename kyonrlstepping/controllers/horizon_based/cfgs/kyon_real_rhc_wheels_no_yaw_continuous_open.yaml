@@ -34,10 +34,11 @@ costs:
   # - vz_contact_3
   # - vz_contact_4
   - base_lin_velxy
-  - base_lin_velz
+  # - base_lin_velz
+  - base_height
   - base_omega
   # - base_capture
-  - joint_posture_capture_roll 
+  - joint_posture_capture_roll
   - joint_posture_capture
   - v_root_reg
   - a_root_reg
@@ -52,7 +53,7 @@ costs:
   - &w_base_vxy 12
   - &w_base_vz 12
   - &w_base_z 12
-  - &w_contact_z 10.0
+  - &w_contact_z 30.0
   - &w_contact_vz 400.0
   - &w_base_capture 10.
   - &w_capture_postural 4.0
@@ -81,6 +82,15 @@ base_lin_velz:
   nodes: ${range(1, N+1)}
   cartesian_type: velocity
   weight: *w_base_vz
+
+base_height:
+  type: Cartesian
+  distal_link: base_link
+  indices: [2]
+  nodes: ${range(1, N+1)}
+  # nodes: all
+  cartesian_type: position
+  weight: *w_base_z
 
 base_omega:
   type: Cartesian
@@ -128,7 +138,7 @@ interaction_contact_1:
   enable_fc: true
   friction_coeff: 0.2
   vertex_frames:
-    - wheel_1
+    - contact_1
 
 interaction_contact_2:
   type: VertexForce
@@ -137,7 +147,7 @@ interaction_contact_2:
   enable_fc: true
   friction_coeff: 0.2
   vertex_frames:
-    - wheel_2
+    - contact_2
 
 interaction_contact_3:
   type: VertexForce
@@ -146,7 +156,7 @@ interaction_contact_3:
   enable_fc: true
   friction_coeff: 0.2
   vertex_frames:
-    - wheel_3
+    - contact_3
 
 interaction_contact_4:
   type: VertexForce
@@ -155,7 +165,7 @@ interaction_contact_4:
   enable_fc: true
   friction_coeff: 0.2
   vertex_frames:
-    - wheel_4
+    - contact_4
 
 contact_1:
   type: Contact

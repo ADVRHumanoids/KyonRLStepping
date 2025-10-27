@@ -25,16 +25,17 @@ constraints:
   - contact_4
 
 costs:
-  # - z_contact_1
-  # - z_contact_2
-  # - z_contact_3
-  # - z_contact_4
-  - vz_contact_1
-  - vz_contact_2
-  - vz_contact_3
-  - vz_contact_4
+  - z_contact_1
+  - z_contact_2
+  - z_contact_3
+  - z_contact_4
+  # - vz_contact_1
+  # - vz_contact_2
+  # - vz_contact_3
+  # - vz_contact_4
   - base_lin_velxy
   - base_lin_velz
+  # - base_height
   - base_omega
   # - base_capture
   - joint_posture_capture_roll
@@ -52,7 +53,7 @@ costs:
   - &w_base_vxy 12
   - &w_base_vz 12
   - &w_base_z 12
-  - &w_contact_z 10.0
+  - &w_contact_z 40.0
   - &w_contact_vz 400.0
   - &w_base_capture 10.
   - &w_capture_postural 4.0
@@ -81,6 +82,15 @@ base_lin_velz:
   nodes: ${range(1, N+1)}
   cartesian_type: velocity
   weight: *w_base_vz
+
+base_height:
+  type: Cartesian
+  distal_link: base_link
+  indices: [2]
+  nodes: ${range(1, N+1)}
+  # nodes: all
+  cartesian_type: position
+  weight: *w_base_z
 
 base_omega:
   type: Cartesian
