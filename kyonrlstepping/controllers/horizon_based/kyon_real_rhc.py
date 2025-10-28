@@ -107,7 +107,7 @@ class KyonRhc(HybridQuadRhc):
             (self._custom_opts["fix_yaw"]):
             fixed_jnts_patterns.append("ankle_yaw")
 
-        flight_duration_sec=0.5 # [s]
+        flight_duration_sec=0.4 # [s]
         flight_duration=int(flight_duration_sec/self._dt)
         post_flight_duration_sec=0.2 # [s]
         post_flight_duration=int(post_flight_duration_sec/self._dt)
@@ -118,7 +118,7 @@ class KyonRhc(HybridQuadRhc):
         #     "True" in self._custom_opts["wheels"]): # use wheels
         #     foot_linkname="ball_1"
 
-        step_height=0.18
+        step_height=0.15
         if ("step_height" in self._custom_opts):
             step_height=self._custom_opts["step_height"]
             
