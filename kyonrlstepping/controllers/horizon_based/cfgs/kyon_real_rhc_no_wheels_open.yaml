@@ -35,7 +35,9 @@ costs:
   # - vz_contact_4
   - base_lin_velxy
   - base_lin_velz
+  # - base_height
   - base_omega
+  - base_horizontal_capture
   # - base_capture
   - joint_posture_capture_roll
   - joint_posture_capture
@@ -50,11 +52,12 @@ costs:
   - &w_base_vxy 12
   - &w_base_vz 12
   - &w_base_z 12
-  - &w_contact_z 50.0
+  - &w_base_hor_capture 60
+  - &w_contact_z 30.0
   - &w_contact_vz 400.0
-  - &w_base_capture 10.
+  - &w_base_capture 50.
   - &w_capture_postural 4.0
-  - &w_capture_postural_roll 10.0
+  - &w_capture_postural_roll 12.0
   - &w_capture_postural_ub 1.
   - &w_v_root 3e-1
   - &w_a_root 5e-1
@@ -77,11 +80,20 @@ base_lin_velz:
   cartesian_type: velocity
   weight: *w_base_vz
 
+base_height:
+  type: Cartesian
+  distal_link: base_link
+  indices: [2]
+  nodes: ${range(1, N+1)}
+  # nodes: all
+  cartesian_type: position
+  weight: *w_base_z
+  
 base_omega:
   type: Cartesian
   distal_link: base_link
   indices: [3, 4, 5]
-  nodes: ${range(1, N+1)}
+  nodes: ${range(1, N-10)}
   cartesian_type: velocity
   weight: *w_base_omega
 
@@ -92,7 +104,14 @@ base_capture:
   nodes: ${range(N-5, N+1)}
   cartesian_type: velocity
   weight: *w_base_capture
-  
+
+base_horizontal_capture:
+  type: Cartesian
+  distal_link: base_link
+  indices: [3, 4]
+  nodes: ${range(N-10, N+1)}
+  # cartesian_type: position
+  weight: *w_base_hor_capture
 # ===============================
 
 zero_velocity_contact_1:
@@ -122,38 +141,6 @@ zero_velocity_contact_4:
   distal_link: contact_4
   indices: [0, 1, 2]
   cartesian_type: velocity
-
-pos_contact_1:
-  type: Cartesian
-  base_link: "world"
-  distal_link: contact_1
-  indices: [2]
-  cartesian_type: position
-  # offset: *wheel_radius
-
-pos_contact_2:
-  type: Cartesian
-  base_link: "world"
-  distal_link: contact_2
-  indices: [2]
-  cartesian_type: position
-  # offset: *wheel_radius
-
-pos_contact_3:
-  type: Cartesian
-  base_link: "world"
-  distal_link: contact_3
-  indices: [2]
-  cartesian_type: position
-  # offset: *wheel_radius
-
-pos_contact_4:
-  type: Cartesian
-  base_link: "world"
-  distal_link: contact_4
-  indices: [2]
-  cartesian_type: position
-  # offset: *wheel_radius
 
 # ==================================
 
@@ -195,19 +182,19 @@ interaction_contact_4:
 
 contact_1:
   type: Contact
-  subtask: [interaction_contact_1, zero_velocity_contact_1, pos_contact_1]
+  subtask: [interaction_contact_1, zero_velocity_contact_1]
 
 contact_2:
   type: Contact
-  subtask: [interaction_contact_2, zero_velocity_contact_2, pos_contact_2]
+  subtask: [interaction_contact_2, zero_velocity_contact_2]
 
 contact_3:
   type: Contact
-  subtask: [interaction_contact_3, zero_velocity_contact_3, pos_contact_3]
+  subtask: [interaction_contact_3, zero_velocity_contact_3]
 
 contact_4:
   type: Contact
-  subtask: [interaction_contact_4, zero_velocity_contact_4, pos_contact_4]
+  subtask: [interaction_contact_4, zero_velocity_contact_4]
 
 joint_posture_capture_roll:
   type: Postural
@@ -216,7 +203,7 @@ joint_posture_capture_roll:
             3,
             6,
             9]
-  nodes: ${range(N-5, N+1)}
+  nodes: ${range(N-8, N+1)}
 
 joint_posture_capture:
   type: Postural
@@ -225,8 +212,17 @@ joint_posture_capture:
             4, 5,
             7, 8,
             10, 11]
-  nodes: ${range(N-5, N+1)}
-  
+  nodes: ${range(N-8, N+1)}
+
+# joint_posture_capture:
+#   type: Postural
+#   weight: *w_capture_postural
+#   indices: [0, 1, 2,
+#             3, 4, 5,
+#             6, 7, 8,
+#             9, 10, 11]
+#   nodes: ${range(N-8, N+1)}
+
 v_root_reg:
   type: Regularization
   nodes: ${range(0, 1)}

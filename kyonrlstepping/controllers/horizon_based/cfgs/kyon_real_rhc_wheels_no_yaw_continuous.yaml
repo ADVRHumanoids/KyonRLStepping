@@ -37,6 +37,7 @@ costs:
   - base_lin_velz
   # - base_height
   - base_omega
+  - base_horizontal_capture
   # - base_capture
   - joint_posture_capture_roll
   - joint_posture_capture
@@ -53,17 +54,18 @@ costs:
   - &w_base_vxy 12
   - &w_base_vz 12
   - &w_base_z 12
-  - &w_contact_z 40.0
+  - &w_base_hor_capture 60
+  - &w_contact_z 100.0
   - &w_contact_vz 400.0
   - &w_base_capture 10.
   - &w_capture_postural 4.0
-  - &w_capture_postural_roll 10.0
+  - &w_capture_postural_roll 12.0
   - &w_capture_postural_ub 1.
   - &w_v_root 3e-1
   - &w_a_root 5e-1
   - &w_v_jnts 6e-1
   - &w_a_jnts 8e-2
-  - &w_v_wheels 5e-2
+  - &w_v_wheels 8e-2
   - &w_a_wheels 8e-2
   - &wheel_radius 0.1066
 
@@ -96,7 +98,7 @@ base_omega:
   type: Cartesian
   distal_link: base_link
   indices: [3, 4, 5]
-  nodes: ${range(1, N+1)}
+  nodes: ${range(1, N-10)}
   cartesian_type: velocity
   weight: *w_base_omega
 
@@ -108,6 +110,14 @@ base_capture:
   cartesian_type: velocity
   weight: *w_base_capture
   
+base_horizontal_capture:
+  type: Cartesian
+  distal_link: base_link
+  indices: [3, 4]
+  nodes: ${range(N-10, N+1)}
+  # cartesian_type: position
+  weight: *w_base_hor_capture
+
 # ==================================
 rolling_contact_1:
   type: Rolling
