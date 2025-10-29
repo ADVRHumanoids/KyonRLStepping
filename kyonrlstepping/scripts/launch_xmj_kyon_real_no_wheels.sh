@@ -5,7 +5,8 @@ source /opt/ros/noetic/setup.bash
 source /opt/xbot/setup.sh
 source /root/ibrido_ws/setup.bash
 
-python /root/ibrido_ws/src/xbot2_mujoco/tests/PyXBotMjSim/launch_simulator.py --urdf_path /root/ibrido_ws/src/KyonRLStepping/kyonrlstepping/config/xmj_env_files/kyon_real/kyon_real_no_wheels.urdf \
+URDF_PATH="/tmp/RtDeploymentEnv/kyon_real_no_wheels.urdf"
+python /root/ibrido_ws/src/xbot2_mujoco/tests/PyXBotMjSim/launch_simulator.py --urdf_path $URDF_PATH \
     --simopt_path /root/ibrido_ws/src/KyonRLStepping/kyonrlstepping/config/xmj_env_files/kyon_real/sim_opt.xml \
     --world_path /root/ibrido_ws/src/KyonRLStepping/kyonrlstepping/config/xmj_env_files/kyon_real/world.xml \
     --sites_path /root/ibrido_ws/src/KyonRLStepping/kyonrlstepping/config/xmj_env_files/sites.xml \
