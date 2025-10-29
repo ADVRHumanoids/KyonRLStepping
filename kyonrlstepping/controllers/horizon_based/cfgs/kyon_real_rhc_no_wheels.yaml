@@ -49,16 +49,16 @@ costs:
 
 #closed loop
 .define:
-  - &w_base_vxy 12
-  - &w_base_vz 12
-  - &w_base_omega 12
-  - &w_base_z 12
+  - &w_base_vxy 8
+  - &w_base_vz 8
+  - &w_base_omega 8
+  - &w_base_z 8
   - &w_base_hor_capture 60
   - &w_contact_z 30.0
   - &w_contact_vz 400.0
   - &w_base_capture 500.
-  - &w_capture_postural 8.0
-  - &w_capture_postural_roll 10.0
+  - &w_capture_postural 6.0
+  - &w_capture_postural_roll 8.0
   - &w_capture_postural_ub 1.
   - &w_v_reg 1e-1
   - &w_v_root 8e-1
