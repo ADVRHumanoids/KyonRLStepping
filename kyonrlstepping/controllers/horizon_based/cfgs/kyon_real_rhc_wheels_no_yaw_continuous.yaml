@@ -51,10 +51,10 @@ costs:
 
 #closed loop
 .define:
-  - &w_base_vxy 8
-  - &w_base_vz 8
-  - &w_base_omega 8
-  - &w_base_z 8
+  - &w_base_vxy 12
+  - &w_base_vz 12
+  - &w_base_omega 12
+  - &w_base_z 12
   - &w_base_hor_capture 200.
   - &w_base_capture 500.
   - &w_contact_z 100.0
@@ -65,9 +65,9 @@ costs:
   - &w_v_reg 1e-1
   - &w_v_root 8e-1
   - &w_a_root 3e-1
-  - &w_v_jnts 8e-1
+  - &w_v_jnts 1e0
   - &w_a_jnts 5e-3
-  - &w_v_wheels 6e-2
+  - &w_v_wheels 1e-1
   - &w_a_wheels 6e-2
   - &wheel_radius 0.1066
 
