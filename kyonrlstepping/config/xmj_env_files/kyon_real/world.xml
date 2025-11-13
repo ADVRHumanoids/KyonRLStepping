@@ -32,5 +32,162 @@
       contype="1"
       conaffinity="1"
       />
+    
+      <body name="double_ramp_3deg" pos="5 0 0">
+
+        <!-- LEFT ramp — slopes UP (rises toward +X) -->
+        <body name="ramp_up0" pos="-2.95 0 0">
+          <!-- size = half-extents: half_x, half_y, half_z -->
+          <!-- total length = 4.0 (x), width = 2.0 (y), thickness = 0.1 (z) -->
+          <!-- quat rotates +10° about Y (rises along +X) -->
+          <geom name="ramp_box_up0" type="box" size="2.0 1.0 0.05"
+                pos="0 0 0.053" 
+                quat="-0.9996573 0 0.0261769 0"
+                material="groundplane" friction="1.0 0.005 0.0001"
+                solref="0.02 1" solimp="0.9 0.95 0.001 0.5 2"
+                group="2" contype="1" conaffinity="1"/>
+        </body>
+  
+        <!-- FLAT platform between ramps -->
+        <body name="platform0" pos="0 0 0">
+          <!-- platform center Z chosen so platform top ≈ 0.40 m (center_z + half_z = top) -->
+          <!-- here center_z = 0.35, half_z = 0.05 -> top ≈ 0.40 -->
+          <geom name="platform_box0" type="box" size="1.0 1.0 0.05"
+                pos="0 0 0.16"
+                material="groundplane" friction="1.0 0.005 0.0001"
+                solref="0.02 1" solimp="0.9 0.95 0.001 0.5 2"
+                group="2" contype="1" conaffinity="1"/>
+        </body>
+  
+        <!-- RIGHT ramp — slopes DOWN (descends back to level) -->
+        <body name="ramp_down0" pos="2.95 0 0">
+          <!-- quat rotates -10° about Y (descends toward +X) -->
+          <geom name="ramp_box_down0" type="box" size="2.0 1.0 0.05"
+                pos="0 0 0.053"
+                quat="-0.9996573 0 -0.0261769 0"
+                material="groundplane" friction="1.0 0.005 0.0001"
+                solref="0.02 1" solimp="0.9 0.95 0.001 0.5 2"
+                group="2" contype="1" conaffinity="1"/>
+        </body>
+  
+      </body>
+  
+      <body name="double_ramp_5deg" pos="5 2.0 0">
+  
+        <!-- LEFT ramp — slopes UP (rises toward +X) -->
+        <body name="ramp_up1" pos="-2.95 0 0">
+          <!-- size = half-extents: half_x, half_y, half_z -->
+          <!-- total length = 4.0 (x), width = 2.0 (y), thickness = 0.1 (z) -->
+          <!-- quat rotates +10° about Y (rises along +X) -->
+          <geom name="ramp_box_up1" type="box" size="2.0 1.0 0.05"
+                pos="0 0 0.053" 
+                quat="-0.9990482 0 0.0436194 0"
+                material="groundplane" friction="1.0 0.005 0.0001"
+                solref="0.02 1" solimp="0.9 0.95 0.001 0.5 2"
+                group="2" contype="1" conaffinity="1"/>
+        </body>
+  
+        <!-- FLAT platform between ramps -->
+        <body name="platform1" pos="0 0 0">
+          <!-- platform center Z chosen so platform top ≈ 0.40 m (center_z + half_z = top) -->
+          <!-- here center_z = 0.35, half_z = 0.05 -> top ≈ 0.40 -->
+          <geom name="platform_box1" type="box" size="1.0 1.0 0.05"
+                pos="0 0 0.22"
+                material="groundplane" friction="1.0 0.005 0.0001"
+                solref="0.02 1" solimp="0.9 0.95 0.001 0.5 2"
+                group="2" contype="1" conaffinity="1"/>
+        </body>
+  
+        <!-- RIGHT ramp — slopes DOWN (descends back to level) -->
+        <body name="ramp_down1" pos="2.95 0 0">
+          <!-- quat rotates -10° about Y (descends toward +X) -->
+          <geom name="ramp_box_down1" type="box" size="2.0 1.0 0.05"
+                pos="0 0 0.053"
+                quat="-0.9990482 0 -0.0436194 0"
+                material="groundplane" friction="1.0 0.005 0.0001"
+                solref="0.02 1" solimp="0.9 0.95 0.001 0.5 2"
+                group="2" contype="1" conaffinity="1"/>
+        </body>
+  
+      </body>
+  
+      <body name="double_ramp_10deg" pos="5 4.0 0">
+  
+        <!-- LEFT ramp — slopes UP (rises toward +X) -->
+        <body name="ramp_up2" pos="-2.95 0 0">
+          <!-- size = half-extents: half_x, half_y, half_z -->
+          <!-- total length = 4.0 (x), width = 2.0 (y), thickness = 0.1 (z) -->
+          <!-- quat rotates +10° about Y (rises along +X) -->
+          <geom name="ramp_box_up2" type="box" size="2.0 1.0 0.05"
+                pos="0 0 0.053" 
+                quat="-0.9961947 0 0.0871557 0"
+                material="groundplane" friction="1.0 0.005 0.0001"
+                solref="0.02 1" solimp="0.9 0.95 0.001 0.5 2"
+                group="2" contype="1" conaffinity="1"/>
+        </body>
+  
+        <!-- FLAT platform between ramps -->
+        <body name="platform2" pos="0 0 0">
+          <!-- platform center Z chosen so platform top ≈ 0.40 m (center_z + half_z = top) -->
+          <!-- here center_z = 0.35, half_z = 0.05 -> top ≈ 0.40 -->
+          <geom name="platform_box2" type="box" size="1.0 1.0 0.05"
+                pos="0 0 0.4"
+                material="groundplane" friction="1.0 0.005 0.0001"
+                solref="0.02 1" solimp="0.9 0.95 0.001 0.5 2"
+                group="2" contype="1" conaffinity="1"/>
+        </body>
+  
+        <!-- RIGHT ramp — slopes DOWN (descends back to level) -->
+        <body name="ramp_down2" pos="2.95 0 0">
+          <!-- quat rotates -10° about Y (descends toward +X) -->
+          <geom name="ramp_box_down2" type="box" size="2.0 1.0 0.05"
+                pos="0 0 0.053"
+                quat="-0.9961947 0 -0.0871557 0"
+                material="groundplane" friction="1.0 0.005 0.0001"
+                solref="0.02 1" solimp="0.9 0.95 0.001 0.5 2"
+                group="2" contype="1" conaffinity="1"/>
+        </body>
+  
+      </body>
+  
+      <body name="double_ramp_15deg" pos="5 6.0 0">
+  
+        <!-- LEFT ramp — slopes UP (rises toward +X) -->
+        <body name="ramp_up3" pos="-2.98 0 0">
+          <!-- size = half-extents: half_x, half_y, half_z -->
+          <!-- total length = 4.0 (x), width = 2.0 (y), thickness = 0.1 (z) -->
+          <!-- quat rotates +10° about Y (rises along +X) -->
+          <geom name="ramp_box_up3" type="box" size="2.0 1.0 0.05"
+                pos="0 0 0.053" 
+                quat="-0.9914449 0 0.1305262 0"
+                material="groundplane" friction="1.0 0.005 0.0001"
+                solref="0.02 1" solimp="0.9 0.95 0.001 0.5 2"
+                group="2" contype="1" conaffinity="1"/>
+        </body>
+  
+        <!-- FLAT platform between ramps -->
+        <body name="platform3" pos="0 0 0">
+          <!-- platform center Z chosen so platform top ≈ 0.40 m (center_z + half_z = top) -->
+          <!-- here center_z = 0.35, half_z = 0.05 -> top ≈ 0.40 -->
+          <geom name="platform_box3" type="box" size="1.07 1.0 0.05"
+                pos="0 0 0.57"
+                material="groundplane" friction="1.0 0.005 0.0001"
+                solref="0.02 1" solimp="0.9 0.95 0.001 0.5 2"
+                group="2" contype="1" conaffinity="1"/>
+        </body>
+  
+        <!-- RIGHT ramp — slopes DOWN (descends back to level) -->
+        <body name="ramp_down3" pos="2.98 0 0">
+          <!-- quat rotates -10° about Y (descends toward +X) -->
+          <geom name="ramp_box_down3" type="box" size="2.0 1.0 0.05"
+                pos="0 0 0.053"
+                quat="-0.9914449 0 -0.1305262 0"
+                material="groundplane" friction="1.0 0.005 0.0001"
+                solref="0.02 1" solimp="0.9 0.95 0.001 0.5 2"
+                group="2" contype="1" conaffinity="1"/>
+        </body>
+  
+      </body>
+      
   </worldbody>
 </mujoco>
