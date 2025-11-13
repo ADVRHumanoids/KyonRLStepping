@@ -52,7 +52,7 @@ costs:
 .define:
   - &w_base_omega 8
   - &w_base_vxy 8
-  - &w_base_vz 8
+  - &w_base_vz 15
   - &w_base_z 15
   - &w_base_hor_capture 200.
   - &w_base_capture 500.
