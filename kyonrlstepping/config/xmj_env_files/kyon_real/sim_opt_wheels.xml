@@ -22,7 +22,7 @@
         <exclude name="knee_pitch4_exclude" body1="knee_pitch_4_link" body2="hip_pitch_4_link"/>
         
         <!-- ankle yaw (wheel mode) collisions-->
-        <!-- <exclude name="ankle_yaw1_exclude" body1="knee_pitch_1_link" body2="ankle_yaw_1_link"/>
+        <exclude name="ankle_yaw1_exclude" body1="knee_pitch_1_link" body2="ankle_yaw_1_link"/>
         <exclude name="ankle_yaw2_exclude" body1="knee_pitch_2_link" body2="ankle_yaw_2_link"/>
         <exclude name="ankle_yaw3_exclude" body1="knee_pitch_3_link" body2="ankle_yaw_3_link"/>
         <exclude name="ankle_yaw4_exclude" body1="knee_pitch_4_link" body2="ankle_yaw_4_link"/>
@@ -30,7 +30,7 @@
         <exclude name="wheel_shin1_exclude" body1="ankle_yaw_1_link" body2="wheel_1"/>
         <exclude name="wheel_shin2_exclude" body1="ankle_yaw_2_link" body2="wheel_2"/>
         <exclude name="wheel_shin3_exclude" body1="ankle_yaw_3_link" body2="wheel_3"/>
-        <exclude name="wheel_shin4_exclude" body1="ankle_yaw_4_link" body2="wheel_4"/> -->
+        <exclude name="wheel_shin4_exclude" body1="ankle_yaw_4_link" body2="wheel_4"/>
         <!--exclude name="hip_pitch_1_exclude" body1="pelvis" body2="hip_pitch_motor_1"/>
         <exclude name="hip_pitch_2_exclude" body1="pelvis" body2="hip_pitch_motor_2"/>
         <exclude name="hip_pitch_3_exclude" body1="pelvis" body2="hip_pitch_motor_3"/>

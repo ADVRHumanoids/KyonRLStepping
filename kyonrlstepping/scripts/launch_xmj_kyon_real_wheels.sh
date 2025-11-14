@@ -6,7 +6,7 @@ source /opt/xbot/setup.sh
 source /root/ibrido_ws/setup.bash
 
 python /root/ibrido_ws/src/xbot2_mujoco/tests/PyXBotMjSim/launch_simulator.py --urdf_path /tmp/RtDeploymentEnv/kyon_real_wheels_no_yaw.urdf \
-    --simopt_path /root/ibrido_ws/src/KyonRLStepping/kyonrlstepping/config/xmj_env_files/kyon_real/sim_opt.xml \
+    --simopt_path /root/ibrido_ws/src/KyonRLStepping/kyonrlstepping/config/xmj_env_files/kyon_real/sim_opt_wheels.xml \
     --world_path /root/ibrido_ws/src/KyonRLStepping/kyonrlstepping/config/xmj_env_files/kyon_real/world.xml \
     --sites_path /root/ibrido_ws/src/KyonRLStepping/kyonrlstepping/config/xmj_env_files/sites.xml \
     --xbot_config_path /root/ibrido_ws/src/KyonRLStepping/kyonrlstepping/config/xmj_env_files/kyon_real/xbot2_basic_wheels_no_yaw_real.yaml \
