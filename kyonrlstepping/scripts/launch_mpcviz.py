@@ -21,6 +21,7 @@ if __name__ == '__main__':
     parser.add_argument('--b2w', action='store_true', help='use unitree b2s')
     parser.add_argument('--kyon_real', action='store_true', help='use real Kyon prototype')
     parser.add_argument('--blink_name', type=str,default=None)
+    parser.add_argument('--show_heightmap', action='store_true', help='Visualize heightmap markers if available')
 
     args = parser.parse_args()
 
@@ -70,6 +71,7 @@ if __name__ == '__main__':
         use_only_collisions=False,
         nodes_perc = args.nodes_perc,
         base_link_name=blink_name,
+        show_heightmap=args.show_heightmap,
         )
     
     mpc_viz.run()
