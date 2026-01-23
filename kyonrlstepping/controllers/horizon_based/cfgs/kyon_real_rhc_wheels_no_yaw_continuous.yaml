@@ -33,12 +33,20 @@ costs:
   # - vz_contact_2
   # - vz_contact_3
   # - vz_contact_4
+  - xy_contact_1
+  - xy_contact_2
+  - xy_contact_3
+  - xy_contact_4
+  # - vxy_contact_1
+  # - vxy_contact_2
+  # - vxy_contact_3
+  # - vxy_contact_4
   - base_lin_velxy
   - base_lin_velz
   # - base_height
   - base_omega
   # - base_horizontal_capture
-  # - base_capture
+  - base_capture
   - joint_posture_capture_roll
   - joint_posture_capture
   - v_root_reg
@@ -50,16 +58,18 @@ costs:
 
 #closed loop
 .define:
-  - &w_base_omega 8
-  - &w_base_vxy 8
-  - &w_base_vz 15
+  - &w_base_omega 15
+  - &w_base_vxy 20
+  - &w_base_vz 20
   - &w_base_z 15
   - &w_base_hor_capture 200.
-  - &w_base_capture 500.
-  - &w_contact_z 200.0
+  - &w_base_capture 200.
+  - &w_contact_z 400.0
   - &w_contact_vz 500.0
+  - &w_contact_xy 60.0
+  - &w_contact_vxy 50.0
   - &w_capture_postural 10.0
-  - &w_capture_postural_roll 18.0
+  - &w_capture_postural_roll 20.0
   - &w_capture_postural_ub 1.
   - &w_v_root 3e-1
   - &w_a_root 5e-1
@@ -73,7 +83,7 @@ base_lin_velxy:
   type: Cartesian
   distal_link: base_link
   indices: [0, 1]
-  nodes: ${range(1, N+1)}
+  nodes: ${range(1, N-5)}
   cartesian_type: velocity
   weight: *w_base_vxy
 
@@ -81,7 +91,7 @@ base_lin_velz:
   type: Cartesian
   distal_link: base_link
   indices: [2]
-  nodes: ${range(1, N+1)}
+  nodes: ${range(1, N-5)}
   cartesian_type: velocity
   weight: *w_base_vz
 
@@ -98,7 +108,7 @@ base_omega:
   type: Cartesian
   distal_link: base_link
   indices: [3, 4, 5]
-  nodes: ${range(1, N-10)}
+  nodes: ${range(1, N-5)}
   cartesian_type: velocity
   weight: *w_base_omega
 
@@ -106,7 +116,7 @@ base_capture:
   type: Cartesian
   distal_link: base_link
   indices: [0, 1, 2]
-  nodes: ${range(N-10, N+1)}
+  nodes: ${range(N-5, N+1)}
   cartesian_type: velocity
   weight: *w_base_capture
   
@@ -114,7 +124,7 @@ base_horizontal_capture:
   type: Cartesian
   distal_link: base_link
   indices: [3, 4]
-  nodes: ${range(N-10, N+1)}
+  nodes: ${range(N-5, N+1)}
   # cartesian_type: position
   weight: *w_base_hor_capture
 
@@ -201,7 +211,7 @@ joint_posture_capture_roll:
             5,
             10,
             15]
-  nodes: ${range(N-10, N+1)}
+  nodes: ${range(N-5, N+1)}
 
 joint_posture_capture:
   type: Postural
@@ -210,7 +220,7 @@ joint_posture_capture:
             6, 7,
             11, 12,
             16, 17]
-  nodes: ${range(N-10, N+1)}
+  nodes: ${range(N-5, N+1)}
 
 # joint_posture_capture:
 #   type: Postural
@@ -324,3 +334,87 @@ vz_contact_4:
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
+
+xy_contact_1:
+  type: Cartesian
+  distal_link: contact_1
+  indices: [0, 1]
+  cartesian_type: position
+  weight: *w_contact_xy
+
+xy_contact_2:
+  type: Cartesian
+  distal_link: contact_2
+  indices: [0, 1]
+  cartesian_type: position
+  weight: *w_contact_xy
+
+xy_contact_3:
+  type: Cartesian
+  distal_link: contact_3
+  indices: [0, 1]
+  cartesian_type: position
+  weight: *w_contact_xy
+
+xy_contact_4:
+  type: Cartesian
+  distal_link: contact_4
+  indices: [0, 1]
+  cartesian_type: position
+  weight: *w_contact_xy
+
+vz_contact_1:
+  type: Cartesian
+  distal_link: contact_1
+  indices: [2]
+  cartesian_type: velocity
+  weight: *w_contact_vz
+
+vz_contact_2:
+  type: Cartesian
+  distal_link: contact_2
+  indices: [2]
+  cartesian_type: velocity
+  weight: *w_contact_vz
+
+vz_contact_3:
+  type: Cartesian
+  distal_link: contact_3
+  indices: [2]
+  cartesian_type: velocity
+  weight: *w_contact_vz
+
+vz_contact_4:
+  type: Cartesian
+  distal_link: contact_4
+  indices: [2]
+  cartesian_type: velocity
+  weight: *w_contact_vz
+
+vxy_contact_1:
+  type: Cartesian
+  distal_link: contact_1
+  indices: [0, 1]
+  cartesian_type: velocity
+  weight: *w_contact_vxy
+
+vxy_contact_2:
+  type: Cartesian
+  distal_link: contact_2
+  indices: [0, 1]
+  cartesian_type: velocity
+  weight: *w_contact_vxy
+
+vxy_contact_3:
+  type: Cartesian
+  distal_link: contact_3
+  indices: [0, 1]
+  cartesian_type: velocity
+  weight: *w_contact_vxy
+
+vxy_contact_4:
+  type: Cartesian
+  distal_link: contact_4
+  indices: [0, 1]
+  cartesian_type: velocity
+  weight: *w_contact_vxy
