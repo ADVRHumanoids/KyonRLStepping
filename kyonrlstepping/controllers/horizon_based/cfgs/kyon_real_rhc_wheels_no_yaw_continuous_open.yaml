@@ -25,14 +25,14 @@ constraints:
   - contact_4
 
 costs:
-  # - z_contact_1
-  # - z_contact_2
-  # - z_contact_3
-  # - z_contact_4
-  - vz_contact_1
-  - vz_contact_2
-  - vz_contact_3
-  - vz_contact_4
+  - z_contact_1
+  - z_contact_2
+  - z_contact_3
+  - z_contact_4
+  # - vz_contact_1
+  # - vz_contact_2
+  # - vz_contact_3
+  # - vz_contact_4
   - base_lin_velxy
   - base_lin_velz
   # - base_height
@@ -52,21 +52,21 @@ costs:
 .define:
   - &w_base_omega 8
   - &w_base_vxy 8
-  - &w_base_vz 8
+  - &w_base_vz 15
   - &w_base_z 15
   - &w_base_hor_capture 200.
   - &w_base_capture 500.
-  - &w_contact_z 80.0
-  - &w_contact_vz 80.0
-  - &w_capture_postural 5.0
-  - &w_capture_postural_roll 12.0
+  - &w_contact_z 200.0
+  - &w_contact_vz 500.0
+  - &w_capture_postural 10.0
+  - &w_capture_postural_roll 18.0
   - &w_capture_postural_ub 1.
   - &w_v_root 3e-1
   - &w_a_root 5e-1
   - &w_v_jnts 6e-1
   - &w_a_jnts 8e-2
-  - &w_v_wheels 5e-2
-  - &w_a_wheels 8e-2
+  - &w_v_wheels 8e-2
+  - &w_a_wheels 1e-1
   - &wheel_radius 0.106
 
 base_lin_velxy:
@@ -271,56 +271,56 @@ a_wheels_jnts_reg:
 
 z_contact_1:
   type: Cartesian
-  distal_link: ball_1
+  distal_link: contact_1
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
 z_contact_2:
   type: Cartesian
-  distal_link: ball_2
+  distal_link: contact_2
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
 z_contact_3:
   type: Cartesian
-  distal_link: ball_3
+  distal_link: contact_3
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
 z_contact_4:
   type: Cartesian
-  distal_link: ball_4
+  distal_link: contact_4
   indices: [2]
   cartesian_type: position
   weight: *w_contact_z
 
 vz_contact_1:
   type: Cartesian
-  distal_link: ball_1
+  distal_link: contact_1
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
 
 vz_contact_2:
   type: Cartesian
-  distal_link: ball_2
+  distal_link: contact_2
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
 
 vz_contact_3:
   type: Cartesian
-  distal_link: ball_3
+  distal_link: contact_3
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
 
 vz_contact_4:
   type: Cartesian
-  distal_link: ball_4
+  distal_link: contact_4
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
