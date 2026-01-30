@@ -38,12 +38,8 @@ costs:
   - base_omega
   # - base_capture
   - joint_posture_capture
-  - v_root_reg
-  - a_root_reg
-  - v_jnts_reg
-  - a_jnts_reg
-  - v_wheel_jnts_reg
-  - a_wheels_jnts_reg
+  - v_reg
+  - a_reg
 
 #closed loop
 .define:
@@ -174,60 +170,45 @@ ball_4:
 # when using continuous joints
 joint_posture_capture:
   type: Postural
-  weight: *w_capture_postural
+  weight: [3.0, 3.0, 3.0,
+    3.0, 3.0, 3.0,
+    3.0, 3.0, 3.0,
+    3.0, 3.0, 3.0]
   indices: [0, 1, 2,
             4, 5, 6,
             8, 9, 10,
             12, 13, 14]
   nodes: ${range(N-5, N+1)}
 
-v_root_reg:
+v_reg:
   type: Regularization
+  variable_name: v
   nodes: ${range(0, 1)}
-  indices: [0, 1, 2, 3, 4, 5]
-  weight:
-    velocity: *w_v_root
+  indices: [0, 1, 2, 3, 4, 5,
+    6, 7, 8, 9,
+    10, 11, 12, 13,
+    14, 15, 16, 17,
+    18, 19, 20, 21]
+  weight: [3e-3, 3e-3, 3e-3, 3e-3, 3e-3, 3e-3,
+    1e-3, 1e-3, 1e-3, 3e-2,
+    1e-3, 1e-3, 1e-3, 3e-2,
+    1e-3, 1e-3, 1e-3, 3e-2,
+    1e-3, 1e-3, 1e-3, 3e-2]
 
-a_root_reg:
+a_reg:
   type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [0, 1, 2, 3, 4, 5]
-  weight:
-    acceleration: *w_a_root # 0.01
-
-v_jnts_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [6, 7, 8, 
-    10, 11, 12,
-    14, 15, 16, 
-    18, 19, 20 ]
-  weight:
-    velocity: *w_v_jnts
-
-a_jnts_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [6, 7, 8, 
-    10, 11, 12,
-    14, 15, 16, 
-    18, 19, 20 ]
-  weight:
-    acceleration: *w_a_jnts # 0.01
-
-v_wheel_jnts_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [9, 13, 17, 21]
-  weight:
-    velocity: *w_v_wheels
-
-a_wheels_jnts_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [9, 13, 17, 21]
-  weight:
-    acceleration: *w_a_wheels # 0.01
+  variable_name: a
+  nodes: ${range(0, 1)}
+  indices: [0, 1, 2, 3, 4, 5,
+    6, 7, 8, 9,
+    10, 11, 12, 13,
+    14, 15, 16, 17,
+    18, 19, 20, 21]
+  weight: [5e-3, 5e-3, 5e-3, 5e-3, 5e-3, 5e-3,
+    3e-3, 3e-3, 3e-3, 5e-2,
+    3e-3, 3e-3, 3e-3, 5e-2,
+    3e-3, 3e-3, 3e-3, 5e-2,
+    3e-3, 3e-3, 3e-3, 5e-2]
 
 z_ball_1:
   type: Cartesian

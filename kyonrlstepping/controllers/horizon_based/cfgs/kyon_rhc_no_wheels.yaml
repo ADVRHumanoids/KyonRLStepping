@@ -38,10 +38,8 @@ costs:
   - base_omega
   # - base_capture
   - joint_posture_capture
-  - v_root_reg
-  - a_root_reg
-  - v_jnts_reg
-  - a_jnts_reg
+  - v_reg
+  - a_reg
 
 #closed loop
 .define:
@@ -52,12 +50,6 @@ costs:
   - &w_contact_z 10.0
   - &w_contact_vz 50.0
   - &w_base_capture 10.
-  - &w_capture_postural 10.0
-  - &w_capture_postural_ub 1.
-  - &w_v_root 3e-1
-  - &w_a_root 5e-1
-  - &w_v_jnts 4e-1
-  - &w_a_jnts 5e-2
 
 base_lin_velxy:
   type: Cartesian
@@ -177,46 +169,45 @@ ball_4:
 
 joint_posture_capture:
   type: Postural
-  weight: *w_capture_postural
+  weight: [10.0, 10.0, 10.0,
+          10.0, 10.0, 10.0,
+          10.0, 10.0, 10.0,
+          10.0, 10.0, 10.0]
   indices: [0, 1, 2,
             3, 4, 5,
             6, 7, 8,
             9, 10, 11]
   nodes: ${range(N-5, N+1)}
   
-v_root_reg:
+v_reg:
   type: Regularization
+  variable_name: v
   nodes: ${range(0, 1)}
-  indices: [0, 1, 2, 3, 4, 5]
-  weight:
-    v: *w_v_root
-
-a_root_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [0, 1, 2, 3, 4, 5]
-  weight:
-    a: *w_a_root # 0.01
-
-v_jnts_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [6, 7, 8,
+  indices: [0, 1, 2, 3, 4, 5,
+    6, 7, 8,
     9, 10, 11, 
     12, 13, 14,
-    15, 16, 17 ]
-  weight:
-    v: *w_v_jnts
+    15, 16, 17]
+  weight: [3e-1, 3e-1, 3e-1, 3e-1, 3e-1, 3e-1,
+    4e-1, 4e-1, 4e-1,
+    4e-1, 4e-1, 4e-1,
+    4e-1, 4e-1, 4e-1,
+    4e-1, 4e-1, 4e-1]
 
-a_jnts_reg:
+a_reg:
   type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [6, 7, 8,
+  variable_name: a
+  nodes: ${range(0, 1)}
+  indices: [0, 1, 2, 3, 4, 5,
+    6, 7, 8,
     9, 10, 11, 
     12, 13, 14,
-    15, 16, 17 ]
-  weight:
-    a: *w_a_jnts # 0.01
+    15, 16, 17]
+  weight: [5e-1, 5e-1, 5e-1, 5e-1, 5e-1, 5e-1,
+    5e-2, 5e-2, 5e-2,
+    5e-2, 5e-2, 5e-2,
+    5e-2, 5e-2, 5e-2,
+    5e-2, 5e-2, 5e-2]
 
 z_ball_1:
   type: Cartesian

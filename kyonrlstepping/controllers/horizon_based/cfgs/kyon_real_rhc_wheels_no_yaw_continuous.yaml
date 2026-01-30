@@ -33,10 +33,10 @@ costs:
   # - vz_contact_2
   # - vz_contact_3
   # - vz_contact_4
-  - xy_contact_1
-  - xy_contact_2
-  - xy_contact_3
-  - xy_contact_4
+  # - xy_contact_1
+  # - xy_contact_2
+  # - xy_contact_3
+  # - xy_contact_4
   # - vxy_contact_1
   # - vxy_contact_2
   # - vxy_contact_3
@@ -47,14 +47,9 @@ costs:
   - base_omega
   # - base_horizontal_capture
   - base_capture
-  - joint_posture_capture_roll
   - joint_posture_capture
-  - v_root_reg
-  - a_root_reg
-  - v_jnts_reg
-  - a_jnts_reg
-  - v_wheel_jnts_reg
-  - a_wheels_jnts_reg
+  - v_reg
+  - a_reg
 
 #closed loop
 .define:
@@ -68,15 +63,6 @@ costs:
   - &w_contact_vz 500.0
   - &w_contact_xy 80.0
   - &w_contact_vxy 80.0
-  - &w_capture_postural 10.0
-  - &w_capture_postural_roll 20.0
-  - &w_capture_postural_ub 1.
-  - &w_v_root 3e-1
-  - &w_a_root 5e-1
-  - &w_v_jnts 6e-1
-  - &w_a_jnts 8e-2
-  - &w_v_wheels 8e-2
-  - &w_a_wheels 1e-1
   - &wheel_radius 0.106
 
 base_lin_velxy:
@@ -203,81 +189,47 @@ contact_4:
   type: Contact
   subtask: [interaction_contact_4, rolling_contact_4]
 
-# when using continuous joints
-joint_posture_capture_roll:
-  type: Postural
-  weight: *w_capture_postural_roll
-  indices: [0,
-            5,
-            10,
-            15]
-  nodes: ${range(N-5, N+1)}
-
 joint_posture_capture:
   type: Postural
-  weight: *w_capture_postural
-  indices: [1, 2,
-            6, 7,
-            11, 12,
-            16, 17]
+  weight: [20.0, 10.0, 10.0,
+          20.0, 10.0, 10.0,
+          20.0, 10.0, 10.0,
+          20.0, 10.0, 10.0]
+  indices: [0, 1, 2,
+            5, 6, 7,
+            10, 11, 12,
+            15, 16, 17]
   nodes: ${range(N-5, N+1)}
 
-# joint_posture_capture:
-#   type: Postural
-#   weight: *w_capture_postural
-#   indices: [0, 1, 2,
-#             5, 6, 7,
-#             10, 11, 12,
-#             15, 16, 17]
-#   nodes: ${range(N-10, N+1)}
-
-v_root_reg:
+v_reg:
   type: Regularization
+  variable_name: v
   nodes: ${range(0, 1)}
-  indices: [0, 1, 2, 3, 4, 5]
-  weight:
-    v: *w_v_root
+  indices: [0, 1, 2, 3, 4, 5,
+    6, 7, 8, 9,
+    10, 11, 12, 13,
+    14, 15, 16, 17, 
+    18, 19, 20, 21]
+  weight: [3e-1, 3e-1, 3e-1, 3e-1, 3e-1, 3e-1,
+    6e-1, 6e-1, 6e-1, 8e-2,
+    6e-1, 6e-1, 6e-1, 8e-2,
+    6e-1, 6e-1, 6e-1, 8e-2,
+    6e-1, 6e-1, 6e-1, 8e-2]
 
-a_root_reg:
+a_reg:
   type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [0, 1, 2, 3, 4, 5]
-  weight:
-    a: *w_a_root # 0.01
-
-v_jnts_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [6, 7, 8, 
-    10, 11, 12,
-    14, 15, 16, 
-    18, 19, 20 ]
-  weight:
-    v: *w_v_jnts
-
-a_jnts_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [6, 7, 8, 
-    10, 11, 12,
-    14, 15, 16, 
-    18, 19, 20 ]
-  weight:
-    a: *w_a_jnts # 0.01
-
-v_wheel_jnts_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [9, 13, 17, 21]
-  weight:
-    v: *w_v_wheels
-
-a_wheels_jnts_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [9, 13, 17, 21]
-  weight:
-    a: *w_a_wheels # 0.01
+  variable_name: a
+  nodes: ${range(0, 1)}
+  indices: [0, 1, 2, 3, 4, 5,
+    6, 7, 8, 9,
+    10, 11, 12, 13,
+    14, 15, 16, 17, 
+    18, 19, 20, 21]
+  weight: [5e-1, 5e-1, 5e-1, 5e-1, 5e-1, 5e-1,
+    8e-2, 8e-2, 8e-2, 1e-1,
+    8e-2, 8e-2, 8e-2, 1e-1,
+    8e-2, 8e-2, 8e-2, 1e-1,
+    8e-2, 8e-2, 8e-2, 1e-1]
 
 z_contact_1:
   type: Cartesian

@@ -25,43 +25,40 @@ constraints:
   - contact_4
 
 costs:
-  - z_contact_1
-  - z_contact_2
-  - z_contact_3
-  - z_contact_4
-  # - vz_contact_1
-  # - vz_contact_2
-  # - vz_contact_3
-  # - vz_contact_4
+  # - z_contact_1
+  # - z_contact_2
+  # - z_contact_3
+  # - z_contact_4
+  - vz_contact_1
+  - vz_contact_2
+  - vz_contact_3
+  - vz_contact_4
   - base_lin_velxy
   - base_lin_velz
   - base_omega
   # - base_capture
-  - joint_posture_capture
-  - v_root_reg
-  - a_root_reg
-  - v_jnts_reg
-  - a_jnts_reg
-  - v_wheel_jnts_reg
-  - a_wheels_jnts_reg
+  - joint_posture_capture 
+  - v_reg
+  - a_reg
 
 #closed loop
 .define:
-  - &w_base_omega 10
-  - &w_base_vxy 10
-  - &w_base_vz 10
-  - &w_base_z 10
-  - &w_contact_z 50.0
-  - &w_contact_vz 130.0
-  - &w_base_capture 30.
-  - &w_capture_postural 10.0
+  - &w_base_omega 12
+  - &w_base_vxy 12
+  - &w_base_vz 12
+  - &w_base_z 12
+  - &w_contact_z 10.0
+  - &w_contact_vz 400.0
+  - &w_base_capture 10.
+  - &w_capture_postural 4.0
+  - &w_capture_postural_roll 10.0
   - &w_capture_postural_ub 1.
-  - &w_v_root 3e-3
-  - &w_a_root 5e-3
-  - &w_v_jnts 1e-3
-  - &w_a_jnts 3e-3
-  - &w_v_wheels 7e-2
-  - &w_a_wheels 10e-2
+  - &w_v_root 3e-1
+  - &w_a_root 5e-1
+  - &w_v_jnts 6e-1
+  - &w_a_jnts 8e-2
+  - &w_v_wheels 5e-2
+  - &w_a_wheels 8e-2
   - &wheel_radius 0.1066
 
 base_lin_velxy:
@@ -122,36 +119,36 @@ rolling_contact_4:
 interaction_contact_1:
   type: VertexForce
   frame: contact_1
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - contact_1
 
 interaction_contact_2:
   type: VertexForce
   frame: contact_2
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - contact_2
 
 interaction_contact_3:
   type: VertexForce
   frame: contact_3
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - contact_3
 
 interaction_contact_4:
   type: VertexForce
   frame: contact_4
-  fn_min: -10
+  fn_min: 50
   enable_fc: true
-  friction_coeff: 0.5
+  friction_coeff: 0.2
   vertex_frames:
     - contact_4
 
@@ -181,53 +178,35 @@ joint_posture_capture:
             18, 19, 20, 21]
   nodes: ${range(N-5, N+1)}
 
-v_root_reg:
+v_reg:
   type: Regularization
+  variable_name: v
   nodes: ${range(0, 1)}
-  indices: [0, 1, 2, 3, 4, 5]
-  weight:
-    v: *w_v_root
+  indices: [0, 1, 2, 3, 4, 5,
+    6, 7, 8, 9,
+    10, 11, 12, 13,
+    14, 15, 16, 17, 
+    18, 19, 20, 21]
+  weight: [3e-1, 3e-1, 3e-1, 3e-1, 3e-1, 3e-1,
+    6e-1, 6e-1, 6e-1, 6e-1, 5e-2,
+    6e-1, 6e-1, 6e-1, 6e-1, 5e-2,
+    6e-1, 6e-1, 6e-1, 6e-1, 5e-2,
+    6e-1, 6e-1, 6e-1, 6e-1, 5e-2]
 
-a_root_reg:
+a_reg:
   type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [0, 1, 2, 3, 4, 5]
-  weight:
-    a: *w_a_root # 0.01
-
-v_jnts_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [6, 7, 8, 9,
-    11, 12, 13, 14,
-    16, 17, 18, 19,  
-    21, 22, 23, 24]
-  weight:
-    v: *w_v_jnts
-
-a_jnts_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [6, 7, 8, 9,
-    11, 12, 13, 14,
-    16, 17, 18, 19,  
-    21, 22, 23, 24]
-  weight:
-    a: *w_a_jnts # 0.01
-
-v_wheel_jnts_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [10, 15, 20, 25]
-  weight:
-    v: *w_v_wheels
-
-a_wheels_jnts_reg:
-  type: Regularization
-  nodes: ${range(0, N+1)}
-  indices: [10, 15, 20, 25]
-  weight:
-    a: *w_a_wheels # 0.01
+  variable_name: a
+  nodes: ${range(0, 1)}
+  indices: [0, 1, 2, 3, 4, 5,
+    6, 7, 8, 9,
+    10, 11, 12, 13,
+    14, 15, 16, 17, 
+    18, 19, 20, 21]
+  weight: [5e-1, 5e-1, 5e-1, 5e-1, 5e-1, 5e-1,
+    8e-2, 8e-2, 8e-2, 8e-2, 8e-2,
+    8e-2, 8e-2, 8e-2, 8e-2, 8e-2,
+    8e-2, 8e-2, 8e-2, 8e-2, 8e-2,
+    8e-2, 8e-2, 8e-2, 8e-2, 8e-2]
 
 z_contact_1:
   type: Cartesian
