@@ -1,3 +1,18 @@
+usage() {
+  echo "Usage: $0 [--rt_factor <value>]"
+  exit 1
+}
+
+RT_FACTOR=1.0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --rt_factor) RT_FACTOR="$2"; shift ;;
+    *) echo "Unknown arg: $1"; usage ;;
+  esac
+  shift
+done
+
 source /root/ibrido_utils/mamba_utils/bin/_activate_current_env.sh
 micromamba activate  ibrido
 
@@ -10,7 +25,8 @@ python /root/ibrido_ws/src/xbot2_mujoco/tests/PyXBotMjSim/launch_simulator.py --
     --world_path /root/ibrido_ws/src/KyonRLStepping/kyonrlstepping/config/xmj_env_files/kyon_real/world.xml \
     --sites_path /root/ibrido_ws/src/KyonRLStepping/kyonrlstepping/config/xmj_env_files/sites.xml \
     --xbot_config_path /root/ibrido_ws/src/KyonRLStepping/kyonrlstepping/config/xmj_env_files/kyon_real/xbot2_basic_wheels_no_yaw_real.yaml \
-     --pub_rostime --blink_name pelvis
+     --pub_rostime --blink_name pelvis \
+    --rt_factor "$RT_FACTOR"
 
 # python /root/ibrido_ws/src/xbot2_mujoco/tests/PyXBotMjSim/launch_simulator.py --urdf_path /root/ibrido_ws/src/xbot2_mujoco/tests/files/centauro/centauro.urdf \
 #     --simopt_path /root/ibrido_ws/src/xbot2_mujoco/tests/files/centauro/sim_opt.xml \
