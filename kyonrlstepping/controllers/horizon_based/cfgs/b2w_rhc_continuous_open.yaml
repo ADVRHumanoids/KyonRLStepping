@@ -60,7 +60,7 @@ costs:
   - &w_contact_vz 500.0
   - &w_contact_xy 80.0
   - &w_contact_vxy 80.0
-  - &wheel_radius 0.1129
+  - &wheel_radius 0.1125
 
 base_lin_velxy:
   type: Cartesian
