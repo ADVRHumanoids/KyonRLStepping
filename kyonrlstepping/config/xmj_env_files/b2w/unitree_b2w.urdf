@@ -557,7 +557,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <cylinder length="0.03" radius="0.1125"/>
+        <cylinder length="0.05" radius="0.1129"/>
       </geometry>
       <!-- <origin xyz="0 0 0" rpy="${PI/2.0} 0 0" /> -->
       <!-- <geometry>
@@ -800,7 +800,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <cylinder length="0.03" radius="0.1125"/>
+        <cylinder length="0.05" radius="0.1129"/>
       </geometry>
       <!-- <origin xyz="0 0 0" rpy="${PI/2.0} 0 0" /> -->
       <!-- <geometry>
@@ -1043,7 +1043,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <cylinder length="0.03" radius="0.1125"/>
+        <cylinder length="0.05" radius="0.1129"/>
       </geometry>
       <!-- <origin xyz="0 0 0" rpy="${PI/2.0} 0 0" /> -->
       <!-- <geometry>
@@ -1286,7 +1286,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <cylinder length="0.03" radius="0.1125"/>
+        <cylinder length="0.05" radius="0.1129"/>
       </geometry>
       <!-- <origin xyz="0 0 0" rpy="${PI/2.0} 0 0" /> -->
       <!-- <geometry>

@@ -175,7 +175,7 @@ joint_posture_capture:
 v_reg:
   type: Regularization
   variable_name: v
-  nodes: ${range(0, 1)}
+  nodes: ${range(0, N+1)}
   indices: [0, 1, 2, 3, 4, 5,
     6, 7, 8, 9,
     10, 11, 12, 13,
@@ -190,7 +190,7 @@ v_reg:
 a_reg:
   type: Regularization
   variable_name: a
-  nodes: ${range(0, 1)}
+  nodes: ${range(0, N+1)}
   indices: [0, 1, 2, 3, 4, 5,
     6, 7, 8, 9,
     10, 11, 12, 13,

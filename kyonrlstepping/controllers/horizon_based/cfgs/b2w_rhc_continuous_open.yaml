@@ -33,32 +33,34 @@ costs:
   # - vz_FR_foot_ball
   # - vz_RR_foot_ball
   # - vz_RL_foot_ball
+  # - xy_FL_foot_ball
+  # - xy_FR_foot_ball
+  # - xy_RR_foot_ball
+  # - xy_RL_foot_ball
+  # - vxy_FL_foot_ball
+  # - vxy_FR_foot_ball
+  # - vxy_RR_foot_ball
+  # - vxy_RL_foot_ball
   - base_lin_velxy
   - base_lin_velz
   - base_omega
-  # - base_capture
+  - base_capture
   - joint_posture_capture
   - v_reg
   - a_reg
 
 #closed loop
 .define:
-  - &w_base_omega 6
-  - &w_base_vxy 6
-  - &w_base_vz 6
-  - &w_base_z 12
-  - &w_contact_z 50.0
-  - &w_contact_vz 100.0
-  - &w_base_capture 30.
-  - &w_capture_postural 30.0
-  - &w_capture_postural_ub 1.
-  - &w_v_root 3e-1
-  - &w_a_root 5e-1
-  - &w_v_jnts 6e-1
-  - &w_a_jnts 8e-2
-  - &w_v_wheels 5e-2
-  - &w_a_wheels 8e-2
-  - &wheel_radius 0.1125
+  - &w_base_omega 15
+  - &w_base_vxy 20
+  - &w_base_vz 20
+  - &w_base_z 15
+  - &w_base_capture 200.
+  - &w_contact_z 500.0
+  - &w_contact_vz 500.0
+  - &w_contact_xy 80.0
+  - &w_contact_vxy 80.0
+  - &wheel_radius 0.1129
 
 base_lin_velxy:
   type: Cartesian
@@ -183,22 +185,22 @@ joint_posture_capture:
 v_reg:
   type: Regularization
   variable_name: v
-  nodes: ${range(0, 1)}
+  nodes: ${range(0, N+1)}
   indices: [0, 1, 2, 3, 4, 5,
     6, 7, 8, 9,
     10, 11, 12, 13,
     14, 15, 16, 17,
     18, 19, 20, 21]
   weight: [3e-1, 3e-1, 3e-1, 3e-1, 3e-1, 3e-1,
-    6e-1, 6e-1, 6e-1, 5e-2,
-    6e-1, 6e-1, 6e-1, 5e-2,
-    6e-1, 6e-1, 6e-1, 5e-2,
-    6e-1, 6e-1, 6e-1, 5e-2]
+    6e-1, 6e-1, 6e-1, 2e-1,
+    6e-1, 6e-1, 6e-1, 2e-1,
+    6e-1, 6e-1, 6e-1, 2e-1,
+    6e-1, 6e-1, 6e-1, 2e-1]
 
 a_reg:
   type: Regularization
   variable_name: a
-  nodes: ${range(0, 1)}
+  nodes: ${range(0, N+1)}
   indices: [0, 1, 2, 3, 4, 5,
     6, 7, 8, 9,
     10, 11, 12, 13,
@@ -265,3 +267,59 @@ vz_RL_foot_ball:
   indices: [2]
   cartesian_type: velocity
   weight: *w_contact_vz
+
+xy_FL_foot_ball:
+  type: Cartesian
+  distal_link: FL_foot
+  indices: [0, 1]
+  cartesian_type: position
+  weight: *w_contact_xy
+
+xy_FR_foot_ball:
+  type: Cartesian
+  distal_link: FR_foot
+  indices: [0, 1]
+  cartesian_type: position
+  weight: *w_contact_xy
+
+xy_RR_foot_ball:
+  type: Cartesian
+  distal_link: RR_foot
+  indices: [0, 1]
+  cartesian_type: position
+  weight: *w_contact_xy
+
+xy_RL_foot_ball:
+  type: Cartesian
+  distal_link: RL_foot
+  indices: [0, 1]
+  cartesian_type: position
+  weight: *w_contact_xy
+
+vxy_FL_foot_ball:
+  type: Cartesian
+  distal_link: FL_foot
+  indices: [0, 1]
+  cartesian_type: velocity
+  weight: *w_contact_vxy
+
+vxy_FR_foot_ball:
+  type: Cartesian
+  distal_link: FR_foot
+  indices: [0, 1]
+  cartesian_type: velocity
+  weight: *w_contact_vxy
+
+vxy_RR_foot_ball:
+  type: Cartesian
+  distal_link: RR_foot
+  indices: [0, 1]
+  cartesian_type: velocity
+  weight: *w_contact_vxy
+
+vxy_RL_foot_ball:
+  type: Cartesian
+  distal_link: RL_foot
+  indices: [0, 1]
+  cartesian_type: velocity
+  weight: *w_contact_vxy
