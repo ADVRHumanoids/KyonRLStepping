@@ -44,6 +44,7 @@ costs:
   - base_lin_velxy
   - base_lin_velz
   - base_omega
+  # - base_horizontal_capture
   - base_capture
   - joint_posture_capture
   - v_reg
@@ -55,8 +56,9 @@ costs:
   - &w_base_vxy 20
   - &w_base_vz 20
   - &w_base_z 15
+  - &w_base_hor_capture 200.
   - &w_base_capture 200.
-  - &w_contact_z 500.0
+  - &w_contact_z 400.0
   - &w_contact_vz 500.0
   - &w_contact_xy 80.0
   - &w_contact_vxy 80.0
@@ -66,7 +68,7 @@ base_lin_velxy:
   type: Cartesian
   distal_link: base
   indices: [0, 1]
-  nodes: ${range(1, N+1)}
+  nodes: ${range(1, N-5)}
   cartesian_type: velocity
   weight: *w_base_vxy
 
@@ -74,7 +76,7 @@ base_lin_velz:
   type: Cartesian
   distal_link: base
   indices: [2]
-  nodes: ${range(1, N+1)}
+  nodes: ${range(1, N-5)}
   cartesian_type: velocity
   weight: *w_base_vz
 
@@ -82,7 +84,7 @@ base_omega:
   type: Cartesian
   distal_link: base
   indices: [3, 4, 5]
-  nodes: ${range(1, N+1)}
+  nodes: ${range(1, N-5)}
   cartesian_type: velocity
   weight: *w_base_omega
 
@@ -93,7 +95,15 @@ base_capture:
   nodes: ${range(N-5, N+1)}
   cartesian_type: velocity
   weight: *w_base_capture
-  
+
+base_horizontal_capture:
+  type: Cartesian
+  distal_link: base_link
+  indices: [3, 4]
+  nodes: ${range(N-5, N+1)}
+  # cartesian_type: position
+  weight: *w_base_hor_capture
+
 # ==================================
 rolling_contact_FL_foot:
   type: Rolling
@@ -172,10 +182,10 @@ RL_foot_ball:
 # when using continuous joints
 joint_posture_capture:
   type: Postural
-  weight: [30.0, 30.0, 30.0,
-            30.0, 30.0, 30.0,
-            30.0, 30.0, 30.0,
-            30.0, 30.0, 30.0]
+  weight: [30.0, 20.0, 10.0,
+          30.0, 20.0, 10.0,
+          30.0, 20.0, 10.0,
+          30.0, 20.0, 10.0]
   indices: [0, 1, 2,
             5, 6, 7,
             10, 11, 12,
@@ -192,10 +202,10 @@ v_reg:
     14, 15, 16, 17,
     18, 19, 20, 21]
   weight: [3e-1, 3e-1, 3e-1, 3e-1, 3e-1, 3e-1,
-    6e-1, 6e-1, 6e-1, 2e-1,
-    6e-1, 6e-1, 6e-1, 2e-1,
-    6e-1, 6e-1, 6e-1, 2e-1,
-    6e-1, 6e-1, 6e-1, 2e-1]
+    6e-1, 6e-1, 6e-1, 8e-2,
+    6e-1, 6e-1, 6e-1, 8e-2,
+    6e-1, 6e-1, 6e-1, 8e-2,
+    6e-1, 6e-1, 6e-1, 8e-2]
 
 a_reg:
   type: Regularization
@@ -207,10 +217,10 @@ a_reg:
     14, 15, 16, 17,
     18, 19, 20, 21]
   weight: [5e-1, 5e-1, 5e-1, 5e-1, 5e-1, 5e-1,
-    8e-2, 8e-2, 8e-2, 8e-2,
-    8e-2, 8e-2, 8e-2, 8e-2,
-    8e-2, 8e-2, 8e-2, 8e-2,
-    8e-2, 8e-2, 8e-2, 8e-2]
+    8e-2, 8e-2, 8e-2, 1e-1,
+    8e-2, 8e-2, 8e-2, 1e-1,
+    8e-2, 8e-2, 8e-2, 1e-1,
+    8e-2, 8e-2, 8e-2, 1e-1]
     
 z_FL_foot_ball:
   type: Cartesian
