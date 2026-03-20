@@ -97,8 +97,7 @@ class B2WRhc(HybridQuadRhc):
             foot_linkname="FL_foot",
             flight_duration=flight_duration,
             post_flight_stance=post_flight_duration,
-            step_height=0.12,
+            step_height=0.15,
             keep_yaw_vert=False,
-            yaw_vertical_weight=1e-6,
             phase_force_reg=2e-2,
             vel_bounds_weight=1.0)
