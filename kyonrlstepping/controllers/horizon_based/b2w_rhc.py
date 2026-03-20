@@ -92,12 +92,17 @@ class B2WRhc(HybridQuadRhc):
         flight_duration=int(flight_duration_sec/self._dt)
         post_flight_duration_sec=0.2 # [s]
         post_flight_duration=int(post_flight_duration_sec/self._dt)
+        
+        step_height=0.15
+        if ("step_height" in self._custom_opts):
+            step_height=self._custom_opts["step_height"]
+
         super()._init_problem(fixed_jnt_patterns=fixed_jnts_patterns,
             wheels_patterns=wheels_patterns,
             foot_linkname="FL_foot",
             flight_duration=flight_duration,
             post_flight_stance=post_flight_duration,
-            step_height=0.15,
+            step_height=step_height,
             keep_yaw_vert=False,
             phase_force_reg=2e-2,
             vel_bounds_weight=1.0)
