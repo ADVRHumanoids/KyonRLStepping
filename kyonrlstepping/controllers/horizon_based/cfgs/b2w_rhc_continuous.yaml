@@ -52,9 +52,9 @@ costs:
 
 #closed loop
 .define:
-  - &w_base_omega 25
-  - &w_base_vxy 25
-  - &w_base_vz 50
+  - &w_base_omega 20
+  - &w_base_vxy 20
+  - &w_base_vz 5
   - &w_base_z 5
   - &w_base_hor_capture 200.
   - &w_base_capture 200.
