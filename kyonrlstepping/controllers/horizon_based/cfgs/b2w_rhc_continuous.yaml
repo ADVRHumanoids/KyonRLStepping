@@ -53,13 +53,13 @@ costs:
 #closed loop
 .define:
   - &w_base_omega 20
-  - &w_base_vxy 20
-  - &w_base_vz 5
+  - &w_base_vxy 15
+  - &w_base_vz 15
   - &w_base_z 5
   - &w_base_hor_capture 200.
   - &w_base_capture 200.
   - &w_contact_z 400.0
-  - &w_contact_vz 500.0
+  - &w_contact_vz 1000.0
   - &w_contact_xy 80.0
   - &w_contact_vxy 80.0
   - &wheel_radius 0.1125
