@@ -45,7 +45,7 @@ costs:
   - base_lin_velz
   # - base_height
   - base_omega
-  # - base_horizontal_capture
+  - base_horizontal_capture
   - base_capture
   - joint_posture_capture
   - v_reg
