@@ -33,10 +33,10 @@ costs:
   # - vz_contact_2
   # - vz_contact_3
   # - vz_contact_4
-  - xy_contact_1
-  - xy_contact_2
-  - xy_contact_3
-  - xy_contact_4
+  # - xy_contact_1
+  # - xy_contact_2
+  # - xy_contact_3
+  # - xy_contact_4
   # - vxy_contact_1
   # - vxy_contact_2
   # - vxy_contact_3
@@ -45,7 +45,7 @@ costs:
   - base_lin_velz
   # - base_height
   - base_omega
-  # - base_horizontal_capture
+  - base_horizontal_capture
   - base_capture
   - joint_posture_capture
   - v_reg
@@ -57,9 +57,9 @@ costs:
   - &w_base_vz 8
   - &w_base_omega 8
   - &w_base_z 8
-  - &w_base_hor_capture 150
+  - &w_base_hor_capture 500
   - &w_base_capture 500.
-  - &w_contact_z 180.0
+  - &w_contact_z 150.0
   - &w_contact_vz 400.0
   - &w_contact_xy 80.0
   - &w_contact_vxy 80.0
