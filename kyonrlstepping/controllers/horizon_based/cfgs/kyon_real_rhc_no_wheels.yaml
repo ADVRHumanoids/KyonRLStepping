@@ -45,21 +45,22 @@ costs:
   - base_lin_velz
   # - base_height
   - base_omega
-  # - base_horizontal_capture
+  - base_horizontal_capture
   - base_capture
-  - joint_posture_capture
+  - joint_posture_capture0 # roll + hip pitch (whole horizon)
+  - joint_posture_capture1 # knee pitch (end horizon) to allow swing
   - v_reg
   # - a_reg
 
 #closed loop
 .define:
-  - &w_base_vxy 8
-  - &w_base_vz 8
-  - &w_base_omega 8
-  - &w_base_z 8
-  - &w_base_hor_capture 150
+  - &w_base_vxy 10
+  - &w_base_vz 10
+  - &w_base_omega 10
+  - &w_base_z 15
+  - &w_base_hor_capture 50
   - &w_base_capture 500.
-  - &w_contact_z 180.0
+  - &w_contact_z 150.0
   - &w_contact_vz 400.0
   - &w_contact_xy 80.0
   - &w_contact_vxy 80.0
@@ -196,17 +197,29 @@ contact_4:
   type: Contact
   subtask: [interaction_contact_4, zero_velocity_contact_4]
 
-joint_posture_capture:
+joint_posture_capture0:
   type: Postural
-  weight: [10.0, 6.0, 6.0,
-            10.0, 6.0, 6.0,
-            10.0, 6.0, 6.0,
-            10.0, 6.0, 6.0]
-  indices: [0, 1, 2,
-            3, 4, 5,
-            6, 7, 8,
-            9, 10, 11]
-  nodes: ${range(N-10, N+1)}
+  weight: [3.0, 5.0,
+            3.0, 5.0,
+            3.0, 5.0,
+            3.0, 5.0]
+  indices: [0, 1,
+            3, 4,
+            6, 7,
+            9, 10]
+  nodes: ${range(5, N+1)}
+
+joint_posture_capture1:
+  type: Postural
+  weight: [20.0,
+          20.0,
+          20.0,
+          20.0]
+  indices: [2,
+            5,
+            8,
+            11]
+  nodes: ${range(N-5, N+1)}
 
 v_reg:
   type: Regularization

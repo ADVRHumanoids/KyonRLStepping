@@ -19,8 +19,8 @@ motor_pd:
 #   "wheel_joint*": [0, 30]
 
 startup_motor_pd:
-  "hip_roll*": [200, 50]
-  "hip_pitch*": [200, 50]
-  "knee_pitch*": [200, 50]
+  "hip_roll*": [100, 40]
+  "hip_pitch*": [100, 40]
+  "knee_pitch*": [100, 40]
   "ankle_yaw*": [100, 10]
   "wheel_joint*": [0, 30]
