@@ -47,7 +47,8 @@ costs:
   - base_omega
   - base_horizontal_capture
   - base_capture
-  - joint_posture_capture
+  - joint_posture_capture0
+  - joint_posture_capture1
   - v_reg
   - a_reg
 
@@ -189,16 +190,28 @@ contact_4:
   type: Contact
   subtask: [interaction_contact_4, rolling_contact_4]
 
-joint_posture_capture:
+joint_posture_capture0:
   type: Postural
-  weight: [60.0, 20.0, 20.0,
-          60.0, 20.0, 20.0,
-          60.0, 20.0, 20.0,
-          60.0, 20.0, 20.0]
-  indices: [0, 1, 2,
-            5, 6, 7,
-            10, 11, 12,
-            15, 16, 17]
+  weight: [8.0, 5.0,
+          8.0, 5.0,
+          8.0, 5.0,
+          8.0, 5.0]
+  indices: [0, 1,
+            5, 6,
+            10, 11,
+            15, 16]
+  nodes: ${range(5, N+1)}
+
+joint_posture_capture1:
+  type: Postural
+  weight: [20.0,
+          20.0,
+          20.0,
+          20.0]
+  indices: [2,
+            7,
+            12,
+            17]
   nodes: ${range(N-5, N+1)}
 
 v_reg:
