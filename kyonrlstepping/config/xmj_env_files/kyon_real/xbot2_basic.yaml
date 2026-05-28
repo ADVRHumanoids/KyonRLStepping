@@ -3,7 +3,7 @@ XBotInterface:
   srdf_path: $PWD/kyon_real_no_wheels.srdf
 
 ModelInterface:
-  model_type: RBDL
+  model_type: pin
   is_model_floating_base: true
 
 # defaults
