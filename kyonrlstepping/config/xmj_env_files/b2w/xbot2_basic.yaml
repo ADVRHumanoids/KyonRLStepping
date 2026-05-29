@@ -37,9 +37,9 @@ xbotcore_plugins:
         thread: rt_main
         type: homing
 
-    ros_io: {thread: nrt_main, type: ros_io}
+    ros_io: {thread: nrt_main, type: ros2_io}
 
-    ros_control: {thread: nrt_main, type: ros_control, params: {autostart: {type: bool, value: true}}}
+    ros_control: {thread: nrt_main, type: ros2_control, params: {autostart: {type: bool, value: true}}}
 
 # global parameters
 xbotcore_param:
