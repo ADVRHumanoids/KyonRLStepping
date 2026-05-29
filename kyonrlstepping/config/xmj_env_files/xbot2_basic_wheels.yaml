@@ -39,7 +39,18 @@ xbotcore_plugins:
 
     ros_io: {thread: nrt_main, type: ros2_io}
 
-    ros_control: {thread: nrt_main, type: ros2_control, params: {autostart: {type: bool, value: true}}}
+    zmq_io:
+        thread: nrt_main
+        type: zmq_io
+        params:
+          autostart: {type: bool, value: true}
+          protocol: {type: string, value: tcp}
+          tcp_state_port: {type: int, value: 5559}
+          tcp_cmd_port: {type: int, value: 5558}
+          tcp_service_port: {type: int, value: 5557}
+          ipc_state_path: {type: string, value: /tmp/xbot2_zmq_pub.ipc}
+          ipc_cmd_path: {type: string, value: /tmp/xbot2_zmq_cmd.ipc}
+          ipc_service_path: {type: string, value: /tmp/xbot2_zmq_rep.ipc}
 
 # global parameters
 xbotcore_param:
