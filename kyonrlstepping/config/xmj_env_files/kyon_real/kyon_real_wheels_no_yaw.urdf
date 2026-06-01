@@ -39,6 +39,23 @@
       </geometry>
     </collision>
   </link>
+  <link name="battery">
+    <inertial>
+      <mass value="9.8"/>
+      <inertia ixx="0.04647935016666667" ixy="0.0" ixz="0.0" iyy="0.09353241683333333" iyz="0.0" izz="0.12974056666666667"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.329 0.225 0.0793"/>
+      </geometry>
+      <material name="dark_grey"/>
+    </visual>
+  </link>
+  <joint name="battery_joint" type="fixed">
+    <origin xyz="0.0 0.0 -0.02725"/>
+    <parent link="pelvis"/>
+    <child link="battery"/>
+  </joint>
   <joint name="base_joint" type="fixed">
     <parent link="pelvis"/>
     <child link="base_link"/>
@@ -98,13 +115,12 @@
       </geometry>
       <material name="dark_grey"/>
     </visual>
-    <collision>
-      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
-      <geometry>
-        <!-- <cylinder radius="${cylinder_radius}" length="${cylinder_length}"/> -->
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_hip-roll.stl" scale="0.001 -0.001 0.001"/>
-      </geometry>
-    </collision>
+    <!-- <collision>
+		<origin xyz="0.0 0.0 0.0"  rpy="0.0 0.0 0.0"/>
+		<geometry>
+			<mesh filename="${MESH_PATH}/collision/mesh_hip-roll.stl" scale="0.001 ${mirror*0.001} 0.001"/>
+		</geometry>
+	</collision> -->
   </link>
   <link name="hip_pitch_1_link">
     <inertial>
@@ -129,7 +145,7 @@
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_hip-pitch.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_hip-pitch_cut.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="kyon_orange"/>
     </collision>
@@ -167,7 +183,7 @@
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
         <!-- <cylinder radius="${cylinder_radius}" length="${cylinder_length}"/> -->
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_knee-steering.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_knee-steering_cut.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -189,7 +205,7 @@
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
         <!-- <cylinder radius="${cylinder_radius}" length="${cylinder_length}"/> -->
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_ankle-yaw.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_ankle-yaw_cut.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -210,7 +226,7 @@
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <cylinder length="0.05" radius="0.1066"/>
+        <cylinder length="0.03" radius="0.1066"/>
         <!-- <mesh filename="${MESH_PATH}/collision/mesh_wheel.stl" scale="0.001 0.001 0.001"/> -->
       </geometry>
       <material name="light_grey"/>
@@ -267,13 +283,12 @@
       </geometry>
       <material name="dark_grey"/>
     </visual>
-    <collision>
-      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
-      <geometry>
-        <!-- <cylinder radius="${cylinder_radius}" length="${cylinder_length}"/> -->
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_hip-roll.stl" scale="0.001 0.001 0.001"/>
-      </geometry>
-    </collision>
+    <!-- <collision>
+		<origin xyz="0.0 0.0 0.0"  rpy="0.0 0.0 0.0"/>
+		<geometry>
+			<mesh filename="${MESH_PATH}/collision/mesh_hip-roll.stl" scale="0.001 ${mirror*0.001} 0.001"/>
+		</geometry>
+	</collision> -->
   </link>
   <link name="hip_pitch_2_link">
     <inertial>
@@ -298,7 +313,7 @@
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_hip-pitch.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_hip-pitch_cut.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="kyon_orange"/>
     </collision>
@@ -336,7 +351,7 @@
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
         <!-- <cylinder radius="${cylinder_radius}" length="${cylinder_length}"/> -->
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_knee-steering.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_knee-steering_cut.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -358,7 +373,7 @@
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
         <!-- <cylinder radius="${cylinder_radius}" length="${cylinder_length}"/> -->
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_ankle-yaw.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_ankle-yaw_cut.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -379,7 +394,7 @@
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <cylinder length="0.05" radius="0.1066"/>
+        <cylinder length="0.03" radius="0.1066"/>
         <!-- <mesh filename="${MESH_PATH}/collision/mesh_wheel.stl" scale="0.001 0.001 0.001"/> -->
       </geometry>
       <material name="light_grey"/>
@@ -436,13 +451,12 @@
       </geometry>
       <material name="dark_grey"/>
     </visual>
-    <collision>
-      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
-      <geometry>
-        <!-- <cylinder radius="${cylinder_radius}" length="${cylinder_length}"/> -->
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_hip-roll.stl" scale="0.001 -0.001 0.001"/>
-      </geometry>
-    </collision>
+    <!-- <collision>
+		<origin xyz="0.0 0.0 0.0"  rpy="0.0 0.0 0.0"/>
+		<geometry>
+			<mesh filename="${MESH_PATH}/collision/mesh_hip-roll.stl" scale="0.001 ${mirror*0.001} 0.001"/>
+		</geometry>
+	</collision> -->
   </link>
   <link name="hip_pitch_3_link">
     <inertial>
@@ -467,7 +481,7 @@
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_hip-pitch.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_hip-pitch_cut.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="kyon_orange"/>
     </collision>
@@ -505,7 +519,7 @@
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
         <!-- <cylinder radius="${cylinder_radius}" length="${cylinder_length}"/> -->
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_knee-steering.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_knee-steering_cut.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -527,7 +541,7 @@
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
         <!-- <cylinder radius="${cylinder_radius}" length="${cylinder_length}"/> -->
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_ankle-yaw.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_ankle-yaw_cut.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -548,7 +562,7 @@
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <cylinder length="0.05" radius="0.1066"/>
+        <cylinder length="0.03" radius="0.1066"/>
         <!-- <mesh filename="${MESH_PATH}/collision/mesh_wheel.stl" scale="0.001 0.001 0.001"/> -->
       </geometry>
       <material name="light_grey"/>
@@ -605,13 +619,12 @@
       </geometry>
       <material name="dark_grey"/>
     </visual>
-    <collision>
-      <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
-      <geometry>
-        <!-- <cylinder radius="${cylinder_radius}" length="${cylinder_length}"/> -->
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_hip-roll.stl" scale="0.001 0.001 0.001"/>
-      </geometry>
-    </collision>
+    <!-- <collision>
+		<origin xyz="0.0 0.0 0.0"  rpy="0.0 0.0 0.0"/>
+		<geometry>
+			<mesh filename="${MESH_PATH}/collision/mesh_hip-roll.stl" scale="0.001 ${mirror*0.001} 0.001"/>
+		</geometry>
+	</collision> -->
   </link>
   <link name="hip_pitch_4_link">
     <inertial>
@@ -636,7 +649,7 @@
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_hip-pitch.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_hip-pitch_cut.stl" scale="0.001 0.001 0.001"/>
       </geometry>
       <material name="kyon_orange"/>
     </collision>
@@ -674,7 +687,7 @@
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
         <!-- <cylinder radius="${cylinder_radius}" length="${cylinder_length}"/> -->
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_knee-steering.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_knee-steering_cut.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -696,7 +709,7 @@
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
         <!-- <cylinder radius="${cylinder_radius}" length="${cylinder_length}"/> -->
-        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_ankle-yaw.stl" scale="0.001 0.001 0.001"/>
+        <mesh filename="/root/ibrido_ws/src/iit-kyon-description/kyon_urdf/meshes/collision/mesh_ankle-yaw_cut.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
   </link>
@@ -717,7 +730,7 @@
     <collision>
       <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
       <geometry>
-        <cylinder length="0.05" radius="0.1066"/>
+        <cylinder length="0.03" radius="0.1066"/>
         <!-- <mesh filename="${MESH_PATH}/collision/mesh_wheel.stl" scale="0.001 0.001 0.001"/> -->
       </geometry>
       <material name="light_grey"/>
