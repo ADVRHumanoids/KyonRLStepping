@@ -6,6 +6,7 @@ class KyonRealUrdfGen(UrdfGenerator):
             robotname: str,
             descr_path: str,
             wheels: bool = False,
+            custom_args_xacro = None,
             name: str = "KyonRealUrdfMPCViz"):
         
         super().__init__(
@@ -14,6 +15,7 @@ class KyonRealUrdfGen(UrdfGenerator):
             name = name)
 
         self._wheels = wheels
+        self._custom_args_xacro = custom_args_xacro or []
 
         self.generate_urdf() # actually generated urdf
 
@@ -44,5 +46,6 @@ class KyonRealUrdfGen(UrdfGenerator):
         cmds.append("payload:=false")
         cmds.append("use_abs_mesh_paths:=true")
         cmds.append("use_local_filesys_for_meshes:=true")
+        cmds += self._custom_args_xacro
 
         return cmds

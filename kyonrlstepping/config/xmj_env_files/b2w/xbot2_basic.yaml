@@ -1,25 +1,11 @@
 XBotInterface:
-  urdf_path: $PWD/unitree_b2w.urdf
-  srdf_path: $PWD/unitree_b2w.srdf
+  urdf_path: "**"
+  srdf_path: "**"
 
 ModelInterface:
   model_type: pin
   is_model_floating_base: true
 
-# defaults
-motor_pd:
-  "*hip_joint": [200, 60]
-  "*thigh_joint": [200, 60]
-  "*calf_joint": [200, 60]
-  "*foot_joint": [0, 30]
-
-# startup pd config
-startup_motor_pd:
-  "*hip_joint": [200, 60]
-  "*thigh_joint": [200, 60]
-  "*calf_joint": [200, 60]
-  "*foot_joint": [0, 30]
-  
 # hal
 xbotcore_device_configs:
     sim: $PWD/hal/b2w_gz.yaml
@@ -56,4 +42,7 @@ xbotcore_plugins:
 xbotcore_param:
   /xbot/hal/joint_safety/filter_autostart: {value: true, type: bool}
   /xbot/hal/joint_safety/filter_cutoff_hz: {value: 2.0, type: double}
-  /xbot/hal/enable_safety: {value: false, type: bool}
+  /xbot/hal/joint_safety/filter_safe_cutoff_hz: {value: 5.0, type: double}
+  /xbot/hal/joint_safety/filter_medium_cutoff_hz: {value: 15.0, type: double}
+  /xbot/hal/joint_safety/filter_fast_cutoff_hz: {value: 25.0, type: double}
+  /xbot/hal/enable_safety: {value: true, type: bool}

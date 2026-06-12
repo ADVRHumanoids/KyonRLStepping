@@ -1,25 +1,11 @@
 XBotInterface:
-  urdf_path: $PWD/kyon_wheels.urdf
-  srdf_path: $PWD/kyon_wheels.srdf
+  urdf_path: "**"
+  srdf_path: "**"
 
 ModelInterface:
   model_type: pin
   is_model_floating_base: true
 
-# defaults
-motor_pd:
-  hip_roll*: [500, 10]
-  hip_pitch*: [500, 10]
-  knee_pitch*: [500, 10]
-  wheel_joint*: [0, 30]
-
-# startup pd config
-startup_motor_pd:
-  hip_roll*: [200, 39]
-  hip_pitch*: [200, 30]
-  knee_pitch*: [200, 30]
-  wheel_joint*: [0, 30]
-  
 # hal
 xbotcore_device_configs:
     sim: $PWD/hal/kyon_gz.yaml

@@ -6,6 +6,7 @@ class B2WUrdfGen(UrdfGenerator):
             robotname: str,
             descr_path: str,
             wheels: bool = True,
+            custom_args_xacro = None,
             name: str = "B2WUrdfMPCViz"):
         
         super().__init__(
@@ -14,6 +15,7 @@ class B2WUrdfGen(UrdfGenerator):
             name = name)
 
         self._wheels = wheels
+        self._custom_args_xacro = custom_args_xacro or []
 
         self.generate_urdf(folder_name="xacro") # actually generated urdf
 
@@ -40,5 +42,6 @@ class B2WUrdfGen(UrdfGenerator):
         cmds.append("floating_joint:=false")
         cmds.append("use_abs_mesh_paths:=true")
         cmds.append("use_local_filesys_for_meshes:=true")
+        cmds += self._custom_args_xacro
 
         return cmds

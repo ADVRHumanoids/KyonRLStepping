@@ -72,19 +72,6 @@ generate_xrdf() {
     -o "$output_path"
 }
 
-patch_runtime_xbot_config() {
-  python3 -c 'from pathlib import Path
-import sys
-cfg = Path(sys.argv[1])
-text = cfg.read_text()
-text = text.replace("urdf_path: $PWD/kyon_real_no_wheels.urdf", "urdf_path: " + sys.argv[2])
-text = text.replace("srdf_path: $PWD/kyon_real_no_wheels.srdf", "srdf_path: " + sys.argv[3])
-text = text.replace("sim: $PWD/hal/kyon_gz.yaml", "sim: " + sys.argv[4])
-text = text.replace("dummy: $PWD/hal/kyon_dummy.yaml", "dummy: " + sys.argv[5])
-cfg.write_text(text)
-' "$XBOT_CONFIG_PATH" "$URDF_PATH" "$SRDF_PATH" "${RUNTIME_DIR}/hal/kyon_gz.yaml" "${RUNTIME_DIR}/hal/kyon_dummy.yaml"
-}
-
 apply_runtime_impedance_config() {
   if [ ! -f "$XBOT_CONFIG_BUILDER" ]; then
     echo "XBot config builder not found: $XBOT_CONFIG_BUILDER"
@@ -99,6 +86,8 @@ apply_runtime_impedance_config() {
     python3 "$XBOT_CONFIG_BUILDER" \
       --xbot-config "$XBOT_CONFIG_PATH" \
       --impedance-config "$KYON_JNT_IMP_CONFIG_PATH" \
+      --urdf-path "$URDF_PATH" \
+      --srdf-path "$SRDF_PATH" \
       --output-dir "${RUNTIME_DIR}/xbot_runtime"
   )"
 }
@@ -117,7 +106,6 @@ prepare_runtime_files() {
   cp "$XBOT_CONFIG_SRC" "$XBOT_CONFIG_PATH"
   rm -rf "$RUNTIME_DIR/hal"
   cp -r "$KYON_XMJ_DIR/hal" "$RUNTIME_DIR/hal"
-  patch_runtime_xbot_config
   apply_runtime_impedance_config
 }
 

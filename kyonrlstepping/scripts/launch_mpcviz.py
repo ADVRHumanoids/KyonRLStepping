@@ -6,6 +6,7 @@ from kyonrlstepping.utils.kyon_urdf_gen import KyonUrdfGen
 from kyonrlstepping.utils.kyon_real_urdf_gen import KyonRealUrdfGen
 
 from kyonrlstepping.utils.b2w_urdf_gen import B2WUrdfGen
+from aug_mpc.utils.custom_arg_parsing import extract_custom_xacro_args, generate_custom_arg_dict
 
 import os
 import argparse
@@ -22,10 +23,14 @@ if __name__ == '__main__':
     parser.add_argument('--kyon_real', action='store_true', help='use real Kyon prototype')
     parser.add_argument('--blink_name', type=str,default=None)
     parser.add_argument('--show_heightmap', action='store_true', help='Visualize heightmap markers if available')
+    parser.add_argument('--custom_args_names', nargs='+', default=None, help='Names of custom arguments')
+    parser.add_argument('--custom_args_vals', nargs='+', default=None, help='Values of custom arguments')
+    parser.add_argument('--custom_args_dtype', nargs='+', default=None, help='Dtypes of custom arguments')
 
     args = parser.parse_args()
 
     syspaths = PathsGetter()
+    custom_xacro_args = extract_custom_xacro_args(generate_custom_arg_dict(args))
 
     blink_name=args.blink_name
     if blink_name is None:
@@ -51,16 +56,19 @@ if __name__ == '__main__':
             urdf_generator = KyonUrdfGen(robotname="kyon", 
                         wheels=args.wheels,
                         descr_path=dpath,
+                        custom_args_xacro=custom_xacro_args,
                         name="kyonUrdf")
         else:
             urdf_generator = KyonRealUrdfGen(robotname="kyon", 
                         wheels=args.wheels,
                         descr_path=dpath,
+                        custom_args_xacro=custom_xacro_args,
                         name="kyonUrdf")
     else:
         urdf_generator = B2WUrdfGen(robotname="robot", 
                     wheels=True,
                     descr_path=dpath,
+                    custom_args_xacro=custom_xacro_args,
                     name="B2WUrdf")
         
     mpc_viz= MPCViz(urdf_file_path=urdf_generator.urdf_path, 
